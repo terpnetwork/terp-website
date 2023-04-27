@@ -7,6 +7,8 @@ import { wallets as leapWallets } from '@cosmos-kit/leap';
 
 import { TailwindModal } from '../components';
 import { ThemeProvider } from '../contexts/theme';
+import { ChakraProvider } from '@chakra-ui/react';
+
 
 import { SignerOptions } from '@cosmos-kit/core';
 import { chains, assets } from 'chain-registry';
@@ -19,6 +21,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
   };
 
   return (
+    <ChakraProvider theme={defaultTheme}>
     <ChainProvider
       chains={chains}
       assetLists={assets}
@@ -45,6 +48,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
         </div>
       </ThemeProvider>
     </ChainProvider>
+    </ChakraProvider>
   );
 }
 
