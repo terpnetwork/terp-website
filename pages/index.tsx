@@ -1,4 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 import Head from 'next/head';
+import Image from 'next/image'
 import { Product, Dependency, WalletSection } from '../components';
 import { dependencies, products } from '../config';
 import { useTheme } from '../contexts/theme';
@@ -36,9 +38,9 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <img
-              src="/cosmology.webp"
+        src="/cosmology.webp"
               className="w-auto h-4 transition duration-150 transform cursor-pointer hover:scale-105"
-            />
+      />
           </a>
         </span>
       </div>

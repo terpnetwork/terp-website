@@ -40,4 +40,5 @@ export interface FeatureProps {
 export interface ChainCardProps {
   prettyName: string
   icon?: string
+  
 }

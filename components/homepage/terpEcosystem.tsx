@@ -8,6 +8,7 @@ import {
     TERPNET_ELEMENT_URL,
     TERPNET_TWITTER_URL,TERPNET_YOUTUBE_URL
  } from "../../config/defaults";
+import { Icon } from "@chakra-ui/react";
 
  
 
@@ -50,7 +51,7 @@ export const TerpEcosystem = () => {
         }
     ];
     
-
+    
     return (
         <section className="home-ecosystem-section TerpEcosystem">
             <div className="container">
@@ -117,13 +118,8 @@ export const TerpEcosystem = () => {
                                     <Card.Title className={'mb-3 mt-4'}>TerpNET Community</Card.Title>
                                     <Card.Text>
 
-                                                <div className="links">
-                                                    {
-                                                        socialList.map((item, index) => (
-                                                                <a href={item.url} onClick={() => (item.iconName)} rel="noopener noreferrer"
-                                                                   target="_blank"></a>
-                                                        ))
-                                                    }
+                                    <div className="links">
+
 
 
                                         </div>

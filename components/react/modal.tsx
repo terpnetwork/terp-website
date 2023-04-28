@@ -41,6 +41,7 @@ export const TailwindModal = ({
   const walletStatus = current?.walletStatus || WalletStatus.Disconnected;
   const currentWalletName = current?.walletName;
 
+  
   useEffect(() => {
     if (isOpen) {
       switch (walletStatus) {
@@ -86,6 +87,7 @@ export const TailwindModal = ({
     setOpen(false);
   }, [setOpen]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const _render = useMemo(() => {
     switch (currentView) {
       case ModalView.WalletList:
@@ -169,6 +171,9 @@ export const TailwindModal = ({
     currentWalletData,
     router,
     current,
+    qrWallet?.qrUrl,
+    qrWallet?.walletInfo.prettyName,
+    walletRepo?.wallets,
   ]);
 
   return (

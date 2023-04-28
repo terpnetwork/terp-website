@@ -1,5 +1,6 @@
 import Carousel from "react-multi-carousel";
 import React from "react";
+import Image from  'next/image'
 
 interface Image {
   url: string;
@@ -59,12 +60,14 @@ const Blogs: React.FC<Props> = ({ deviceType }) => {
                   key={image.url}
                   className="button"
                 >
-                  <img
-                    draggable={true}
-                    alt={image.image}
-                    style={{ width: "100%", height: "100%" }}
-                    src={image.image}
-                  />
+                <Image
+                draggable={true}
+                alt={image.image}
+                src={image.image}
+            width={undefined}
+            height={undefined}
+            className="transition duration-150 transform cursor-pointer hover:scale-105"
+          />
                   <div className={"blog-title"}>
                     <h6>{image.subtitle}</h6>
                     <h5>{image.title}</h5>
