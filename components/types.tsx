@@ -31,11 +31,12 @@ export interface ConnectWalletType {
   onClickConnectBtn?: MouseEventHandler<HTMLButtonElement>;
 }
 
+
 export interface ConnectedUserCardType {
-  walletIcon?: string;
   username?: string;
   icon?: ReactNode;
 }
+
 
 export interface FeatureProps {
   title: string;

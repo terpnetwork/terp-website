@@ -2305,10 +2305,20 @@
     react-icons "^4.4.0"
     react-resize-detector "^8.0.3"
 
-"@cosmos-kit/core@1.3.0", "@cosmos-kit/core@^1.3.0":
+"@cosmos-kit/core@^1.3.0":
   version "1.3.0"
   resolved "https://registry.npmjs.org/@cosmos-kit/core/-/core-1.3.0.tgz"
   integrity sha512-5MqzJ+Zd3Avy81sUe8ZXnry7rA1TAn2YC0yqE2aX4SlH+EMwh47ah2QxSt32Dc9qAva1b9ZoYjtgi+lTzzTwJQ==
+  dependencies:
+    "@chain-registry/types" "0.13.0"
+    "@walletconnect/types" "2.2.0"
+    bowser "2.11.0"
+    events "3.3.0"
+
+"@cosmos-kit/core@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@cosmos-kit/core/-/core-1.4.0.tgz#65f676e41f427ffd2edb4c4bd09d2594e8d40d63"
+  integrity sha512-Ci1IRWw3ouflbKVzrLyLZohC+ixo796LyCfvGhBEeP+p8YyTqHCTNCxwnbD/KTJOPUMZ3DiqF6yMWbCUTev0QA==
   dependencies:
     "@chain-registry/types" "0.13.0"
     "@walletconnect/types" "2.2.0"
