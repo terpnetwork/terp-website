@@ -13,7 +13,7 @@ export const Banner = () => {
                         <span>   a full spectrum of DeFi applications.</span>
                     </p>
                     <div className={"button-section text-center d-inline-block"}>
-                    <a href="https://stake.terp.network" rel="noopener noreferrer"
+                    <a href="/delegate" rel="noopener noreferrer"
                         className="button-initial button one">
                         Staking Dashboard
                     </a>

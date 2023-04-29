@@ -8,7 +8,7 @@ export const Network = () => {
                         <div className="content-container">
                             <h2 className="heading">Building a Trust Layer For the Culture.</h2>
                             <div className={"button-section text-center d-inline-block"}>
-                    <a href="/terp" rel="noopener noreferrer"
+                    <a href="https://docs.terp.network" rel="noopener noreferrer"
                         className="button-initial ">
                         Learn More
                     </a>

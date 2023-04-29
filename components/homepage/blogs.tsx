@@ -1,4 +1,3 @@
-import Carousel from "react-multi-carousel";
 import React from "react";
 import Image from  'next/image'
 
@@ -42,42 +41,7 @@ const Blogs: React.FC<Props> = ({ deviceType }) => {
   return (
     <section className="stay-updated">
       <div className="container">
-        <Carousel
-          ssr
-          partialVisbile
-          deviceType={deviceType}
-          itemClass="image-item"
-          responsive={responsive}
-          autoPlay={false}
-        >
-          {images.slice(0, 5).map((image: Image) => {
-            return (
-              <>
-                <a
-                  href={image.url}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  key={image.url}
-                  className="button"
-                >
-                <Image
-                draggable={true}
-                alt={image.image}
-                src={image.image}
-            width={undefined}
-            height={undefined}
-            className="transition duration-150 transform cursor-pointer hover:scale-105"
-          />
-                  <div className={"blog-title"}>
-                    <h6>{image.subtitle}</h6>
-                    <h5>{image.title}</h5>
-                  </div>
-                </a>
-              </>
-            );
-          })}
-        </Carousel>
-      </div>
+         </div>
     </section>
   );
 };

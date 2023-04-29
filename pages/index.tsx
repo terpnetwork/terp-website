@@ -1,5 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 import Head from 'next/head';
+import {
+  Box,
+  Divider,
+  Grid,
+  Heading,
+  Text,
+  Stack,
+  Container,
+  Link,
+  Button,
+  Flex,
+  Icon,
+  useColorMode,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import Image from 'next/image'
 import { Product, Dependency, WalletSection } from '../components';
 import { dependencies, products } from '../config';
@@ -10,11 +25,11 @@ import { Ecosystem } from '../components/homepage/ecosystem';
 import { Network, TerpEcosystem } from '../components/homepage';
 
 export default function Home() {
-  const chainName = process.env.NEXT_PUBLIC_CHAIN ?? 'stargaze';
+  const chainName = process.env.NEXT_PUBLIC_CHAIN ?? 'terpnetwork';
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="max-w-5xl py-10 mx-6 lg:mx-auto">
+    <Container maxW="5xl"  py={10}> 
       <Head>
         <title>Terp Network</title>
         <meta name="description" content="The Culture's Verifiable Platform" />
@@ -45,6 +60,6 @@ export default function Home() {
         </span>
       </div>
 
-    </div>
+    </Container>
   );
 }
