@@ -22,7 +22,7 @@ export const ChainWalletCard = ({
     } else {
       setGlobalStatus?.(WalletStatus.Disconnected);
     }
-  }, [status]);
+  }, [status, setGlobalStatus?]);
 
   switch (type) {
     case "address-in-modal":

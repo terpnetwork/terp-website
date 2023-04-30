@@ -78,6 +78,7 @@ export const ConnectedShowAddress = ({
           defaultMaxLength[size as keyof typeof defaultMaxLength]
         )
       );
+       // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
   return (
