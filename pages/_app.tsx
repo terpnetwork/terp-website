@@ -40,11 +40,10 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
         wrappedWithChakra={true}
         signerOptions={signerOptions}
       >
-         <ThemeProvider>
+ 
          <div className="background">
         <Component {...pageProps} />
         </div>
-        </ThemeProvider>
       </ChainProvider>
     </ChakraProvider>
   );

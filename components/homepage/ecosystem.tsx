@@ -22,7 +22,7 @@ export const Ecosystem = () => {
         <section className="home-ecosystem-section">
             <div className='silver-gradient'>
 
-                <h3 className="section-title">Infusing Censorship Resistant Technology</h3>
+                <Heading className="section-title">Infusing Censorship Resistant Technology</Heading>
                 <p className="sub-heading">Terp Network applications bridge self-soviergnty & interoperability into our community. Utilize any Terp Network logic in your buisness model to integrate censorship-resistant solutions & discover amazing opportunities.</p>
                 <div className="card-tiles">
                                 <h3 className='section-title'>What is it?</h3>

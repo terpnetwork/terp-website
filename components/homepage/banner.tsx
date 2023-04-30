@@ -1,14 +1,14 @@
-import { Box, Button } from '@chakra-ui/react'
+import { Box, Button, Container, Heading } from '@chakra-ui/react'
 import Link from 'next/link'
 
 
 export const Banner = () => {
     return (
         <section className="banner-section">
-        <div className="container">
+        <Container>
             <div className="row">
-                <div className="col-md-12 col-sm-12 text-center">
-                    <p className="banner-heading"><span>TERP NETWORK: Decentralized Infrastructure for Terp Culture  </span></p>
+                <div className="text-center">
+                    <Heading className="banner-heading"><span>Decentralized Infrastructure for Terp Culture  </span></Heading>
                     <Box>
                     <p className="text">
                         Terp Network is a decentralized L1 blockchain hub, powering
@@ -39,7 +39,7 @@ export const Banner = () => {
                 </div>
 
             </div>
-        </div>
+        </Container>
     </section>
     )
 }

@@ -16,7 +16,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import Image from 'next/image'
-import { Product, Dependency, WalletSection } from '../components';
+import { Product, Dependency } from '../components';
 import { dependencies, products } from '../config';
 import { useTheme } from '../contexts/theme';
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
@@ -29,7 +29,7 @@ export default function Home() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <Container maxW="5xl"  py={10}> 
+    <Container py={5}> 
       <Head>
         <title>Terp Network</title>
         <meta name="description" content="The Culture's Verifiable Platform" />
