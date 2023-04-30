@@ -29,7 +29,7 @@ export default function Home() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <Container py={5}> 
+    <div> 
       <Head>
         <title>Terp Network</title>
         <meta name="description" content="The Culture's Verifiable Platform" />
@@ -38,8 +38,10 @@ export default function Home() {
 
 
       <Banner/>
+      <Container>
       <Ecosystem/>
       <Network/>
+      </Container>
      
 
 
@@ -60,6 +62,6 @@ export default function Home() {
         </span>
       </div>
 
-    </Container>
+    </div>
   );
 }

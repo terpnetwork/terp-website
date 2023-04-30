@@ -11,7 +11,7 @@ export const Banner = () => {
                     <Heading className="banner-heading"><span>Decentralized Infrastructure for Terp Culture  </span></Heading>
                     <Box>
                     <p className="text">
-                        Terp Network is a decentralized L1 blockchain hub, powering
+                        Terp Network is a decentralized L1 blockchain hub, capable of powering
                         <span> a full spectrum of DeFi applications.</span>
                     </p>
                     </Box>
@@ -32,7 +32,7 @@ export const Banner = () => {
                         </div>
                         <div className="stats-section">
                             <h2> &gt;50% </h2>
-                            <h6 className="home-desc">Supply is Protocol Owned </h6>
+                            <h6 className="home-desc">Protocol Owned Supply </h6>
                         </div>
                     </div>
 

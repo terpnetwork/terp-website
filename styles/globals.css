@@ -39,6 +39,7 @@
   }
 
   .banner-section .stats-container .stats-section h2 {
+    padding: 5px;
     font-weight: 700;
     font-size: 36px;
   }
@@ -90,7 +91,7 @@
  .banner-heading {
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
-    font-size: 40px;
+    font-size: 38px;
     line-height: 1.2;
     color: linear-gradient(to right, #6bffa9, #5b90eb);
     margin-bottom: 20px;
@@ -108,7 +109,7 @@
     color: #fff;
     font-weight: 800;
     width: auto;
-    font-size: 56px;
+    font-size: 50px;
   }
   
   .banner-section .text {
