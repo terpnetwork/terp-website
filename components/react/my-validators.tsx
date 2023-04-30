@@ -373,7 +373,7 @@ const MyValidators = ({
 
   return (
     <>
-      <Heading as="h4" size="md" mt={12} mb={6}>
+      <Heading as="h4" size="md" mt={12} mb={6} >
         My Validators
       </Heading>
 
@@ -399,7 +399,7 @@ const MyValidators = ({
                   ? exponentiate(currentValidator.commission, -16).toFixed(0)
                   : 0
               }
-              apr={22.08}
+              apr={0}
             />
             <ValidatorDesc description={currentValidator?.details || ''} />
 
@@ -453,7 +453,7 @@ const MyValidators = ({
                   ? exponentiate(currentValidator.commission, -16).toFixed(0)
                   : 0
               }
-              apr={22.08}
+              apr={0}
             />
             <DelegateWarning unbondingDays={unbondingDays} />
             <Stack direction="row" spacing={4} my={4}>
@@ -513,7 +513,7 @@ const MyValidators = ({
                   ? exponentiate(currentValidator.commission, -16).toFixed(0)
                   : 0
               }
-              apr={22.08}
+              apr={0}
             />
             <Stack direction="column" spacing={4}>
               <UndelegateWarning unbondingDays={unbondingDays} />
@@ -610,7 +610,7 @@ const MyValidators = ({
                       <Td>
                         <Box width="100%" display="flex" alignItems="center">
                           {/* <Text>{validator.apr}</Text> */}
-                          <Text>22.04%</Text>
+                          <Text>Live Data Coming Soon</Text>
                         </Box>
                       </Td>
                     </Tr>
@@ -635,7 +635,7 @@ const MyValidators = ({
           <ModalBody>
             <Stack direction="row" mt={8} mb={2}>
               <Text>From </Text>
-              <Text size="lg" fontWeight="bold">
+              <Text size="xl" fontWeight="bold">
                 {currentValidator?.name}
               </Text>
             </Stack>
@@ -686,18 +686,18 @@ const MyValidators = ({
                     maxWidth={280}
                     overflowX="hidden"
                   >
-                    <Text mr={4}>{index + 1}</Text>
+                    <Text fontWeight="bold" color={'white'}  mr={4}>{index + 1}</Text>
                     <Thumbnail
                       identity={validator.identity}
                       name={validator.name}
                       thumbnailUrl={thumbnails[validator.address]}
                     />
-                    <Text>{validator.name}</Text>
+                    <Text color='blackAlpha.900' fontWeight="bold"  fontSize='xl'>  {validator.name}</Text>
                   </Box>
                 </Td>
                 <Td>
                   {validator.staked}&nbsp;
-                  <Token color="blackAlpha.800" token={stakecoin.symbol} />
+                  <Token color="blackAlpha.800"  token={stakecoin.symbol} />
                 </Td>
                 <Td>
                   <Box width="100%" display="flex" alignItems="center">

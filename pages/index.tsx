@@ -22,7 +22,7 @@ import { useTheme } from '../contexts/theme';
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 import { Banner } from '../components/homepage/banner';
 import { Ecosystem } from '../components/homepage/ecosystem';
-import { Network, TerpEcosystem } from '../components/homepage';
+import { Network } from '../components/homepage';
 
 export default function Home() {
   const chainName = process.env.NEXT_PUBLIC_CHAIN ?? 'terpnetwork';
@@ -42,7 +42,6 @@ export default function Home() {
       <Network/>
      
 
-      {/* <WalletSection chainName={chainName} /> */}
 
       <div className="flex justify-center pt-6 text-sm text-center border-t border-black/10 dark:border-white/10">
         <span className="flex flex-row items-center space-x-2">
@@ -55,6 +54,7 @@ export default function Home() {
             <img
         src="/cosmology.webp"
               className="w-auto h-4 transition duration-150 transform cursor-pointer hover:scale-105"
+              alt="cosmology"
       />
           </a>
         </span>

@@ -250,7 +250,7 @@ const AllValidators = ({
                     ).toFixed(0)
                   : 0
               }
-              apr={22.08}
+              apr={0}
             />
             <ValidatorDesc
               description={currentValidator?.description?.details || ''}
@@ -313,13 +313,13 @@ const AllValidators = ({
                     maxWidth={280}
                     overflowX="hidden"
                   >
-                    <Text mr={4}>{index + 1}</Text>
+                    <Text  fontWeight="bold" color={'white'} mr={4}>{index + 1}</Text>
                     <Thumbnail
                       identity={validator.description?.identity}
                       name={validator.description?.moniker}
                       thumbnailUrl={thumbnails[validator.operatorAddress]}
                     />
-                    <Text>{validator?.description?.moniker}</Text>
+                    <Text fontWeight="bold" color={'black'}>{validator?.description?.moniker}</Text>
                   </Box>
                 </Td>
                 <Td>
@@ -340,7 +340,7 @@ const AllValidators = ({
                 <Td>
                   <Box width="100%" display="flex" alignItems="center">
                     {/* <Text>{validator.apr}</Text> */}
-                    <Text>22.04%</Text>
+                    <Text>Live Data Coming Soon</Text>
                     <Button
                       variant="ghost"
                       ml="auto"

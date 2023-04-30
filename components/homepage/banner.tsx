@@ -1,4 +1,5 @@
-
+import { Box, Button } from '@chakra-ui/react'
+import Link from 'next/link'
 
 
 export const Banner = () => {
@@ -7,17 +8,19 @@ export const Banner = () => {
         <div className="container">
             <div className="row">
                 <div className="col-md-12 col-sm-12 text-center">
-                    <p className="banner-heading"><span>TERPNET: Decentralized Infrastructure for Terp Culture  </span></p>
+                    <p className="banner-heading"><span>TERP NETWORK: Decentralized Infrastructure for Terp Culture  </span></p>
+                    <Box>
                     <p className="text">
-                        Terp Network is a decentralized L1 blockchain hub within the Interchain, powering
-                        <span>   a full spectrum of DeFi applications.</span>
+                        Terp Network is a decentralized L1 blockchain hub, powering
+                        <span> a full spectrum of DeFi applications.</span>
                     </p>
-                    <div className={"button-section text-center d-inline-block"}>
-                    <a href="/delegate" rel="noopener noreferrer"
+                    </Box>
+                    <Button className={"button-section text-center d-inline-block"}>
+                    <Link href="/delegate" 
                         className="button-initial button one">
                         Staking Dashboard
-                    </a>
-                </div>
+                    </Link>
+                </Button>
                     <div className="stats-container text-white">
                         <div className="stats-section">
                             <h2>+52</h2>
@@ -28,12 +31,8 @@ export const Banner = () => {
                             <h6 className="home-desc">Presale Raised</h6>
                         </div>
                         <div className="stats-section">
-                            <h2>$66+ Billion</h2>
-                            <h6 className="home-desc">Digital Assets on Cosmos Networks </h6>
-                        </div>
-                        <div className="stats-section">
-                            <h2>$790+ Million</h2>
-                            <h6 className="home-desc">IBC Volume (30 Days)</h6>
+                            <h2> &gt;50% </h2>
+                            <h6 className="home-desc">Supply is Protocol Owned </h6>
                         </div>
                     </div>
 
