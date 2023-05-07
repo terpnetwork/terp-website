@@ -12,6 +12,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 
 import { SignerOptions } from '@cosmos-kit/core';
 import { chains, assets } from 'chain-registry';
+import { Banner } from '../components/banner';
 
 function CreateCosmosApp({ Component, pageProps }: AppProps) {
   const signerOptions: SignerOptions = {
@@ -44,6 +45,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
     >
       <ThemeProvider>
         <div className="min-h-screen text-black bg-white dark:bg-gray-bg dark:text-white background">
+          <Banner/>
           <Component {...pageProps} />
         </div>
       </ThemeProvider>
