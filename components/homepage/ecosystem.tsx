@@ -1,5 +1,6 @@
 import React from 'react';
 import {Card,CardGroup} from 'react-bootstrap';
+import {Text} from '@chakra-ui/react';
 import cometbft from '../../public/cometbft.png';
 import cosmwasm from '../../public/cosmwasm.svg';
 import cosmossdk from '../../public/cosmossdk.svg';
@@ -16,10 +17,9 @@ export const Ecosystem = () => {
                             <div >
 
                                 <h3 className='section-title'>What is it?</h3>
-                                <Card.Text className={'mb-3 mt-4'}>
-                                    <span>A community owned smart contract database for creating solutions to problems that exist in our culture.</span>
-
-                                </Card.Text>
+                                <p className={'mb-3 mt-4'}>
+                                  A community owned smart contract database for creating solutions to problems that exist in our culture.
+                                </p>
 
 
                             </div>

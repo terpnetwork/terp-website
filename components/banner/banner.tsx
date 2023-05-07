@@ -12,7 +12,6 @@ import {
   useColorMode,
   useColorModeValue,
   Text,
-  Link,
   Divider,
   useDisclosure,
   Drawer,
@@ -32,12 +31,33 @@ import {
   ModalOverlay,
   ModalCloseButton,
 } from '@chakra-ui/react'
-import { ChevronLeftIcon } from '@chakra-ui/icons';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 // import Homebutton from './homebutton';
 
 
 export const Banner = () => {
 
+  const router = useRouter();
+
+  const handleClick = (buttonId: string) => {
+    switch (buttonId) {
+      case 'ecosystem':
+        router.push('/ecosystem');
+        break;
+      case 'blog':
+        router.push('/blog');
+        break;
+      case 'docs':
+        router.push('https://docs.terp.network');
+        break;
+      case 'dashboard':
+        router.push('/dashboard');
+        break;
+      default:
+        break;
+    }
+  };
     const OverlayOne = () => (
         <ModalOverlay
           bg='none'
@@ -55,25 +75,29 @@ export const Banner = () => {
   return (
     <Center >
       <div className='navbarcontent p-4 '>
-        <div className="frosted">
+        <Button className="frosted"
+        onClick={() => handleClick('ecosystem')} >
         Ecosystem
-        </div>
+        </Button>
       </div>
   
       <div className='navbarcontent  p-4 '>
-        <div className="frosted">
+        <Button className="frosted"
+        onClick={() => handleClick('blog')} >
         Blog
-        </div>
+        </Button>
       </div>
       <div className='navbarcontent  p-4 '>
-        <div className="frosted">
+        <Button className="frosted"
+        onClick={() => handleClick('docs')} >
         Documentation
-        </div>
+        </Button>
       </div>
       <div className='navbarcontent  p-4 '>
-        <div className="frosted">
+        <Button className="frosted"
+           onClick={() => handleClick('dashboard')} >
         Dashboard
-        </div>
+        </Button>
       </div>
     </Center>
   )

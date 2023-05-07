@@ -5,6 +5,7 @@ import React from 'react';
 import Layout from '../components/layout';
 import { getAllPosts } from '../lib/api';
 import { PostType } from '../types/post';
+import { Center, Heading } from '@chakra-ui/react';
 
 type IndexProps = {
   posts: PostType[];
@@ -13,26 +14,13 @@ type IndexProps = {
 export const Index = ({ posts }: IndexProps): JSX.Element => {
   return (
     <Layout>
-      <h1>Home Page</h1>
-      <p>Next.js starter for your next blog or personal site. Built with:</p>
-      <ul className="list-disc pl-4 my-6">
-        <li>Next.js</li>
-        <li className="mt-2">Typescript</li>
-        <li className="mt-2">MDX</li>
-        <li className="mt-2">Tailwind CSS</li>
-      </ul>
-
-      <a
-        href="https://github.com/ChangoMan/nextjs-typescript-mdx-blog"
-        className="inline-block px-7 py-3 rounded-md text-white dark:text-white bg-blue-600 hover:bg-blue-700 hover:text-white dark:hover:text-white"
-      >
-        Get the source code!
-      </a>
+     
+     <Center><Heading>All Blogs</Heading></Center>
+     
 
       {posts.map((post) => (
-        <article key={post.slug} className="mt-12">
+        <article key={post.slug} className="mt-12 frosted">
           <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-         
           </p>
           <h1 className="mb-2 text-xl">
             <Link as={`/posts/${post.slug}`} href={`/posts/[slug]`}>
@@ -49,6 +37,7 @@ export const Index = ({ posts }: IndexProps): JSX.Element => {
           </p>
         </article>
       ))}
+
     </Layout>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { MetaProps } from '../types/layout';
 import Head from './head';
+import { Center } from '@chakra-ui/react';
 
 
 type LayoutProps = {
@@ -14,6 +15,7 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
   return (
     <>
       <Head customMeta={customMeta} />
+        <Center>
       <header>
         <div className="max-w-5xl px-8 mx-auto">
           <div className="flex items-center justify-between py-6">
@@ -24,17 +26,8 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
       <main>
         <div className="max-w-5xl px-8 py-4 mx-auto">{children}</div>
       </main>
-      <footer className="py-8">
-        <div className="max-w-5xl px-8 mx-auto">
-          Built by{' '}
-          <a
-            className="text-gray-900 dark:text-white"
-            href="https://twitter.com/hunterhchang"
-          >
-            Hunter Chang
-          </a>
-        </div>
-      </footer>
+      </Center>
+
     </>
   );
 };
