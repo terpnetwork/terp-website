@@ -638,3 +638,39 @@
   letter-spacing: 0.1px;
   margin-top: 20px;
 }
+
+.blog-body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+  flex-direction: row;
+  position: relative;
+}
+
+.blog-card {
+  background-color: #303030;
+  border-radius: 4px;
+  box-shadow: 0px 1px 2px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  height: 300px;
+  margin: 10px;
+  overflow: hidden;
+  position: relative;
+  width: calc(50.33% - 20px);
+}
+/* Style the post card image */
+.blog-card img {
+  height: 150px;
+  object-fit: cover;
+  width: 100%;
+}
+/* Style the post card content */
+.blog-card-content {
+  padding: 20px;
+}
+.blog-card-content .text {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 10px;
+}
