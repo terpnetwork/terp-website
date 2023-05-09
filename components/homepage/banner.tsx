@@ -18,7 +18,7 @@ export const Banner = () => {
                         Staking Dashboard
                     </a>
                 </div>
-                    <div className="stats-container text-white">
+                    <div className="stats-container text-white frosted-stats">
                         <div className="stats-section">
                             <h2>+52</h2>
                             <h6 className="home-desc">Interoperable Zones</h6>

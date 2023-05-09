@@ -14,6 +14,21 @@
     background-position: 0% 50%;
   }
 }
+
+@layer base {
+  h1 {
+    @apply mb-6 text-3xl font-semibold;
+  }
+  h2 {
+    @apply text-2xl font-semibold;
+  }
+  p {
+    @apply mb-4;
+  }
+  a {
+    @apply text-blue-500 hover:text-blue-400 dark:text-blue-400 dark:hover:text-blue-300;
+  }
+}
 /********************************************* HOME PAGE *********************************************/
 
 .background {
@@ -29,11 +44,25 @@
   .frosted{
     background:  #4a4a4a69;
     backdrop-filter: blur(2px);
-    border-radius: 14px;
+    border-radius: 4px;
     padding: 10px;
   }
 
-  
+  .frosted-blog{
+    background: #1c1c2cb1 !important;
+    color: white;
+    backdrop-filter: blur(2px);
+    border-radius: 7.77px;
+    padding: 7.77px;
+  }
+  .frosted-stats{
+    background:  #e8e3e393;
+    backdrop-filter: blur(2px);
+    border-radius: 400px;
+    padding: 7.77px;
+   
+    
+  }
   .banner-section .stats-container {
     display: flex;
     position: relative;
@@ -45,6 +74,8 @@
   .banner-section .stats-container .stats-section h2 {
     font-weight: 700;
     font-size: 36px;
+    color: #181818;
+    padding: 7.77px;
   }
   
   .center {
@@ -56,7 +87,7 @@
   .banner-section .stats-container .stats-section h6 {
     font-size: 16px;
     font-weight: 400;
-    color: #B0B0B0;
+    color: #110b14;
   }
   
   .banner-section .button-initial.button.one {
@@ -647,18 +678,7 @@
   position: relative;
 }
 
-.blog-card {
-  background-color: #303030;
-  border-radius: 4px;
-  box-shadow: 0px 1px 2px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  height: 300px;
-  margin: 10px;
-  overflow: hidden;
-  position: relative;
-  width: calc(50.33% - 20px);
-}
+
 /* Style the post card image */
 .blog-card img {
   height: 150px;
@@ -673,4 +693,200 @@
   font-size: 20px;
   font-weight: bold;
   margin: 0 0 10px;
+}
+.blog-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 10px;
+}
+
+.sidebar-layout {
+    bottom: 0;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 160px;
+}
+.sidebar-layout .buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-wrapper {
+  display: flex;
+}
+
+.sidebar-wrapper > div {
+  flex: 0 0 64px;
+  overflow-y: auto;
+}
+.two-column-layout {
+  display: flex;
+  color: rgba(255, 255, 255, 0.89);
+
+}
+
+.left-sidebar {
+  flex: 0 0 64px;
+  color: transparent;
+  color: rgba(255, 255, 255, 0.89);
+
+}
+
+.right-content {
+  flex: 1;
+}
+
+
+/* Base styles */
+h1 {
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+    color: #f6f6f6;
+
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #2563eb;
+}
+
+.dark a {
+  color: #dbdadc;
+}
+
+.dark a:hover {
+  color: #9c64f8;
+}
+
+/* Post styles */
+.prose .anchor {
+  position: absolute;
+  visibility: visible;
+  text-decoration: none;
+  margin-left: -1em;
+  padding-right: 0.5em;
+  width: 100%;
+  max-width: 700px;
+  cursor: pointer;
+  color: #d1d5db;
+}
+.prose a {
+  color: white;
+}
+.anchor:hover {
+  visibility: visible;
+}
+
+.prose a {
+  transition: all 0.2s ease-in-out;
+}
+
+.prose .anchor:after {
+  content: '#';
+  color: #d1d5db;
+}
+
+.prose *:hover > .anchor {
+  visibility: visible;
+}
+
+.prose pre {
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #f6f6f6;
+}
+
+.prose code {
+  color: #3c82e6;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid #d2d6dc;
+  border-radius: 0.375rem;
+  background-color: #edf2f7;
+}
+
+.prose pre code {
+  color: #f6f6f6;
+  padding: 0;
+  border: none;
+}
+
+.prose img {
+  margin: 0;
+}
+
+.prose > :first-child {
+  margin-top: 1.25em !important;
+  margin-bottom: 1.25em !important;
+}
+
+/* Prism Styles */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #4a5568;
+}
+
+.token.punctuation {
+  color: #ebebeb;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #48bb78;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #9f7aea;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #f6e05e;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #4299e1;
+}
+
+.token.function,
+.token.class-name {
+  color: #ed64a6;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #f6e05e;
 }

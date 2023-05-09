@@ -1,15 +1,14 @@
-import DashboardContent from "components/apps/dashboard";
 import TwoColumnLayout from "components/layout/twoColumnLayout"
+import PoapContent from "../components/apps/poap/poapDashboard";
+import React from "react";
 
 
-const DashboardPage = () => {
+export default function PoapPage(){
   return (
     <div  className="two-column-layout">
     <TwoColumnLayout/>
-    <DashboardContent/>
+    <PoapContent/>
     </div>
   )
 }
 
-
-export default DashboardPage;

@@ -33,26 +33,30 @@ import {
 } from '@chakra-ui/react'
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { SideBarContent } from '../sidebar';
 // import Homebutton from './homebutton';
 
 
-export const Banner = () => {
+export const NavBar = () => {
 
   const router = useRouter();
 
   const handleClick = (buttonId: string) => {
     switch (buttonId) {
-      case 'ecosystem':
-        router.push('/ecosystem');
-        break;
       case 'blog':
         router.push('/blog');
+        break;
+      case 'dashboard':
+        router.push('/dashboard');
         break;
       case 'docs':
         router.push('https://docs.terp.network');
         break;
-      case 'dashboard':
-        router.push('/dashboard');
+      case 'ecosystem':
+        router.push('/ecosystem');
+        break;
+      case 'home':
+        router.push('https://terp.network');
         break;
       default:
         break;
@@ -73,7 +77,14 @@ export const Banner = () => {
   const [overlay, setOverlay] = React.useState(<OverlayOne />)
 
   return (
+    <div className='navbar-bg'>
     <Center >
+    <div className='navbarcontent p-4 '>
+        <Button className="frosted"
+        onClick={() => handleClick('home')} >
+        Home
+        </Button>
+      </div>
       <div className='navbarcontent p-4 '>
         <Button className="frosted"
         onClick={() => handleClick('ecosystem')} >
@@ -100,5 +111,6 @@ export const Banner = () => {
         </Button>
       </div>
     </Center>
+    </div>
   )
 }

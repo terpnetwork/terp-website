@@ -17,7 +17,7 @@ export const Ecosystem = () => {
                             <div >
 
                                 <h3 className='section-title'>What is it?</h3>
-                                <p className={'mb-3 mt-4'}>
+                                <p className={' frosted-blog '}>
                                   A community owned smart contract database for creating solutions to problems that exist in our culture.
                                 </p>
 

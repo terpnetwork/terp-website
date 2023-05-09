@@ -8,11 +8,11 @@ import { wallets as leapWallets } from '@cosmos-kit/leap';
 import { TailwindModal } from '../components';
 import { ThemeProvider } from '../contexts/theme';
 import { ChakraProvider } from '@chakra-ui/react';
-
+import { MainLayout } from '../components/layout/main'
 
 import { SignerOptions } from '@cosmos-kit/core';
 import { chains, assets } from 'chain-registry';
-import { Banner } from '../components/banner';
+import { NavBar } from '../components/navbar';
 
 function CreateCosmosApp({ Component, pageProps }: AppProps) {
   const signerOptions: SignerOptions = {
@@ -44,8 +44,9 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
       walletModal={TailwindModal}
     >
       <ThemeProvider>
-        <div className="min-h-screen text-black bg-white dark:bg-gray-bg dark:text-white background">
-          <Banner/>
+          <MainLayout />
+        <div className="min-h-screen  bg-white dark:bg-gray-bg dark:text-white background">
+        
           <Component {...pageProps} />
         </div>
       </ThemeProvider>
@@ -55,3 +56,4 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
 }
 
 export default CreateCosmosApp;
+
