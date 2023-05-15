@@ -32,9 +32,9 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
           projectId: 'a8510432ebb71e6948cfd6cde54b70f7',
           relayUrl: 'wss://relay.walletconnect.org',
           metadata: {
-            name: 'CosmosKit Template',
+            name: 'Terp Network',
             description: 'CosmosKit dapp template',
-            url: 'https://docs.cosmoskit.com/',
+            url: 'https://terp.network/',
             icons: [],
           },
         },
@@ -45,8 +45,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
     >
       <ThemeProvider>
           <MainLayout />
-        <div className="min-h-screen  bg-white dark:bg-gray-bg dark:text-white background">
-        
+        <div className="min-h-screen bg-white dark:bg-gray-bg dark:text-white background">
           <Component {...pageProps} />
         </div>
       </ThemeProvider>

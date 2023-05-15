@@ -4,6 +4,7 @@ import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronLeftIcon } from '@heroicons/react/20/solid';
 import { QRCodeSVG } from 'qrcode.react';
+import { Mutable } from '@cosmos-kit/core';
 
 export const QRCode = ({
   onClose,

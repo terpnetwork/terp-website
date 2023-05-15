@@ -17,7 +17,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Network",
         status: "Live",
-        wikilink: "https://akash.network/"
+        wikilink: "https://agoric.com/"
     },
     {
         network: "Akash Network",
@@ -33,7 +33,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Network",
         status: "Live",
-        wikilink: "https://akash.network/"
+        wikilink: "https://anoma.net/"
     },
     {
         network: "Axelar Network ",
@@ -44,12 +44,28 @@ export const networkData: NetworkData[] = [
         wikilink: "https://axelar.network/"
     },
     {
+        network: "Archway Network ",
+        description: "EVM Intechain router",
+        icon: "",
+        name: "Network",
+        status: "Live",
+        wikilink: "https://axelar.network/"
+    },
+    {
+        network: "Babylon Network ",
+        description: "Bringing Bitcoin security to Cosmos and beyond",
+        icon: "",
+        name: "Network",
+        status: "Live",
+        wikilink: "https://www.babylonchain.io/"
+    },
+    {
         network: "Bitsong ",
         description: "Tokenizing music & fan interaction.",
         icon: "",
         name: "Network",
         status: "Live",
-        wikilink: "https://osmosis.zone/"
+        wikilink: "https://bitsong.io/"
     },
     {
         network: "Bitcanna Network ",
@@ -65,7 +81,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Network",
         status: "Live",
-        wikilink: "https://nomic.io"
+        wikilink: "https://junonetwork.io"
     },
     {
         network: "Nomic",
@@ -89,7 +105,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Network",
         status: "Live",
-        wikilink: "https://sentinel.co/"
+        wikilink: "https://secret.network/"
     },
     {
         network: "Sentienel DVPN ",
@@ -129,7 +145,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Tools",
         status: "Coming Soon",
-        wikilink: "https://sifchain.network/"
+        wikilink: "https://interchaininfo.zone/"
     },
     {
         network: "Abstract.io",
@@ -137,7 +153,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Tools",
         status: "Coming Soon",
-        wikilink: "https://sifchain.network/"
+        wikilink: "https://abstract.money/"
     },
     {
         network: "Komple.io ",
@@ -145,7 +161,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Tools",
         status: "Coming Soon",
-        wikilink: "https://sifchain.network/"
+        wikilink: "https://komple.io/"
     },
     {
         network: "Keplr",
@@ -161,7 +177,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Defi",
         status: "Coming Soon",
-        wikilink: "https://sifchain.network/"
+        wikilink: "https://www.wynddao.com//"
     },
     {
         network: "Gelotto.io",
@@ -169,7 +185,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "Defi",
         status: "Live TestNET",
-        wikilink: "https://wallet.keplr.app/"
+        wikilink: "https://gelotto.io/"
     },
     {
         network: "Leap",
@@ -273,6 +289,14 @@ export const networkData: NetworkData[] = [
     },
     // Community Developed Apps
     {
+        network: "Area 52",
+        description: " interactive coding platform that teaches you all things CosmWasm, Rust smart contracts, and how to build and deploy your own multichain applications.",
+        icon: "",
+        name: "Tools",
+        status: "Live",
+        wikilink: "https://area-52.io/"
+    },
+    {
         network: "Judging App: Legends of Hashish",
         description: "Decentralised voting framework",
         icon: "",
@@ -310,7 +334,7 @@ export const networkData: NetworkData[] = [
         icon: "",
         name: "dApp",
         status: "Coming Soon",
-        wikilink: "https://terp.network/stake"
+        wikilink: "https://terp.network/gov"
     },
     {
         network: "Poap Badges",

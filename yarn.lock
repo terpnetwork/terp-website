@@ -1226,6 +1226,14 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
+"@chain-registry/assets@^1.14.0":
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/@chain-registry/assets/-/assets-1.14.0.tgz#0e7cd7c976ac1b6831d58648ec281878601d54ca"
+  integrity sha512-L8yAy227wXTFfwMfr14wEZLpnx52fkn6x+krU704F1YIeqHYPp5Y1KBzIOcdQ1oq45hhYwuHf7xoMwoXcd/sTQ==
+  dependencies:
+    "@babel/runtime" "^7.21.0"
+    "@chain-registry/types" "^0.16.0"
+
 "@chain-registry/cosmostation@1.8.0":
   version "1.8.0"
   resolved "https://registry.npmjs.org/@chain-registry/cosmostation/-/cosmostation-1.8.0.tgz"

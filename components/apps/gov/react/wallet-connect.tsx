@@ -1,7 +1,7 @@
 import React, { MouseEventHandler, ReactNode } from 'react';
 import { Button, Icon, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { IoWallet } from 'react-icons/io5';
-import { ConnectWalletType } from '../types';
+import { ConnectWalletType } from '../../../types';
 import { FiAlertTriangle } from 'react-icons/fi';
 import { WalletStatus } from '@cosmos-kit/core';
 
@@ -35,7 +35,6 @@ export const ConnectWalletButton = ({
       }}
       onClick={onClickConnectBtn}
     >
-      <Icon as={icon ? icon : IoWallet} mr={2} />
       {buttonText ? buttonText : 'Connect Wallet'}
     </Button>
   );

@@ -15,11 +15,11 @@ export const WalletList = ({
   wallets: ChainWalletBase[];
 }) => {
   return (
-    <div className="mt-2 text-center sm:mt-0.5 sm:text-left">
-      <div className="flex flex-row items-center justify-between pl-3">
+    <div className="wallet-list">
+      <div className="flex-row-center">
         <Dialog.Title
           as="h3"
-          className="font-medium leading-6 text-gray-900 dark:text-white"
+          className="medium-text"
         >
           Select a Wallet
         </Dialog.Title>

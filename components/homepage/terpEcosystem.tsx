@@ -9,6 +9,7 @@ import {
     TERPNET_TWITTER_URL,TERPNET_YOUTUBE_URL
  } from "../../config/defaults";
 import { Icon } from "@chakra-ui/react";
+import Link from "next/link";
 
  
 
@@ -100,10 +101,10 @@ export const TerpEcosystem = () => {
                                     </Card.Text>
 
                                     <div className={"comingsoon cards-buttons button-section mt-5"}>
-                                        <a href="https://docs.terp.network/overview/validate" rel="noopener noreferrer"
-                                           target="_blank" className="button-initial button">
-                                            DOCS
-                                        </a>
+                                    <Link href="https://docs.terp.network/overview/validate"
+                                     target="_blank" rel="noopener noreferrer" className="button-initial button" >
+                                     DOCS
+                                    </Link>
                                     </div>
                                 </Card.Body>
                             </div>
@@ -126,13 +127,13 @@ export const TerpEcosystem = () => {
                                     </Card.Text>
 
                                     <div className={"comingsoon cards-buttons button-section mt-5"}>
-                                        <a href="/ecosystem" rel="noopener noreferrer" className="button-initial button">
+                                        <Link href="/ecosystem" rel="noopener noreferrer" className="button-initial button">
                                             ECOSYSTEM
-                                        </a>
-                                        <a href="https://bit.ly/38VBfme" rel="noopener noreferrer"
+                                        </Link>
+                                        <Link href="https://bit.ly/38VBfme" rel="noopener noreferrer"
                                             className="button-initial button ml-3">
                                             Zealy
-                                        </a>
+                                        </Link>
                                     </div>
                                 </Card.Body>
                             </div>

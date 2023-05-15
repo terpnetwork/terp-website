@@ -40,6 +40,7 @@ export default function Home() {
             <img
         src="/cosmology.webp"
               className="w-auto h-4 transition duration-150 transform cursor-pointer hover:scale-105"
+              alt="cosmology"
       />
           </a>
         </span>

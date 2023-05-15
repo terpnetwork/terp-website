@@ -8,7 +8,7 @@ import {
     useColorMode,
   } from "@chakra-ui/react";
   import { WalletStatus } from "@cosmos-kit/core";
-  import React, { ReactNode, useEffect, useState } from "react";
+  import React, { ReactNode, useEffect, useMemo, useState } from "react";
   import { FaCheckCircle } from "react-icons/fa";
   import { FiCopy } from "react-icons/fi";
   
@@ -61,24 +61,29 @@ import {
     const { hasCopied, onCopy } = useClipboard(address ? address : "");
     const [displayAddress, setDisplayAddress] = useState("");
    // const { colorMode } = useColorMode();
-    const defaultMaxLength = {
-      lg: 14,
-      md: 16,
-      sm: 18,
-    };
+   const defaultMaxLength = useMemo(() => ({
+    xs: 12,
+    sm: 16,
+    md: 20,
+    lg: 24,
+    xl: 28,
+    "2xl": 32,
+    "3xl": 40,
+    "4xl": 48,
+  }), []);
   
-    useEffect(() => {
-      if (!address) setDisplayAddress("address not identified yet");
-      if (address && maxDisplayLength)
-        setDisplayAddress(stringTruncateFromCenter(address, maxDisplayLength));
-      if (address && !maxDisplayLength)
-        setDisplayAddress(
-          stringTruncateFromCenter(
-            address,
-            defaultMaxLength[size as keyof typeof defaultMaxLength]
-          )
-        );
-    }, [address]);
+  useEffect(() => {
+    if (!address) setDisplayAddress("address not identified yet");
+    if (address && maxDisplayLength)
+      setDisplayAddress(stringTruncateFromCenter(address, maxDisplayLength));
+    if (address && !maxDisplayLength)
+      setDisplayAddress(
+        stringTruncateFromCenter(
+          address,
+          defaultMaxLength[size as keyof typeof defaultMaxLength]
+        )
+      );
+  }, [address, size, maxDisplayLength, defaultMaxLength]);
   
     return (
       <Button
@@ -103,7 +108,7 @@ import {
         isDisabled={!address && true}
         isLoading={isLoading}
         _hover={{
-          bg: "rgba(142, 142, 142, 0.05)",
+          bg: "rgba(22, 22, 22, 0.05)",
         }}
         _focus={{
           outline: "none",

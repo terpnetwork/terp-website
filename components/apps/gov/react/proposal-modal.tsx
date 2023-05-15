@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { TransactionResult, VoteOption } from '../../../types';
+import { TransactionResult, VoteOption } from '../../../../types';
 import {
   AiFillCheckCircle,
   AiFillCloseCircle,

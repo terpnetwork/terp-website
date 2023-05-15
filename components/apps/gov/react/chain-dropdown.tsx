@@ -26,7 +26,7 @@ import {
   ChainOption,
   ChangeChainDropdownType,
   ChangeChainMenuType
-} from '../types';
+} from '../../../types';
 
 const SkeletonOptions = () => {
   return (

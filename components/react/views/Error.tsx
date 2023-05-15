@@ -50,7 +50,7 @@ export const Error = ({
           />
         </div>
         <p className="mt-3 font-medium text-black">An error has occured</p>
-        <p className="mt-1 text-sm text-gray-500">Lorem ipsum dolor sit amet</p>
+        <p className="mt-1 text-sm text-gray-500">Please try again!</p>
         <button
           className="rounded-lg bg-purple-damp hover:bg-purple-damp/75 inline-flex justify-center items-center py-2.5 font-medium mt-4 text-white"
           onClick={onReconnect}

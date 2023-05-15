@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^1.10.3",
+    "@chain-registry/assets": "^1.14.0",
     "@chakra-ui/icons": "2.0.12",
     "@chakra-ui/react": "2.5.1",
     "@cosmjs/cosmwasm-stargate": "0.29.5",

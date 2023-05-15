@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import type { Proposal } from 'interchain/types/codegen/cosmos/gov/v1beta1/gov';
 import dayjs from 'dayjs';
 import { cosmos } from 'interchain';
-import { VoteOption } from '../../../types';
+import { VoteOption } from '../../../../types';
 import { decodeUint8Arr, Votes } from './vote';
 import {
   Badge,

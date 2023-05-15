@@ -35,6 +35,10 @@ const buttons = {
   },
 };
 
+type WalletSectionProps = {
+  chainName?: string;
+  setChainName?: React.Dispatch<React.SetStateAction<string | undefined>>;
+};
 export const WalletSection = () => {
   const {
     connect,

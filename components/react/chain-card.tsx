@@ -1,14 +1,39 @@
-/* eslint-disable @next/next/no-img-element */
+import { Box, Stack, useColorModeValue, Image, Text } from '@chakra-ui/react';
 import { ChainCardProps } from '../types';
 
 export const ChainCard = (props: ChainCardProps) => {
   return (
-    <div className="flex items-center justify-center w-full space-x-2 overflow-hidden">
-      <img 
-      alt="chain-icon"
-      src={props.icon}
-      className="w-8 h-8" />
-      <p className="text-xl font-semibold">{props.prettyName}</p>
-    </div>
+    <Stack
+      isInline={true}
+      alignItems="center"
+      justifyContent={'center'}
+      spacing={3}
+      overflow="hidden"
+      wordBreak="break-word"
+      color={'blackAlpha.800'}
+      w="full"
+    >
+      <Box
+        minW={10}
+        minH={10}
+        maxW={10}
+        maxH={10}
+        w="full"
+        h="full"
+        border="1px solid"
+        borderColor={useColorModeValue('blackAlpha.200', 'whiteAlpha.200')}
+        borderRadius="full"
+        overflow="hidden"
+      >
+        <Image
+          alt=""
+          src={props.icon}
+          fallbackSrc={'https://dummyimage.com/150/9e9e9e/ffffff&text=☒'}
+        />
+      </Box>
+      <Text fontSize="xl" fontWeight="semibold" paddingEnd={'18px'}>
+        {props.prettyName}
+      </Text>
+    </Stack>
   );
 };

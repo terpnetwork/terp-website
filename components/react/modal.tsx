@@ -137,8 +137,7 @@ export const TailwindModal = ({
           <QRCode
             onClose={onCloseModal}
             onReturn={() => setCurrentView(ModalView.WalletList)}
-            qrUri={qrWallet?.qrUrl}
-            name={qrWallet?.walletInfo.prettyName}
+          
           />
         );
       case ModalView.Error:

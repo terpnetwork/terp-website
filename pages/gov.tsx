@@ -17,26 +17,22 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { BsFillMoonStarsFill, BsFillSunFill } from 'react-icons/bs';
-import {WalletSection} from '../components/wallet'
 import {VotingSection} from '../components/apps/gov/react/vote'
 import { useState } from 'react';
 import { ChainName } from '@cosmos-kit/core';
+import { WalletSection } from "components/wallet";
 
 
 export default function GovernancePage(){
 
   const { colorMode, toggleColorMode } = useColorMode();
-  const [chainName, setChainName] = useState<ChainName | undefined>('osmosis');
+  const [chainName, setChainName] = useState<ChainName | undefined>('terpnetwork');
   return (
     <div  className="two-column-layout">
     <TwoColumnLayout/>
     <Container maxW="5xl" py={10}>
       <Flex justifyContent="end" mb={4}>
-        <Button variant="outline" px={0} onClick={toggleColorMode}>
-          <Icon
-            as={colorMode === 'light' ? BsFillMoonStarsFill : BsFillSunFill}
-          />
-        </Button>
+   
       </Flex>
       <Box textAlign="center">
         <Heading
@@ -47,7 +43,6 @@ export default function GovernancePage(){
         >
        Governance Dashboard
         </Heading>
-        
       </Box>
       <WalletSection chainName={chainName} setChainName={setChainName} />
       {chainName && <VotingSection chainName={chainName} />}

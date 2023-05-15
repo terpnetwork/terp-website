@@ -8,7 +8,7 @@ import {
   KeyResponse,
   OwnerResponse,
 } from "@steak-enjoyers/badges.js/types/codegen/Hub.types";
-import create from "zustand";
+import {create} from "zustand";
 import { Network, NetworkConfig, NETWORK_CONFIGS, PUBLIC_ACCOUNTS } from "./configs";
 
 export type State = {

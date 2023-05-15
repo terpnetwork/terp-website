@@ -4,7 +4,7 @@ import {
   ChooseChainInfo,
   ChainOption,
   handleSelectChainDropdown
-} from '../types';
+} from '../../../types';
 
 export function ChooseChain({
   chainName,

@@ -1,4 +1,4 @@
-import DashboardContent from "components/apps/dashboard";
+import DashboardContent from "components/apps/dashboard/dashboard";
 import TwoColumnLayout from "components/layout/twoColumnLayout"
 
 

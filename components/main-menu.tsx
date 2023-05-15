@@ -1,6 +1,3 @@
-
-
-
 export const MainMenu = () => {
   return (
     <ul className="mt-20 flex w-full flex-col gap-3 md:mt-0 md:gap-0">

@@ -18,8 +18,8 @@ import {
   import { useChain } from '@cosmos-kit/react';
   import { IoWalletOutline } from 'react-icons/io5';
   
-  import  {ChainWalletCard}  from '../chain-wallet-card';
-import { FaUserCircle } from "react-icons/fa";
+import  {ChainWalletCard}  from './chain-wallet-card';
+import  { FaUserCircle } from "react-icons/fa";
 
     const chainNames_1 = ['cosmoshub', 'osmosis'];
     const chainNames_2 = ['stargaze', 'akash'];
@@ -61,7 +61,7 @@ export default function DashboardContent(){
         <Button
           isLoading
           loadingText={`Connecting ${wallet?.prettyName}`}
-          colorScheme="teal"
+          colorScheme="purple"
           size="md"
           marginTop={6}
           marginBottom={2}
@@ -88,7 +88,7 @@ export default function DashboardContent(){
             {username}
           </Button>
           <Button
-            colorScheme="teal"
+            colorScheme="purple"
             onClick={async () => {
               await disconnect();
               setGlobalStatus(WalletStatus.Disconnected);
@@ -104,7 +104,7 @@ export default function DashboardContent(){
       <Button
         isLoading={false}
         loadingText={`Connecting ${wallet?.prettyName}`}
-        colorScheme="teal"
+        colorScheme="purple"
         size="md"
         marginTop={6}
         marginBottom={2}
@@ -117,7 +117,6 @@ export default function DashboardContent(){
 
     return (
       <div className="right-content">
-    
         <SimpleGrid columns={1} spacing={10} maxW={'60%'} marginX="auto">
           <Flex justifyContent="end">
           </Flex>
