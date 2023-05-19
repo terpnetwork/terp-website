@@ -1,0 +1,19 @@
+name: 'publish'
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+          docker build -f Dockerfile . --tag ghcr.io/cosmoscontracts/website:${GITHUB_REF#refs/tags/}
+          docker tag ghcr.io/cosmoscontracts/website:${GITHUB_REF#refs/tags/} ghcr.io/cosmoscontracts/website:latest
+          docker push ghcr.io/cosmoscontracts/website:${GITHUB_REF#refs/tags/}
+          docker push ghcr.io/cosmoscontracts/website:latest

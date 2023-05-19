@@ -1,0 +1,49 @@
+[
+  {
+    "icon": "",
+    "title": "DAO DAO",
+    "text": "A DAO building tooling to create DAOs",
+    "featured": true,
+    "category": "DAO",
+    "website": "",
+    "github": "",
+    "discord": "",
+    "twitter": "https://twitter.com/terpNETFoundationDAO",
+    "telegram": ""
+  },
+  {
+  "icon": "",
+  "title": "TerpNET Foundation DAO",
+  "text": "",
+  "featured": true,
+  "category": "DAO",
+  "website": "",
+  "github": "",
+  "discord": "",
+  "twitter": "https://twitter.com/terpNETFoundationDAO",
+  "telegram": ""
+},{
+  "icon": "nmn.jpg",
+  "title": "TerpNET Validation SubDAO",
+  "text": "",
+  "featured": true,
+  "category": "DAO",
+  "website": "",
+  "github": "",
+  "discord": "",
+  "twitter": "",
+  "telegram": ""
+},
+{
+  "icon": "nmn.jpg",
+  "title": "TerpNET Design SubDAO",
+  "text": "",
+  "featured": true,
+  "category": "DAO",
+  "website": "",
+  "github": "",
+  "discord": "",
+  "twitter": "",
+  "telegram": ""
+}
+]

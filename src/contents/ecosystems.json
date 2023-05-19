@@ -1,0 +1,337 @@
+[
+    {
+        "title": "Agoric Network",
+        "text": "An intent-centric, privacy-preserving protocol for decentralized counterparty discovery, solving, and multi-chain atomic settlement.",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://agoric.com/"
+    },
+    {
+        "title": "Akash Network",
+        "text": "Decentralized Cloud Computing",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://akash.network/"
+    },
+    {
+        "title": "Anoma ",
+        "text": "An intent-centric, privacy-preserving protocol for decentralized counterparty discovery, solving, and multi-chain atomic settlement.",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://anoma.net/"
+    },
+    {
+        "title": "Axelar Network ",
+        "text": "EVM Intechain router",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://axelar.network/"
+    },
+    {
+        "title": "Archway Network ",
+        "text": "EVM Intechain router",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://axelar.network/"
+    },
+    {
+        "title": "Babylon Network ",
+        "text": "Bringing Bitcoin security to Cosmos and beyond",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://www.babylonchain.io/"
+    },
+    {
+        "title": "Bitsong ",
+        "text": "Tokenizing music & fan interaction.",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://bitsong.io/"
+    },
+    {
+        "title": "Bitcanna Network ",
+        "text": "Supply chain logic for cannabis culture",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://bitcanna.io/"
+    },
+    {
+        "title": "Juno Network ",
+        "text": "Cutting edge CosmWasm.",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://junonetwork.io"
+    },
+    {
+        "title": "Nomic",
+        "text": "Bringing native BTC to the Cosmos Ecosystem.",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://nomic.io"
+    },
+    {
+        "title": "Osmosis Zone ",
+        "text": "Interchain AMM & DEX Zone",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://osmosis.zone/"
+    },
+    {
+        "title": "Secret Network ",
+        "text": "The privacy platform for web3 ",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://secret.network/"
+    },
+    {
+        "title": "Sentienel DVPN ",
+        "text": "Web3 Cosmos Based Global Decentrlaized Virtual Private Network, built on a P2P bandwidth sharing marketplace. ",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://sentinel.co/"
+    },
+    {
+        "title": "Sommelier ",
+        "text": "Off-chain Ethereum co-processor.",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://www.sommelier.finance/"
+    },
+    {
+        "title": "Stargaze Network  ",
+        "text": "The first interoperable Layer 1 for NFTs.",
+        "icon": "",
+        "category": "networks",
+        "status": "Live",
+        "website": "https://stargaze.zone/"
+    },
+    {
+        "title": "DAO DAO",
+        "text": "An DAO building an app to build DAOs",
+        "icon": "",
+        "name": "dApps",
+        "status": "Live TestNET",
+        "website": "https://daodao.zone/"
+    },
+    {
+        "title": "Interchain Info ",
+        "text": "Interchain indexer, the wikipedia of the cosmos.",
+        "icon": "",
+        "category": "Tool",
+        "status": "Coming Soon",
+        "website": "https://interchaininfo.zone/"
+    },
+    {
+        "title": "Abstract.io",
+        "text": "Abstract is a chain-agnostic CosmWasm framework that allows developers to create and monetize decentralized applications using a modular component system.",
+        "icon": "",
+        "category": "Tool",
+        "status": "Coming Soon",
+        "website": "https://abstract.money/"
+    },
+    {
+        "title": "Komple.io ",
+        "text": "From NFT-based ticketing applications to games with dynamic NFT, with Komple you can create products that leverage the full power of blockchain and NFT technology.",
+        "icon": "",
+        "category": "Tool",
+        "status": "Coming Soon",
+        "website": "https://komple.io/"
+    },
+    {
+        "title": "Keplr",
+        "text": "Cosmos Ecosystem wallet",
+        "icon": "",
+        "name": "Wallet",
+        "status": "Live TestNET",
+        "website": "https://wallet.keplr.app/"
+    },
+    {
+        "title": "WyndDAO",
+        "text": "Decentralized Exchange on Juno Network",
+        "icon": "",
+        "name": "Defi",
+        "status": "Coming Soon",
+        "website": "https://www.wynddao.com//"
+    },
+    {
+        "title": "Gelotto.io",
+        "text": "The first ibc luck based game platform built on Juno",
+        "icon": "",
+        "name": "Defi",
+        "status": "Live TestNET",
+        "website": "https://gelotto.io/"
+    },
+    {
+        "title": "Leap",
+        "text": "Cosmos Ecosystem wallet",
+        "icon": "",
+        "name": "Wallet",
+        "status": "Live TestNET",
+        "website": "https://www.leapwallet.io/"
+    },
+    {
+        "title": "CypherD",
+        "text": "Cosmos Ecosystem wallet",
+        "icon": "",
+        "name": "Wallet",
+        "status": "Coming Soon",
+        "website": "https://www.cypherwallet.io/"
+    },
+    {
+        "title": "Cosmostation",
+        "text": "Cosmos Ecosystem wallet",
+        "icon": "",
+        "name": "Wallet",
+        "status": "Coming Soon",
+        "website": "https://www.cosmostation.io/"
+    },
+    {
+        "title": "Ledger",
+        "text": "Hardware Wallet",
+        "icon": "",
+        "name": "Wallet",
+        "status": "Live TestNET",
+        "website": "https://www.ledger.com"
+    },
+    {
+        "title": "Cosmos Directory",
+        "text": "Terp Network Ecosystem Directory",
+        "icon": "",
+        "name": "Explorer",
+        "status": "Live",
+        "website": "https://cosmos.directory/terpnetwork"
+    },
+    {
+        "title": "Zenscan",
+        "text": "Terp Network Ecosystem Explorer",
+        "icon": "",
+        "name": "Explorer",
+        "status": "Live TestNET",
+        "website": "https://www.terp.zenscan.io"
+    },
+    {
+        "title": "KjNodes Explorer",
+        "text": "Terp Network Ecosystem Explorer",
+        "icon": "",
+        "name": "Explorer",
+        "status": "Live TestNET",
+        "website": "https://explorer.kjnodes.com/terp-testnet"
+    },
+    {
+        "title": "NodeJumper Explorer",
+        "text": "Terp Network Ecosystem Explorer",
+        "icon": "",
+        "name": "Explorer Tools",
+        "status": "Live TestNET",
+        "website": "https://nodejumper.io/terpnetwork-testnet"
+    },
+    {
+        "title": "Highstakes Snapshot",
+        "text": "Terp Network Ecosystem Explorer",
+        "icon": "",
+        "category": "Tool",
+        "status": "Live TestNET",
+        "website": "https://tools.highstakes.ch/snapshots"
+    },
+    {
+        "title": "Code Explorer",
+        "text": "CosmWasm Code Explorer",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Coming Soon",
+        "website": "https://code.terp.network/"
+    },
+    {
+        "title": "Satelitte Bridge",
+        "text": "Cross Chain Routing",
+        "icon": "",
+        "category": "Tool",
+        "status": "Coming Soon",
+        "website": "https://satellite.money/"
+    },
+    {
+        "title": "Gravity Bridge",
+        "text": "Trustless bridge between Ethereum and the Cosmos ecosystem",
+        "icon": "",
+        "category": "Tool",
+        "status": "Coming Soon",
+        "website": "https://spacestation.zone/"
+    },
+    {
+        "title": "Area 52",
+        "text": " interactive coding platform that teaches you all things CosmWasm, Rust smart contracts, and how to build and deploy your own multichain applications.",
+        "icon": "",
+        "category": "Tool",
+        "status": "Live",
+        "website": "https://area-52.io/"
+    },
+    {
+        "title": "Judging App: Legends of Hashish",
+        "text": "Decentralised voting framework",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Live",
+        "website": "https://glassflow.xyz"
+    },
+    {
+        "title": "GlassFlow",
+        "text": "Multi-utility NFT marketplace",
+        "icon": "",
+        "category": "Dapp",
+        "website": "https://glassflow.io/"
+    },
+    {
+        "title": "Multisig Creator",
+        "text": "Create on chain multisig with a group of friends to distribute riskof key management.",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Coming Soon",
+        "website": "https://terp.network/gov"
+    },
+    {
+        "title": "Staking Interface",
+        "text": "Stake your Terps to various validators",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Coming Soon",
+        "website": "https://terp.network/stake"
+    },
+    {
+        "title": "Governance Dashboard",
+        "text": "provide your vote to on-chain proposals",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Coming Soon",
+        "website": "https://terp.network/gov"
+    },
+    {
+        "title": "Poap Badges",
+        "text": "Create on chain collectable POAP for your community to collect.",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Coming Soon",
+        "website": "https://terp.network/gov"
+    },
+    {
+        "title": "Cross Chain Bridge",
+        "text": "Bridge any defi asset cross-chain to Terp Network.",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Coming Soon",
+        "website": "https://terp.network/ibc"
+    }
+]
