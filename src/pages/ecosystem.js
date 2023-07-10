@@ -273,7 +273,7 @@ const EcosystemPage = (props) => {
                                     })}
                                     {!hasSoon && 
                                         <div className={'text-box'} data-sal="fade">
-                                            Have an ongoing project coming up on Juno? Let us know. <a className={'p-1'} href={'https://github.com/CosmosContracts/website/pulls'} target={'_blank'} rel={'noreferrer'}><i className={'icon-social-github'} aria-label={'Github'}></i></a>
+                                            Have an ongoing project coming up on you want to see on chain ? Let us know. <a className={'p-1'} href={'https://github.com/terpnetwork/website/pulls'} target={'_blank'} rel={'noreferrer'}><i className={'icon-social-github'} aria-label={'Github'}></i></a>
                                         </div>
                                     }
                                 </div>

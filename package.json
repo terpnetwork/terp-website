@@ -1,9 +1,9 @@
 {
-  "name": "juno",
+  "name": "terp-website",
   "version": "1.0.0",
   "private": true,
-  "description": "juno",
-  "author": "Gabor Sera",
+  "description": "terp website",
+  "author": "Gabor Sera, DiscoverDefiTeam",
   "keywords": [
     "gatsby"
   ],

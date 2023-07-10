@@ -40,8 +40,8 @@ const HeroSection = () => {
                         <div className={'text-box'} data-sal="fade"
                              data-sal-delay="400"
                              data-sal-duration="1000">
-                            Use & create censorship applications on Terp Network, <br/>
-                            A decentralized, public, and verifiable blockchain for full spectrum smart contract applications.
+                            Terp Network helps realize a sovereign blockchain ecosystem,  <br/>
+                            for a full spectrum of verifiable smart contracts & buisness logic.
                         </div>
 
                         <div className={'row'} data-sal="fade"

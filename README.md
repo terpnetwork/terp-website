@@ -1,6 +1,6 @@
 # How To Submit Your Project To The Ecosystem Page
 
-Submit a pull request to add your project to the Juno ecosystem page.
+Submit a pull request to add your project to the Terp ecosystem page.
 
 You need to edit `ecosystems.json` in `src\contents\` and add your project's info.
 

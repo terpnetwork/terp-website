@@ -4,7 +4,7 @@ require("dotenv").config({
 
 module.exports = {
     siteMetadata: {
-        title: `Juno`,
+        title: `Terp`,
         siteUrl: `https://terp.network`
     },
     plugins: ["gatsby-plugin-sass", "gatsby-plugin-scroll-reveal", "gatsby-plugin-image", "gatsby-plugin-react-helmet", "gatsby-plugin-sitemap", {

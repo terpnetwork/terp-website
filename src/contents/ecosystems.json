@@ -248,14 +248,6 @@
         "website": "https://tools.highstakes.ch/snapshots"
     },
     {
-        "title": "Code Explorer",
-        "text": "CosmWasm Code Explorer",
-        "icon": "",
-        "category": "Dapp",
-        "status": "Coming Soon",
-        "website": "https://code.terp.network/"
-    },
-    {
         "title": "Satelitte Bridge",
         "text": "Cross Chain Routing",
         "icon": "",
@@ -278,60 +270,5 @@
         "category": "Tool",
         "status": "Live",
         "website": "https://area-52.io/"
-    },
-    {
-        "title": "Judging App: Legends of Hashish",
-        "text": "Decentralised voting framework",
-        "icon": "",
-        "category": "Dapp",
-        "status": "Live",
-        "website": "https://glassflow.xyz"
-    },
-    {
-        "title": "GlassFlow",
-        "text": "Multi-utility NFT marketplace",
-        "icon": "",
-        "category": "Dapp",
-        "website": "https://glassflow.io/"
-    },
-    {
-        "title": "Multisig Creator",
-        "text": "Create on chain multisig with a group of friends to distribute riskof key management.",
-        "icon": "",
-        "category": "Dapp",
-        "status": "Coming Soon",
-        "website": "https://terp.network/gov"
-    },
-    {
-        "title": "Staking Interface",
-        "text": "Stake your Terps to various validators",
-        "icon": "",
-        "category": "Dapp",
-        "status": "Coming Soon",
-        "website": "https://terp.network/stake"
-    },
-    {
-        "title": "Governance Dashboard",
-        "text": "provide your vote to on-chain proposals",
-        "icon": "",
-        "category": "Dapp",
-        "status": "Coming Soon",
-        "website": "https://terp.network/gov"
-    },
-    {
-        "title": "Poap Badges",
-        "text": "Create on chain collectable POAP for your community to collect.",
-        "icon": "",
-        "category": "Dapp",
-        "status": "Coming Soon",
-        "website": "https://terp.network/gov"
-    },
-    {
-        "title": "Cross Chain Bridge",
-        "text": "Bridge any defi asset cross-chain to Terp Network.",
-        "icon": "",
-        "category": "Dapp",
-        "status": "Coming Soon",
-        "website": "https://terp.network/ibc"
     }
 ]
