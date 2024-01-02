@@ -1,5 +1,21 @@
 [
     {
+        "title": "Headstash Airop Dashboard",
+        "text": "Support Web3 & Cannabis? Claim your Headstash of $TERP & $THIOL!",
+        "icon": "",
+        "category": "Dapp",
+        "status": "Live",
+        "website": "https://dash.terp.network/w/heastash/"
+    },
+    {
+        "title": "Core Cosmwasm",
+        "text": "Core CosmWasm library for Terp Network",
+        "icon": "",
+        "category": "Contract",
+        "status": "Live",
+        "website": "https://github.com/terpnetwork/core-cosmwasm"
+    },
+    {
         "title": "Agoric Network",
         "text": "An intent-centric, privacy-preserving protocol for decentralized counterparty discovery, solving, and multi-chain atomic settlement.",
         "icon": "",
@@ -38,14 +54,6 @@
         "category": "networks",
         "status": "Live",
         "website": "https://axelar.network/"
-    },
-    {
-        "title": "Babylon Network ",
-        "text": "Bringing Bitcoin security to Cosmos and beyond",
-        "icon": "",
-        "category": "networks",
-        "status": "Live",
-        "website": "https://www.babylonchain.io/"
     },
     {
         "title": "Bitsong ",

@@ -38,13 +38,13 @@ class FeaturesSection extends React.Component {
                                 <div className={'col-12 col-sm-6'}>
                                     <div className={'bounty first'}>
                                         <div className={'image'}>
-                                            {/* <StaticImage
+                                            <StaticImage
                                                 src={'../images/decentralized-finance.png'}
                                                 alt={'Decentralized Finance'}
                                                 width={218}
                                                 height={96}
                                                 placeholder="blurred"
-                                            /> */}
+                                            />
                                         </div>
                                         <div className={'title'}>Governance Tooling</div>
                                         <div className={'text-box'}>
@@ -55,13 +55,13 @@ class FeaturesSection extends React.Component {
                                 <div className={'col-12 col-sm-6'}>
                                     <div className={'bounty'}>
                                         <div className={'image'}>
-                                            {/* <StaticImage
+                                            <StaticImage
                                                 src={'../images/gaming.png'}
                                                 alt={'Gaming/Gamification'}
                                                 width={96}
                                                 height={97}
                                                 placeholder="blurred"
-                                            /> */}
+                                            />
                                         </div>
                                         <div className={'title'}>Multi-Chain Models</div>
                                         <div className={'text-box'}>
@@ -72,13 +72,13 @@ class FeaturesSection extends React.Component {
                                 <div className={'col-12 col-sm-6'}>
                                     <div className={'bounty'}>
                                         <div className={'image'}>
-                                            {/* <StaticImage
+                                            <StaticImage
                                                 src={'../images/non-fungible-tokens.png'}
                                                 alt={'Non Fungible Tokens'}
                                                 width={96}
                                                 height={96}
                                                 placeholder="blurred"
-                                            /> */}
+                                            />
                                         </div>
                                         <div className={'title'}>Non Fungible Tokens</div>
                                         <div className={'text-box'}>
@@ -89,13 +89,13 @@ class FeaturesSection extends React.Component {
                                 <div className={'col-12 col-sm-6'}>
                                     <div className={'bounty'}>
                                         <div className={'image'}>
-                                            {/* <StaticImage
+                                            <StaticImage
                                                 src={'../images/privacy.png'}
                                                 alt={'Privacy'}
                                                 width={96}
                                                 height={96}
                                                 placeholder="blurred"
-                                            /> */}
+                                            />
                                         </div>
                                         <div className={'title'}>Privacy</div>
                                         <div className={'text-box'}>

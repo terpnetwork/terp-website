@@ -74,7 +74,7 @@ export function ServicesSection() {
                                     />
                             </Parallax>
                         </div>
-                        {/* <div className={'col-12 col-md-12 col-lg-5 pe-lg-4 z-index-front'}>
+                        <div className={'col-12 col-md-12 col-lg-5 pe-lg-4 z-index-front'}>
                             <h3
                                 data-sal="fade"
                                 data-sal-delay="200"
@@ -112,7 +112,7 @@ export function ServicesSection() {
                                     </a>
                                 </div>
                             </div>
-                        </div> */}
+                        </div>
                     </div>
 
                     <PiechartSection/>

@@ -17,14 +17,14 @@ const HeroSection = () => {
             <div className={'video-container'}>
                 <div className={'video-wrapper'}>
                     <div className={'video-bg'}/>
-                    {/* <video id={'hero-video'} autoPlay={true} preload={'none'} loop={true} playsInline={true} muted={true} poster={HeroVideoPoster}>
+                    <video id={'hero-video'} autoPlay={true} preload={'none'} loop={true} playsInline={true} muted={true} poster={HeroVideoPoster}>
                         {isSafari &&
                             <source src={HeroVideoMov} type='video/mp4;codecs="hvc1"'/>
                         }
                         {!isSafari &&
                             <source src={HeroVideo} type="video/webm" />
                         }
-                    </video> */}
+                    </video>
                 </div>
             </div>
             <div className={'container'}>
@@ -32,7 +32,7 @@ const HeroSection = () => {
                     <div className={'col-12 col-xl-6'}>
                         <h1 data-sal="fade"
                             data-sal-delay="200"
-                            data-sal-duration="1000">The Decentralized Protocol <br/>
+                            data-sal-duration="1000">The Blockchain Protocol <br/>
                              For<br/>
                             Terp Culture
                         </h1>
@@ -41,7 +41,7 @@ const HeroSection = () => {
                              data-sal-delay="400"
                              data-sal-duration="1000">
                             Terp Network helps realize a sovereign blockchain ecosystem,  <br/>
-                            for a full spectrum of verifiable smart contracts & buisness logic.
+                            for a full spectrum of verifiable buisness logic.
                         </div>
 
                         <div className={'row'} data-sal="fade"

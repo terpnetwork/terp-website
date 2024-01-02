@@ -20,14 +20,14 @@ const EcosystemSection = () => {
                         <div className={'video-container'}>
                             <div className={'video-wrapper'}>
                                 <div id={'video-bg'}/>
-                                {/* <video id={'ecosystem-video'} autoPlay={true} preload={'none'} loop={true} playsInline={true} muted={true} poster={EcosystemPoster}>
+                                <video id={'ecosystem-video'} autoPlay={true} preload={'none'} loop={true} playsInline={true} muted={true} poster={EcosystemPoster}>
                                     {isSafari &&
                                         <source src={EcosystemVideoMov} type='video/mp4;codecs="hvc1"'/>
                                     }
                                     {!isSafari &&
                                         <source src={EcosystemVideo} type="video/webm" />
                                     }
-                                </video> */}
+                                </video>
                             </div>
                         </div>
                     </div>
@@ -37,7 +37,7 @@ const EcosystemSection = () => {
                                 data-sal-duration="1000">ECOSYSTEM</legend>
                         <h3 data-sal="fade"
                              data-sal-delay="200"
-                             data-sal-duration="1000">52+ Interoperable Networks, Ø Presale Raised, with Industry Standard Cryptography </h3>
+                             data-sal-duration="1000">75+ Interoperable Networks, Ø Presale Raised, with Industry Standard Cryptography </h3>
                         <div className={'text-box'} data-sal="fade"
                              data-sal-delay="600"
                              data-sal-duration="1000">
