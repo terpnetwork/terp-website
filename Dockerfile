@@ -1,26 +1,23 @@
-# Use the official Node.js v14.x image as the base image
-FROM node:16
+# Multi-stage
+# 1) Node image for building frontend assets
+# 2) nginx stage to serve frontend assets
 
-# Set the working directory to /app
+# Name the node stage "builder"
+FROM node:14 AS builder
+# Set working directory
 WORKDIR /app
-
-# Copy the package.json and package-lock.json files to the container
-COPY package*.json ./
-
-# Install dependencies
-RUN yarn install
-
-# Copy the rest of the application code to the container
+# Copy all files from current directory to working dir in image
 COPY . .
+# install node modules and build assets
+RUN yarn install && yarn build
 
-# Build the Next.js app for production
-RUN yarn run build
-
-# Set the environment variable for the app to run on port 3000
-ENV PORT=3000
-
-# Expose port 3000 for the app to listen on
-EXPOSE 3000
-
-# Start the app
-CMD ["yarn", "start"]
+# nginx state for serving content
+FROM nginx:alpine
+# Set working directory to nginx asset directory
+WORKDIR /usr/share/nginx/html
+# Remove default nginx static assets
+RUN rm -rf ./*
+# Copy static assets from builder stage
+COPY --from=builder /app/public .
+# Containers run nginx with global directives and daemon off
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
