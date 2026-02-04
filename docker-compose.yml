@@ -1,11 +1,12 @@
-version: '3'
+version: '3.8'
+
 services:
-  web:
+  terp-network:
     build:
       context: .
       dockerfile: Dockerfile
+    image: terpnetwork/terp-network:latest
+    container_name: terp-network
     ports:
       - "8080:80"
-    environment:
-      - NODE_ENV=development
-      - GATSBY_WEBPACK_PUBLICPATH=/
+    restart: unless-stopped

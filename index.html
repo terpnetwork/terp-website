@@ -1,0 +1,1310 @@
+<!-- design heavily inspired by: @willmcgugan website for <3 -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Terp Network - A L1 Blockchain dedicated to programmable censorship-resistance. Ensuring undoubtable access & sovereignty for collaboration in a technological world.">
+    <title>Terp Network - Respect the Hash</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="public/favicon/terp-32x32.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="public/favicon/terp-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="public/favicon/terp-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/favicon/terp-apple-touch.png">
+    <link rel="manifest" href="public/site.webmanifest">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://x.com/terpnetofficial/">
+    <meta property="twitter:title" content="A L1 Blockchain dedicated to programmable censorship-resistance">
+    <meta property="twitter:description" content="">
+    <meta property="twitter:image" content="">
+    <meta name="twitter:creator" content="@terpculture">
+
+    <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: #f8f8f2;
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 300;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            overflow: visible;
+        }
+
+        #glow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: #cfffcf;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(183, 255, 183, 0.068);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.1;
+        }
+
+        .title-static {
+            white-space: nowrap;
+        }
+
+        .title-rotator {
+            position: relative;
+            height: 2.8rem;
+            overflow: hidden;
+            -webkit-mask-image: linear-gradient(to bottom,
+                    transparent 0%,
+                    black 15%,
+                    black 85%,
+                    transparent 100%);
+            mask-image: linear-gradient(to bottom,
+                    transparent 0%,
+                    black 15%,
+                    black 85%,
+                    transparent 100%);
+        }
+
+        .title-list {
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .title-item {
+            height: 2.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            color: #fe7d7d;
+            font-weight: 500;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #ffffda;
+            text-shadow: 0 0 3px rgba(71, 50, 102, 0.935);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 2rem;
+        }
+
+        .description {
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #d2d3d8;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .description a {
+            color: #bd93f9;
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .description a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+
+
+        .install-section {
+            margin: 3rem auto;
+            padding: 0 1rem;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .install-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(152, 232, 193, 0.1);
+            border: 1px solid rgba(152, 232, 193, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .install-header:hover {
+            background: rgba(152, 232, 193, 0.15);
+            border-color: rgba(152, 232, 193, 0.5);
+            box-shadow: 0 0 20px rgba(152, 232, 193, 0.1);
+        }
+
+        .install-icon {
+            width: 20px;
+            height: 20px;
+            fill: #98e8c1;
+            flex-shrink: 0;
+        }
+
+        .install-header span {
+            flex: 1;
+            color: #cfffcf;
+            font-size: 1rem;
+            font-weight: 400;
+            text-align: left;
+        }
+
+        .install-header-code {
+            font-family: 'Courier New', monospace;
+            color: #98e8c1;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.25rem 0.6rem;
+            background: rgba(152, 232, 193, 0.08);
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .install-subtitle {
+            text-align: center;
+            background: rgba(30, 26, 26, 0.138);
+             padding: 0.25rem 0.6rem;
+            color: #fe7d7d;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .install-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .install-content.expanded {
+            max-height: 800px;
+            padding-top: 1.5rem;
+        }
+
+        .install-box-container {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(207, 255, 207, 0.2);
+            border-radius: 4px;
+            overflow: visible;
+        }
+
+        .inline-verify {
+            border-top: 1px solid rgba(207, 255, 207, 0.15);
+            background: rgba(0, 0, 0, 0.15);
+            padding: 0.75rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            overflow: visible;
+        }
+
+        .inline-verify-button {
+            background: rgba(152, 232, 193, 0.08);
+            border: 1px solid rgba(152, 232, 193, 0.25);
+            color: rgba(207, 255, 207, 0.8);
+            padding: 0.5rem 1rem;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .inline-verify-button svg {
+            width: 14px;
+            height: 14px;
+            fill: rgba(152, 232, 193, 0.7);
+            transition: fill 0.2s ease;
+        }
+
+        .inline-verify-button:hover {
+            background: rgba(152, 232, 193, 0.15);
+            border-color: rgba(152, 232, 193, 0.4);
+            color: #98e8c1;
+        }
+
+        .inline-verify-button:hover svg {
+            fill: #98e8c1;
+        }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(152, 232, 193, 0.3);
+            border-radius: 6px;
+            padding: 0.75rem;
+            width: 280px;
+            max-width: calc(100vw - 2rem);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 9999;
+            pointer-events: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+            white-space: normal;
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 1.5rem;
+            border: 6px solid transparent;
+            border-top-color: rgba(152, 232, 193, 0.3);
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 1.5rem;
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.95);
+            margin-top: -1px;
+        }
+
+        .tooltip-trigger:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            bottom: calc(100% + 12px);
+        }
+
+        .tooltip-title {
+            color: #98e8c1;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            white-space: normal;
+        }
+
+        .tooltip-text {
+            color: rgba(207, 255, 207, 0.9);
+            font-size: 0.7rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            white-space: normal;
+            max-width: 100%;
+        }
+
+        .tooltip-footer {
+            color: rgba(207, 255, 207, 0.5);
+            font-size: 0.65rem;
+            font-style: italic;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(207, 255, 207, 0.1);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            white-space: normal;
+            max-width: 100%;
+        }
+
+        .inline-checksum {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .inline-checksum-value {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(207, 255, 207, 0.15);
+            color: #cfffcf;
+            padding: 0.4rem 0.6rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.65rem;
+            border-radius: 3px;
+            cursor: text;
+            user-select: all;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .inline-checksum-value:hover,
+        .inline-checksum-value:focus {
+            background: rgba(152, 232, 193, 0.08);
+            border-color: rgba(152, 232, 193, 0.3);
+        }
+
+        .inline-copy-btn {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(207, 255, 207, 0.15);
+            color: rgba(207, 255, 207, 0.5);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .inline-copy-btn:hover {
+            background: rgba(152, 232, 193, 0.1);
+            border-color: rgba(152, 232, 193, 0.4);
+            color: #98e8c1;
+        }
+
+        .inline-copy-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 700px) {
+            .inline-verify {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+                padding: 0.9rem 1rem;
+            }
+
+            .inline-verify-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .inline-checksum {
+                max-width: 100%;
+            }
+
+            .inline-checksum-value {
+                font-size: 0.6rem;
+            }
+
+            .tooltip {
+                width: 240px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .countdown-timer {
+                gap: 1rem;
+            }
+
+            .countdown-value {
+                font-size: 2rem;
+            }
+
+            .countdown-label {
+                font-size: 0.7rem;
+            }
+
+            .install-box {
+                font-size: 0.6rem !important;
+            }
+
+            .copy-button {
+                padding: 0.7rem 1rem !important;
+                font-size: 0.7rem !important;
+            }
+
+            .install-tab {
+                font-size: 0.65rem !important;
+                padding: 0.4rem 0.8rem !important;
+            }
+        }
+
+        .install-emoji {
+            font-size: 1.2rem;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .install-box {
+            background: transparent;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-weight: 400;
+            font-size: 0.85rem;
+            color: #ffffda;
+            flex: 1;
+            cursor: text;
+            user-select: all;
+            outline: none;
+            padding: 0;
+        }
+
+        .copy-button {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(207, 255, 207, 0.2);
+            border-left: none;
+            border-radius: 0;
+            color: #cfffcf;
+            padding: 0.9rem 1.3rem;
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 300;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .copy-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(152, 232, 193, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .copy-button:hover::before {
+            left: 100%;
+        }
+
+        .copy-button:hover {
+            background: rgba(152, 232, 193, 0.1);
+            border-color: rgba(152, 232, 193, 0.5);
+            color: #98e8c1;
+            box-shadow: 0 0 20px rgba(152, 232, 193, 0.1);
+        }
+
+        .copy-button:active {
+            background: rgba(152, 232, 193, 0.2);
+            transform: scale(0.98);
+        }
+
+        .copy-button.copied {
+            border-color: #98e8c1;
+            background: rgba(152, 232, 193, 0.15);
+        }
+
+        .copy-button svg {
+            width: 18px;
+            height: 18px;
+            fill: #cfffcf;
+            transition: fill 0.3s ease;
+        }
+
+        .copy-button:hover svg {
+            fill: #98e8c1;
+        }
+
+        .copy-button.copied svg {
+            fill: #98e8c1;
+        }
+
+        .install-tabs {
+            display: flex;
+            gap: 0;
+            margin: 0 0 1rem 0;
+            border-radius: 4px 4px 0 0;
+            overflow: hidden;
+        }
+
+        .install-tab {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(207, 255, 207, 0.2);
+            border-bottom: none;
+            color: rgba(207, 255, 207, 0.5);
+            padding: 0.6rem 1.5rem;
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 300;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+            flex: 1;
+            text-align: center;
+            user-select: none;
+            position: relative;
+        }
+
+        .install-tab:first-child {
+            border-right: none;
+            border-radius: 4px 0 0 0;
+        }
+
+        .install-tab:last-child {
+            border-radius: 0 4px 0 0;
+        }
+
+        .install-tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #98e8c1;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .install-tab:hover {
+            background: rgba(152, 232, 193, 0.05);
+            color: #98e8c1;
+            border-color: rgba(152, 232, 193, 0.3);
+        }
+
+        .install-tab.active {
+            background: rgba(152, 232, 193, 0.1);
+            color: #cfffcf;
+            border-color: rgba(207, 255, 207, 0.4);
+            box-shadow: 0 0 15px rgba(152, 232, 193, 0.1);
+        }
+
+        .install-tab.active::after {
+            transform: scaleX(1);
+        }
+
+        .install-wrapper {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .install-input-wrapper {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(207, 255, 207, 0.2);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            flex: 1;
+            padding: 0.9rem 1.2rem;
+            gap: 0.7rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .install-input-wrapper:focus-within {
+            border-color: rgba(152, 232, 193, 0.5);
+            box-shadow: 0 0 20px rgba(152, 232, 193, 0.1);
+            background: rgba(152, 232, 193, 0.05);
+        }
+
+        .verify-subsection {
+            margin-top: 1rem;
+        }
+
+        .verify-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(207, 255, 207, 0.15);
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .verify-header:hover {
+            background: rgba(152, 232, 193, 0.05);
+            border-color: rgba(152, 232, 193, 0.3);
+        }
+
+        .verify-icon {
+            width: 16px;
+            height: 16px;
+            fill: #98e8c1;
+            flex-shrink: 0;
+        }
+
+        .verify-header span {
+            flex: 1;
+            color: rgba(207, 255, 207, 0.8);
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+
+        .expand-icon {
+            width: 20px;
+            height: 20px;
+            fill: rgba(207, 255, 207, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .verify-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(207, 255, 207, 0.15);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .verify-content.expanded {
+            max-height: 500px;
+            padding: 1.5rem 1rem;
+        }
+
+        .verify-button {
+            width: 100%;
+            background: rgba(152, 232, 193, 0.1);
+            border: 1px solid rgba(152, 232, 193, 0.3);
+            color: #cfffcf;
+            padding: 0.75rem 1.5rem;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .verify-button:hover {
+            background: rgba(152, 232, 193, 0.2);
+            border-color: rgba(152, 232, 193, 0.5);
+            box-shadow: 0 0 15px rgba(152, 232, 193, 0.1);
+        }
+
+        .verify-button:active {
+            transform: scale(0.98);
+        }
+
+        .checksum-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .checksum-result .checksum-label {
+            color: rgba(207, 255, 207, 0.6);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .checksum-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checksum-value {
+            flex: 1;
+            color: #cfffcf;
+            word-break: break-all;
+            user-select: all;
+            cursor: text;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            transition: all 0.2s ease;
+        }
+
+        .checksum-value:hover {
+            background: rgba(152, 232, 193, 0.1);
+        }
+
+        .checksum-copy-btn {
+            background: transparent;
+            border: 1px solid rgba(207, 255, 207, 0.2);
+            color: rgba(207, 255, 207, 0.5);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checksum-copy-btn:hover {
+            background: rgba(152, 232, 193, 0.1);
+            border-color: rgba(152, 232, 193, 0.5);
+            color: #98e8c1;
+        }
+
+        .checksum-copy-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .verify-hint {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: rgba(207, 255, 207, 0.5);
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .social-link svg {
+            width: 32px;
+            height: 32px;
+            fill: #ffffff;
+            opacity: 0.5;
+            transition: fill 0.2s ease, opacity 0.2s ease;
+        }
+
+        .social-link:hover svg {
+            fill: #98e8c1;
+            opacity: 1;
+        }
+
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6272a4;
+            padding: 1.5rem;
+            z-index: 10;
+        }
+
+        .footer svg {
+            opacity: 25%;
+            max-width: 100%;
+            width: 10%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="glow-canvas"></canvas>
+    <div class="container">
+        <div class="title">
+            <span class="title-static">Terp Network</span>
+            <div class="title-rotator">
+                <div class="title-list" id="titleList">
+                    <div class="title-item">DAOs</div>
+                    <div class="title-item">Staking</div>
+                    <div class="title-item">Validators</div>
+                    <div class="title-item">Tokenization</div>
+                    <div class="title-item">WASM</div>
+                    <div class="title-item">Smart Contracts</div>
+                    <div class="title-item">Privacy</div>
+                    <div class="title-item">Account Abstraction</div>
+                    <div class="title-item">Interoperability</div>
+                    <div class="title-item">Modularity</div>
+                    <div class="title-item">Transparency</div>
+                    <div class="title-item">Openness</div>
+                    <div class="title-item">Governance</div>
+                    <div class="title-item">Technology</div>
+                    <div class="title-item">Trustlessness</div>
+                    <div class="title-item">Permissionlessness</div>
+                </div>
+            </div>
+        </div>
+        <div class="subtitle">Ensuring undoubtable access & sovereignty for collaboration in a technological world</div>
+
+        <div class="install-section">
+            <!-- Main Installation Header -->
+            <div class="install-header" onclick="toggleInstall()">
+                <code class="install-header-code">terp-core</code>
+                <span>Software to Connect, Interact, & Validate Terp Network</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="expand-icon"
+                    id="install-expand-icon">
+                    <path d="M7 10l5 5 5-5z" />
+                </svg>
+            </div>
+
+            <!-- Installation Content (Collapsible) -->
+            <div class="install-content" id="install-content">
+                <div class="install-subtitle">
+                To install the primary software for Terp-Network, copy and paste this script into your terminal:
+                </div>
+                <div class="install-tabs">
+                    <div class="install-tab active" data-tab="shell" onclick="switchTab('shell')">macOS &amp; Linux
+                    </div>
+                    <!-- <div class="install-tab" data-tab="python" onclick="switchTab('python')">UV TOOL</div> -->
+                </div>
+
+                <div class="install-box-container">
+                    <div class="install-wrapper">
+                        <div class="install-input-wrapper">
+                            <input type="text" class="install-box" id="install-command"
+                                value="curl -sL https://terp.network/install | python3" size="50" readonly=""
+                                onclick="this.select()">
+                        </div>
+                        <button class="copy-button" onclick="copyToClipboard()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path
+                                    d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Inline Verification Section -->
+                    <div class="inline-verify">
+                        <button onclick="verifyInstallerChecksums()" class="inline-verify-button tooltip-trigger">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+                            </svg>
+                            <span>Verify Install Tooling Integrity</span>
+                            <div class="tooltip">
+                                <div class="tooltip-title">Client-Side Verification</div>
+                                <div class="tooltip-text">
+                                    Calculates SHA-256 hash of the installer script directly in your browser.
+                                    Compare this with checksums from trusted sources (GitHub, docs) before running.
+                                </div>
+                                <div class="tooltip-footer">
+                                    🔮 Future: On-chain verification via smart contract
+                                </div>
+                            </div>
+                        </button>
+                        <div class="inline-checksum" id="inline-checksum" style="display: none;">
+                            <input type="text" class="inline-checksum-value" id="sha256-checksum" readonly
+                                value="Click Verify">
+                            <button class="inline-copy-btn" onclick="copyChecksum('sha256')" title="Copy checksum">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path
+                                        d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="description">
+            <a href="https://github.com/terpnetwork" class="social-link" title="GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z">
+                    </path>
+                </svg>
+            </a>
+            <a href="https://x.com/terpnetofficial" class="social-link" title="Twitter">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z">
+                    </path>
+                </svg>
+            </a>
+            <a href="https://docs.terp.network" class="social-link" title="Docs">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                        d="M19 2H6c-1.206 0-3 .799-3 3v14c0 2.201 1.794 3 3 3h15v-2H6.012C5.55 19.988 5 19.806 5 19c0-.101.009-.191.024-.273.112-.576.584-.717.988-.727H21V4a2 2 0 0 0-2-2zm0 9-2-1-2 1V4h4v7z">
+                    </path>
+                </svg>
+            </a>
+            <a href="https://discord.gg/W3QnHe77S6" class="social-link" title="Discord">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800px"
+                    height="800px" viewBox="0 -28.5 256 256" version="1.1" preserveAspectRatio="xMidYMid">
+                    <g>
+                        <path
+                            d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z">
+
+                        </path>
+                    </g>
+                </svg>
+            </a>
+
+            <a href="mailto:team.terp@protonmail.com" class="social-link" title="Email team.terp@protonmail.com">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"
+                    version="1.1" id="Layer_1" viewBox="0 0 512 512">
+                    <path
+                        d="M495.313,79.017H16.687C7.639,79.017,0,86.359,0,95.704v320.592c0,9.216,7.471,16.687,16.687,16.687h478.625    c9.216,0,16.687-7.471,16.687-16.687V95.704C512,86.326,504.297,79.017,495.313,79.017z M447.954,112.391L255.999,266.844    c-5.689-4.578-177.914-143.155-191.955-154.453H447.954z M33.375,130.55l172.697,138.958L33.375,385.815V130.55z M72.64,399.608    l160.655-108.197c2.542,2.045,10.07,9.1,22.705,9.1c12.32,0,19.541-6.554,22.767-9.15l161.409,108.247H72.64z M478.624,385.21    L306.006,269.444L478.624,130.55V385.21z" />
+
+                </svg>
+            </a>
+        </div>
+
+
+        <div class="footer">
+            <a href="https://akash.network" title="Akash Network">
+                <svg width="1007" height="102" viewBox="0 0 1007 102" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M803.335 76.0557V60.7423L812.479 51.1576L828.233 76.0557H840.131L819.64 43.6662L840.241 22.1834H827.242L803.335 47.5221V0.0351562H792.979V76.0557H803.335ZM769.782 22.1834L769.011 32.0985C765.485 24.3867 757.663 20.641 749.401 20.641C733.977 20.641 724.062 32.2087 724.062 48.7339C724.062 65.149 733.206 77.4879 749.07 77.4879C757.994 77.4879 764.934 73.1913 768.57 66.2507L769.451 76.0557H778.926V22.1834H769.782ZM768.35 49.1746C768.35 60.3016 761.85 68.1235 751.274 68.1235C740.697 68.1235 734.528 60.1914 734.528 49.1746C734.528 38.0476 740.808 30.1155 751.384 30.1155C761.96 30.1155 768.35 37.9374 768.35 49.1746ZM886.981 32.0985L887.752 22.1834H896.896V76.0557H887.422L886.541 66.2507C882.905 73.1913 875.964 77.4879 867.041 77.4879C851.176 77.4879 842.032 65.149 842.032 48.7339C842.032 32.2087 851.948 20.641 867.371 20.641C875.634 20.641 883.456 24.3867 886.981 32.0985ZM869.244 68.1235C879.82 68.1235 886.32 60.3016 886.32 49.1746C886.32 37.9374 879.93 30.1155 869.354 30.1155C858.778 30.1155 852.498 38.0476 852.498 49.1746C852.498 60.1914 858.668 68.1235 869.244 68.1235ZM905.247 60.4118C905.247 70.6574 913.289 77.3777 925.958 77.3777C938.738 77.3777 947.551 70.8778 947.551 60.6321C947.551 52.5898 943.034 48.4034 933.891 46.2L924.416 43.8865C919.128 42.5645 916.484 40.1408 916.484 36.5052C916.484 31.5477 920.119 28.6833 926.619 28.6833C932.899 28.6833 936.535 32.0985 936.755 37.4967H946.67C946.45 27.2511 938.738 20.641 926.95 20.641C915.052 20.641 906.679 26.9206 906.679 36.8357C906.679 44.7679 911.196 49.5051 920.78 51.8186L930.255 54.022C935.874 55.4542 937.636 57.6576 937.636 61.2931C937.636 66.2507 933.45 69.2252 926.179 69.2252C919.348 69.2252 915.162 65.9202 915.162 60.4118H905.247ZM983.713 30.1155C973.688 30.1155 968.29 37.3866 968.29 46.6407V75.9455H957.934V0.0351562H968.29V30.446C971.705 24.6071 978.205 20.641 986.578 20.641C1000.35 20.641 1006.96 29.3443 1006.96 43.1153V76.0557H996.603V45.4289C996.603 34.5222 991.425 30.1155 983.713 30.1155ZM383.618 77.3895C392.211 77.3895 399.482 73.6438 403.008 66.2625L403.889 76.0675H413.143V0.300799H402.897V30.8985C399.262 24.2884 392.321 20.6528 384.059 20.6528C368.084 20.6528 358.5 32.7714 358.5 49.2966C358.5 65.7117 367.974 77.3895 383.618 77.3895ZM385.711 68.0252C375.135 68.0252 368.966 60.0931 368.966 48.9661C368.966 37.9493 375.135 30.0171 385.711 30.0171C396.287 30.0171 402.787 37.9493 402.787 48.9661C402.787 60.2033 396.287 68.0252 385.711 68.0252ZM11.2611 95.131H0.905273V22.1952H10.2696L11.0408 31.89C14.6763 24.5087 21.9474 20.6528 30.5406 20.6528C45.9641 20.6528 55.5488 32.2205 55.5488 48.7458C55.5488 65.1608 46.515 77.4997 30.5406 77.4997C21.9474 77.4997 14.7865 73.8641 11.2611 67.254V95.131ZM28.3372 30.1273C17.761 30.1273 11.3713 37.9493 11.3713 49.1864C11.3713 60.2033 17.761 68.1354 28.3372 68.1354C38.9133 68.1354 45.1929 60.2033 45.1929 49.1864C45.1929 38.0594 38.9133 30.1273 28.3372 30.1273ZM90.4291 77.3895C74.2343 77.3895 62.3362 65.7117 62.3362 49.0763C62.3362 32.4408 74.2343 20.763 90.4291 20.763C106.514 20.763 118.412 32.4408 118.412 49.0763C118.412 65.7117 106.514 77.3895 90.4291 77.3895ZM90.4291 30.0171C79.9631 30.0171 72.8022 37.8391 72.8022 49.0763C72.8022 60.3134 79.9631 68.1354 90.4291 68.1354C100.785 68.1354 108.056 60.3134 108.056 49.0763C108.056 37.8391 100.785 30.0171 90.4291 30.0171ZM137.867 76.0675H148.113L157.477 47.3136C159.46 40.8136 160.451 37.2883 161.002 34.6442C161.553 37.6188 162.655 41.8052 164.417 47.2034L173.782 76.0675H183.587L201.985 22.1952H191.188L182.155 50.178C180.612 54.9152 179.621 58.6609 178.739 62.9575C177.858 59.1016 176.095 52.822 175.214 50.178L166.29 22.1952H155.714L146.68 50.178C145.468 53.7033 144.036 58.2202 143.155 62.9575C142.163 58.2202 141.062 54.144 139.85 50.178L130.926 22.1952H120.24L137.867 76.0675ZM255.54 59.3219C252.896 70.8896 243.862 77.3895 230.531 77.3895C214.667 77.3895 203.76 65.932 203.76 49.1864C203.76 32.3307 214.447 20.6528 230.091 20.6528C245.404 20.6528 255.429 31.229 255.429 47.2034V51.0593L213.786 51.1695C214.557 62.5168 220.506 68.7964 230.752 68.7964C238.794 68.7964 244.082 65.4913 245.845 59.3219H255.54ZM245.074 44.2289C245.074 35.3052 239.235 29.3561 230.091 29.3561C221.057 29.3561 215.328 34.7544 214.006 44.2289H245.074ZM296.742 21.7545C294.648 21.3138 293.106 21.0935 291.233 21.0935C283.852 21.0935 278.454 24.8392 276.25 30.4578L275.589 22.3054H265.895V76.0675H276.25V47.5339C276.25 37.1781 282.31 31.229 292.115 31.229H296.742V21.7545ZM351.67 59.3219C349.026 70.8896 339.992 77.3895 326.662 77.3895C310.798 77.3895 299.891 65.932 299.891 49.1864C299.891 32.3307 310.577 20.6528 326.221 20.6528C341.535 20.6528 351.56 31.229 351.56 47.2034V51.0593L309.916 51.1695C310.687 62.5168 316.637 68.7964 326.882 68.7964C334.924 68.7964 340.213 65.4913 341.975 59.3219H351.67ZM341.204 44.2289C341.204 35.3052 335.365 29.3561 326.221 29.3561C317.187 29.3561 311.459 34.7544 310.137 44.2289H341.204ZM466.991 76.0675L467.762 66.2625C471.288 73.6438 478.449 77.3895 486.932 77.3895C502.576 77.3895 512.27 65.7117 512.27 49.4068C512.27 32.7714 503.016 20.6528 487.593 20.6528C478.779 20.6528 471.508 24.3986 467.983 31.4493V0.300799H457.627V76.0675H466.991ZM468.093 48.9661C468.093 37.9493 474.483 30.0171 485.059 30.0171C495.635 30.0171 501.915 37.9493 501.915 48.9661C501.915 60.0931 495.635 68.0252 485.059 68.0252C474.483 68.0252 468.093 60.2033 468.093 48.9661ZM515.576 100.194C518.331 100.855 521.195 101.296 524.61 101.296C532.873 101.296 538.271 97.4402 541.907 88.186L567.355 22.1952H556.669L540.695 65.6015L525.051 22.1952H514.144L535.847 78.9319L533.974 84.1098C531.441 90.9402 527.475 91.7114 522.517 91.7114H515.576V100.194Z"
+                        fill="#CECECE" />
+                    <path d="M660.828 51.333L675.353 76.9956H646.012L631.333 51.333H660.828Z"
+                        fill="url(#paint0_linear_233_453)" />
+                    <path d="M675.345 77L690 51.3374L660.667 0H631.333L675.345 77Z" fill="#FA5757" />
+                    <path d="M616.667 25.6562H646L616.679 76.9938L602 51.3312L616.667 25.6562Z" fill="#FA5757" />
+                    <defs>
+                        <linearGradient id="paint0_linear_233_453" x1="648.003" y1="59.1623" x2="675.376" y2="76.9297"
+                            gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#FA5757" />
+                            <stop offset="0.0240912" stop-color="#FA5757" stop-opacity="0.99831" />
+                            <stop offset="0.045037" stop-color="#FA5757" stop-opacity="0.992615" />
+                            <stop offset="0.064967" stop-color="#FA5757" stop-opacity="0.981977" />
+                            <stop offset="0.0860106" stop-color="#FA5757" stop-opacity="0.96546" />
+                            <stop offset="0.110297" stop-color="#FA5757" stop-opacity="0.942125" />
+                            <stop offset="0.139956" stop-color="#FA5757" stop-opacity="0.911036" />
+                            <stop offset="0.177117" stop-color="#FA5757" stop-opacity="0.871255" />
+                            <stop offset="0.223909" stop-color="#FA5757" stop-opacity="0.821844" />
+                            <stop offset="0.282462" stop-color="#FA5757" stop-opacity="0.761867" />
+                            <stop offset="0.354904" stop-color="#FA5757" stop-opacity="0.690386" />
+                            <stop offset="0.443367" stop-color="#FA5757" stop-opacity="0.606463" />
+                            <stop offset="0.549978" stop-color="#FA5757" stop-opacity="0.509162" />
+                            <stop offset="0.676868" stop-color="#FA5757" stop-opacity="0.397545" />
+                            <stop offset="0.826165" stop-color="#FA5757" stop-opacity="0.270674" />
+                            <stop offset="1" stop-color="#FA5757" stop-opacity="0.127613" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Install commands for different platforms
+        const installCommands = {
+            shell: "curl -sL https://terp.network/install | python3",
+            python: "uvx --from terp-core terpd"
+        };
+
+        // Switch between install tabs
+        function switchTab(tab) {
+            // Update tab active state
+            document.querySelectorAll('.install-tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+            // Update install command
+            const commandInput = document.getElementById('install-command');
+            commandInput.value = installCommands[tab];
+            commandInput.size = installCommands[tab].length + 10;
+        }
+
+        // Copy install command to clipboard
+        function copyToClipboard() {
+            const commandInput = document.getElementById('install-command');
+            commandInput.select();
+            commandInput.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                navigator.clipboard.writeText(commandInput.value).then(() => {
+                    // Visual feedback
+                    const button = event.currentTarget;
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    // Fallback for older browsers
+                    document.execCommand('copy');
+                    const button = event.currentTarget;
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.classList.remove('copied');
+                    }, 2000);
+                });
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
+
+        // Toggle install section
+        function toggleInstall() {
+            const content = document.getElementById('install-content');
+            const icon = document.getElementById('install-expand-icon');
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('expanded');
+            }
+        }
+
+        // Copy checksum to clipboard
+        function copyChecksum(type) {
+            const checksumElement = document.getElementById(`${type}-checksum`);
+            const checksum = checksumElement.value;
+
+            if (checksum === 'Click Calculate' || checksum === 'Calculating...' || checksum.includes('Error')) return;
+
+            // Select and copy
+            checksumElement.select();
+            checksumElement.setSelectionRange(0, 99999);
+
+            navigator.clipboard.writeText(checksum).then(() => {
+                // Visual feedback
+                const originalBg = checksumElement.style.background;
+                const originalBorder = checksumElement.style.borderColor;
+                checksumElement.style.background = 'rgba(152, 232, 193, 0.25)';
+                checksumElement.style.borderColor = 'rgba(152, 232, 193, 0.5)';
+                setTimeout(() => {
+                    checksumElement.style.background = originalBg || 'rgba(0, 0, 0, 0.3)';
+                    checksumElement.style.borderColor = originalBorder || 'rgba(207, 255, 207, 0.15)';
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy checksum:', err);
+            });
+        }
+
+        // Calculate SHA-256 checksum
+        async function calculateSHA256(content) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(content);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Fetch and verify installer script checksums
+        async function verifyInstallerChecksums() {
+            const sha256Element = document.getElementById('sha256-checksum');
+            const inlineChecksumDiv = document.getElementById('inline-checksum');
+
+            // Show loading state
+            sha256Element.value = 'Calculating...';
+            sha256Element.style.color = '#cfffcf';
+            inlineChecksumDiv.style.display = 'flex';
+
+            try {
+                let scriptContent;
+
+                // Try fetching from nginx endpoint first
+                try {
+                    const response = await fetch('/install');
+                    if (response.ok) {
+                        scriptContent = await response.text();
+                    } else {
+                        throw new Error('Nginx endpoint not available');
+                    }
+                } catch (fetchError) {
+                    // Fallback: try direct file path (for local development)
+                    console.log('Trying fallback path...');
+                    const fallbackResponse = await fetch('install/terp-installer.py');
+                    if (!fallbackResponse.ok) {
+                        throw new Error(`Failed to fetch installer script`);
+                    }
+                    scriptContent = await fallbackResponse.text();
+                }
+
+                // Calculate SHA-256
+                const sha256 = await calculateSHA256(scriptContent);
+                sha256Element.value = sha256;
+
+                // Highlight the checksum briefly
+                sha256Element.style.background = 'rgba(152, 232, 193, 0.2)';
+                sha256Element.style.borderColor = 'rgba(152, 232, 193, 0.4)';
+                setTimeout(() => {
+                    sha256Element.style.background = 'rgba(0, 0, 0, 0.3)';
+                    sha256Element.style.borderColor = 'rgba(207, 255, 207, 0.15)';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Failed to verify checksums:', error);
+                sha256Element.value = `Error: ${error.message}`;
+                sha256Element.style.color = '#fe7d7d';
+            }
+        }
+
+        // Title word rotator
+        (function () {
+            const titleList = document.getElementById('titleList');
+            const itemHeight = 2.8;
+            const totalItems = 16;
+            let currentIndex = 0;
+
+            function rotateTitle() {
+                currentIndex++;
+                titleList.style.transform = `translateY(-${currentIndex * itemHeight}rem)`;
+
+                if (currentIndex >= totalItems) {
+                    setTimeout(() => {
+                        titleList.style.transition = 'none';
+                        currentIndex = 0;
+                        titleList.style.transform = `translateY(0)`;
+                        setTimeout(() => {
+                            titleList.style.transition = 'transform 0.5s ease-in-out';
+                        }, 50);
+                    }, 500);
+                }
+            }
+
+            setTimeout(() => {
+                rotateTitle();
+                setInterval(rotateTitle, 2500);
+            }, 2000);
+        })();
+
+        // Glowing orbs pattern
+        const canvas = document.getElementById('glow-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, centerX, centerY;
+        let time = 0;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            centerX = width / 2;
+            centerY = height / 2;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Diamond grid pattern matching the reference image
+        // Structure: cross shape forming a diamond lattice with D4 symmetry
+        // Grid coordinates where spacing = 1 unit, then scaled
+
+        const gridSpacing = 1.0; // Unit spacing between orbs
+
+        // All orbs have similar size/brightness for uniform bokeh look
+        const orbPositions = [
+            // Center orb (brightest)
+            { x: 0, y: 0, size: 0.9, brightness: 1.0 },
+
+            // Inner ring - 4 orbs adjacent to center (forms small diamond)
+            { x: -1, y: 0, size: 0.85, brightness: 0.9 },
+            { x: 1, y: 0, size: 0.85, brightness: 0.9 },
+            { x: 0, y: -1, size: 0.85, brightness: 0.9 },
+            { x: 0, y: 1, size: 0.85, brightness: 0.9 },
+
+            // Diagonal positions (corners of inner 3x3)
+            { x: -1, y: -1, size: 0.8, brightness: 0.85 },
+            { x: 1, y: -1, size: 0.8, brightness: 0.85 },
+            { x: -1, y: 1, size: 0.8, brightness: 0.85 },
+            { x: 1, y: 1, size: 0.8, brightness: 0.85 },
+
+            // Outer cardinal tips (extends the cross)
+            { x: -2, y: 0, size: 0.75, brightness: 0.75 },
+            { x: 2, y: 0, size: 0.75, brightness: 0.75 },
+            { x: 0, y: -2, size: 0.75, brightness: 0.75 },
+            { x: 0, y: 2, size: 0.75, brightness: 0.75 },
+        ];
+
+        // Pale minty green color matching reference image
+        const glowColor = { r: 200, g: 255, b: 210 };
+
+        function drawOrb(x, y, baseRadius, brightness, pulseOffset) {
+            // Subtle pulsing for organic feel
+            const pulse = 1 + 0.03 * Math.sin(time * 0.0008 + pulseOffset);
+            const radius = baseRadius * pulse;
+
+            // Create soft bokeh gradient - very diffused edges
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+
+            // Core is slightly more opaque, edges very soft
+            const alpha = brightness * 0.7;
+            gradient.addColorStop(0, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, ${alpha})`);
+            gradient.addColorStop(0.15, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, ${alpha * 0.85})`);
+            gradient.addColorStop(0.35, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, ${alpha * 0.55})`);
+            gradient.addColorStop(0.55, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, ${alpha * 0.3})`);
+            gradient.addColorStop(0.75, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, ${alpha * 0.12})`);
+            gradient.addColorStop(1, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, 0)`);
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+
+        function draw(timestamp) {
+            time = timestamp;
+
+            // Clear to pure black
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, width, height);
+
+            // Grid spacing scales with screen size - increased for larger pattern
+            const gridUnit = Math.min(width, height) * 0.14;
+            const orbRadius = gridUnit * 1.1; // Orbs overlap for soft blending
+
+            // Draw each orb
+            orbPositions.forEach((orb, index) => {
+                const x = centerX + orb.x * gridUnit;
+                const y = centerY + orb.y * gridUnit;
+                const radius = orbRadius * orb.size;
+                const pulseOffset = index * 0.4;
+
+                drawOrb(x, y, radius, orb.brightness, pulseOffset);
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
+    </script>
+</body>
+
+</html>
