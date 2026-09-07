@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Resources | Terp Network</title>
+<meta name="description" content="Snapshots, installer, upgrades, and terpd releases for Terp Network.">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png">
+
+<link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
+<link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+<link rel="stylesheet" href="/public/global.css">
+
+<style>
+.main {
+    position: relative;
+    z-index: 1;
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3.5rem;
+    min-height: 100vh;
+    transition: max-width 0.2s ease;
+}
+.main.graphs-wide {
+    max-width: min(1200px, 100%);
+    width: 100%;
+}
+.res-panel[hidden] { display: none !important; }
+body.graphs-open { overflow: hidden; }
+.page-title {
+    font-size: clamp(2.1rem, 4.2vw, 2.7rem);
+    font-weight: 500;
+    color: #cfffcf;
+    text-align: center;
+    margin-bottom: 0.45rem;
+}
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #ffffda;
+    text-shadow: 0 0 3px rgba(71, 50, 102, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+.lead {
+    font-size: 1.15rem;
+    color: #d2d3d8;
+    line-height: 1.65;
+    text-align: center;
+    margin: 0 auto 2rem;
+    max-width: 36rem;
+}
+.section-label {
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #bd93f9;
+    margin: 1.75rem 0 0.75rem;
+    text-align: left;
+    width: 100%;
+}
+.tabs-row {
+    display: flex;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+.tab-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid rgba(152, 232, 193, 0.2);
+    background: transparent;
+    color: #6272a4;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+.tab-btn.active {
+    color: #98e8c1;
+    border-color: rgba(152, 232, 193, 0.4);
+    background: rgba(152, 232, 193, 0.1);
+}
+.muted {
+    font-size: 0.98rem;
+    color: #6272a4;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+}
+.state-status {
+    font-size: 0.95rem;
+    color: #98e8c1;
+    margin-top: 0.5rem;
+}
+.state-status.err { color: #fe7d7d; }
+.res-head { text-align: center; width: 100%; margin-bottom: 0.35rem; }
+.res-title-row {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.res-info {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid rgba(152, 232, 193, 0.35);
+    background: rgba(152, 232, 193, 0.08);
+    color: #98e8c1; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; line-height: 1; font-family: inherit;
+}
+.res-info:hover { background: rgba(152, 232, 193, 0.18); }
+.res-desc {
+    font-size: 1.05rem; color: #d2d3d8; line-height: 1.6;
+    text-align: center; max-width: 34rem; margin: 0.35rem auto 1.1rem;
+}
+.res-layout {
+    display: grid;
+    grid-template-columns: 11.5rem minmax(0, 1fr);
+    gap: 1.25rem 1.5rem;
+    align-items: start;
+    width: 100%;
+}
+.main.graphs-wide .res-head .res-desc { display: none; }
+.graph-stage {
+    width: 100%;
+    height: calc(100vh - 11rem);
+    min-height: 32rem;
+    border: 1px solid rgba(152, 232, 193, 0.16);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+}
+.graph-frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #000;
+}
+.res-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    position: sticky;
+    top: 1rem;
+}
+.res-side-item {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+.res-side-item.active {
+    border-color: rgba(152,232,193,0.35);
+    background: rgba(152,232,193,0.1);
+}
+.res-side-item.is-blur { opacity: 0.5; }
+.res-side a {
+    flex: 1;
+    padding: 0.55rem 0.65rem;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--tn-text, #d2d3d8);
+}
+.res-side-item.active a { color: var(--tn-mint, #cfffcf); }
+.res-side a:hover { color: var(--tn-teal, #98e8c1); }
+.res-side .res-info {
+    width: 22px; height: 22px; font-size: 0.75rem; flex-shrink: 0; margin-right: 0.35rem;
+}
+.res-main { min-width: 0; }
+@media (max-width: 700px) {
+    .res-layout { grid-template-columns: 1fr; }
+    .res-side { position: static; flex-direction: row; flex-wrap: wrap; }
+    .res-side a { flex: 1 1 40%; }
+}
+.res-blur-wrap { position: relative; width: 100%; }
+.res-blur {
+    filter: blur(6px); pointer-events: none; user-select: none;
+}
+.res-blur-note {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 2; pointer-events: none;
+    color: #ffffda; letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.85rem;
+}
+.res-info-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.65); align-items: center; justify-content: center; padding: 1rem;
+}
+.res-info-overlay.open { display: flex; }
+.res-info-modal {
+    max-width: 460px; width: 100%;
+    background: rgba(10,10,15,0.94);
+    border: 1px solid rgba(152,232,193,0.2);
+    border-radius: 12px; padding: 1.35rem 1.45rem; color: #d2d3d8;
+    font-size: 1rem; line-height: 1.6;
+}
+.res-info-modal h3 { color: #cfffcf; margin: 0 0 0.7rem; font-size: 1.15rem; font-weight: 500; }
+.res-info-modal p { margin: 0 0 0.7rem; }
+.res-info-modal ul { margin: 0 0 0.85rem; padding: 0 0 0 1.1rem; }
+.res-info-modal li { margin: 0.25rem 0; }
+.res-info-modal .close-info {
+    width: 100%; padding: 0.55rem; border-radius: 6px;
+    border: 1px solid rgba(152,232,193,0.3);
+    background: rgba(152,232,193,0.1); color: #98e8c1;
+    cursor: pointer; font-family: inherit;
+}
+.snap-lead { font-size: 1.08rem; color: #d2d3d8; line-height: 1.6; margin: 0 0 1.25rem; }
+.snap-blurb { font-size: 0.98rem; color: #d2d3d8; line-height: 1.55; margin: 0 0 0.85rem; }
+.snap-height {
+    font-size: clamp(1.45rem, 3vw, 1.85rem); font-weight: 500; color: #cfffcf;
+    margin: 0 0 0.85rem; letter-spacing: -0.02em;
+}
+.snap-facts { margin-top: 0.25rem; }
+.snap-file { margin: 0.65rem 0 0; }
+.snap-run { margin-top: 1.5rem; }
+.snap-run h3 { color: #cfffcf; font-size: 1.25rem; margin: 0 0 0.5rem; }
+.snap-run-tabs { display: flex; gap: 0.4rem; margin: 0.75rem 0 0.65rem; }
+.res-kicker {
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #bd93f9; margin: 0 0 0.35rem;
+}
+.res-note { color: #a0a8c0; line-height: 1.55; max-width: 68ch; margin: 0 0 0.75rem; }
+.res-note a { color: #98e8c1; }
+.res-pill {
+    display: inline-block; border: 1px solid rgba(152,232,193,0.35);
+    border-radius: 999px; padding: 0.05rem 0.45rem; font-size: 0.72rem; color: #98e8c1;
+    vertical-align: middle;
+}
+.res-pill.current, .res-pill.applied { color: #cfffcf; border-color: rgba(152,232,193,0.55); background: rgba(152,232,193,0.1); }
+.res-pill.pending { color: #ffb86c; border-color: rgba(255,184,108,0.45); background: rgba(255,184,108,0.1); }
+.res-pill.upcoming { color: #bd93f9; border-color: rgba(189,147,249,0.45); background: rgba(189,147,249,0.1); }
+.res-pill.unverified { color: #6272a4; border-color: rgba(98,114,164,0.45); background: rgba(98,114,164,0.12); }
+.rel-pick {
+    display: flex; flex-wrap: wrap; gap: 0.55rem 0.75rem; align-items: center;
+    margin: 0.75rem 0 0.85rem;
+}
+.rel-pick label {
+    font-size: 0.72rem; color: #bd93f9; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.rel-pick select {
+    appearance: none; -webkit-appearance: none;
+    flex: 1; min-width: 14rem; max-width: 24rem;
+    padding: 0.55rem 2.4rem 0.55rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(152, 232, 193, 0.28);
+    background-color: rgba(152, 232, 193, 0.08);
+    background-image:
+      linear-gradient(45deg, transparent 50%, #98e8c1 50%),
+      linear-gradient(135deg, #98e8c1 50%, transparent 50%);
+    background-position: calc(100% - 16px) calc(50% - 2px), calc(100% - 11px) calc(50% - 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    color: #cfffcf;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+}
+.rel-pick select:hover {
+    border-color: rgba(152, 232, 193, 0.5);
+    background-color: rgba(152, 232, 193, 0.14);
+}
+.rel-pick select:focus {
+    border-color: rgba(152, 232, 193, 0.65);
+    box-shadow: 0 0 0 2px rgba(152, 232, 193, 0.12);
+}
+.rel-pick select option {
+    background: #0a0c0e;
+    color: #d2d3d8;
+}
+.res-subhead { color: #cfffcf; font-size: 1.02rem; font-weight: 500; margin: 1.15rem 0 0.45rem; }
+.res-table-wrap { overflow-x: auto; margin: 0.5rem 0 0.85rem; }
+.res-table {
+    width: 100%; border-collapse: collapse; font-size: 0.86rem;
+}
+.res-table th {
+    text-align: left; color: #98e8c1; font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 0.5rem 0.55rem;
+    border-bottom: 1px solid rgba(152,232,193,0.2); background: rgba(152,232,193,0.04);
+}
+.res-table td {
+    padding: 0.45rem 0.55rem; border-bottom: 1px solid rgba(152,232,193,0.08);
+    vertical-align: top; color: #d2d3d8;
+}
+.res-table a { color: #98e8c1; }
+.res-table .hash, .res-table .cid, .res-table code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem; word-break: break-all; color: #98e8c1;
+}
+.res-table .cid { color: #6272a4; margin-top: 0.2rem; }
+.res-release {
+    border: 1px solid rgba(152,232,193,0.14); border-radius: 10px;
+    margin: 0.55rem 0; background: rgba(0,0,0,0.22);
+}
+.res-release summary {
+    cursor: pointer; padding: 0.7rem 0.9rem; color: #cfffcf; font-weight: 500;
+    display: flex; align-items: center; gap: 0.45rem;
+}
+.res-release[open] summary { border-bottom: 1px solid rgba(152,232,193,0.1); }
+.res-release-body { padding: 0.75rem 0.9rem 1rem; }
+.res-tag { font-family: ui-monospace, monospace; }
+.res-index h3 { margin-bottom: 0.45rem; }
+.res-filter {
+    width: 100%; margin: 0.5rem 0 0.75rem; padding: 0.5rem 0.7rem; border-radius: 8px;
+    border: 1px solid rgba(152,232,193,0.2); background: rgba(0,0,0,0.35);
+    color: #f8f8f2; font-size: 0.9rem; font-family: inherit;
+}
+.res-main .snap-card { box-sizing: border-box; }
+.res-guide-modal {
+    max-width: min(720px, 100%);
+    max-height: min(88vh, 900px);
+    overflow: auto;
+}
+.guide-modal-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 0.75rem; margin-bottom: 0.85rem;
+}
+.guide-modal-head h3 { margin: 0; }
+.md-guide h3, .md-guide .guide-h { color: #cfffcf; margin: 1rem 0 0.4rem; font-size: 1.05rem; }
+.md-guide h4 { color: #98e8c1; margin: 0.85rem 0 0.35rem; font-size: 0.95rem; }
+.md-guide p { margin: 0 0 0.65rem; }
+.md-guide ul, .md-guide ol { margin: 0 0 0.75rem; padding-left: 1.15rem; }
+.md-guide li { margin: 0.2rem 0; }
+.md-guide hr { border: 0; border-top: 1px solid rgba(152,232,193,0.15); margin: 1rem 0; }
+.md-guide .snap-code { margin: 0.4rem 0 0.85rem; }
+.md-guide a { color: #98e8c1; }
+.res-group { margin: 1.1rem 0 0.4rem; }
+.res-group h4 {
+    color: #cfffcf; font-size: 0.92rem; font-weight: 500;
+    letter-spacing: 0.04em; margin: 0 0 0.35rem;
+}
+.res-group .count { color: #6272a4; font-weight: 400; font-size: 0.78rem; margin-left: 0.35rem; }
+.addr-cell { min-width: 12rem; }
+.addr-cell .addr-full {
+    display: block; word-break: break-all; color: #98e8c1;
+    font-size: 0.72rem; line-height: 1.4; margin-bottom: 0.28rem;
+}
+.addr-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.addr-actions .snap-btn { padding: 0.12rem 0.45rem; font-size: 0.72rem; }
+.plan-facts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.55rem; margin: 0.75rem 0 1rem;
+}
+.plan-facts dt { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6272a4; }
+.plan-facts dd { color: #cfffcf; font-size: 1.02rem; margin: 0.15rem 0 0; }
+.plan-none { color: #d2d3d8; }
+</style>
+</head>
+<body>
+<script src="/lib/fab.js"></script>
+<canvas id="glow-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+
+<main class="main">
+    <div class="res-head">
+        <h1 class="page-title" id="res-title" style="margin:0;">Resources</h1>
+        <p class="page-subtitle" id="res-sub" style="margin-bottom:0.35rem;">Join the network</p>
+        <p class="res-desc" id="res-desc">
+            Install the node, download a snapshot, grab a binary, or check the next upgrade.
+        </p>
+    </div>
+
+    <div class="res-info-overlay" id="res-info-modal" role="dialog" aria-modal="true">
+        <div class="res-info-modal">
+            <h3 id="res-info-title">Resources</h3>
+            <div id="res-info-body"></div>
+            <button type="button" class="close-info" id="res-info-close">Close</button>
+        </div>
+    </div>
+
+    <div class="res-layout">
+    <nav class="res-side" id="res-subtabs" role="tablist" aria-label="Resource sections">
+        <div class="res-side-item" data-kind="install">
+            <a href="#install">Install</a>
+            <button type="button" class="res-info" data-info="install" aria-label="Install details">?</button>
+        </div>
+        <div class="res-side-item" data-kind="app-state">
+            <a href="#app-state">App state</a>
+            <button type="button" class="res-info" data-info="app-state" aria-label="App state details">?</button>
+        </div>
+        <div class="res-side-item" data-kind="graphs">
+            <a href="#graphs">Graphs</a>
+            <button type="button" class="res-info" data-info="graphs" aria-label="Graphs details">?</button>
+        </div>
+        <div class="res-side-item" data-kind="releases">
+            <a href="#releases">Releases</a>
+            <button type="button" class="res-info" data-info="releases" aria-label="Releases details">?</button>
+        </div>
+        <div class="res-side-item" data-kind="upgrades">
+            <a href="#upgrades">Upgrades</a>
+            <button type="button" class="res-info" data-info="upgrades" aria-label="Upgrades details">?</button>
+        </div>
+        <div class="res-side-item" data-kind="snapshots">
+            <a href="#snapshots">Snapshot</a>
+            <button type="button" class="res-info" data-info="snapshots" aria-label="Snapshot details">?</button>
+        </div>
+    </nav>
+    <div class="res-main">
+
+    <section class="res-panel" id="panel-snapshots">
+        <div id="snapshots-host"></div>
+    </section>
+
+    <section class="res-panel" id="panel-app-state" hidden>
+        <div id="app-state-host"></div>
+        <div id="contracts-host"></div>
+    </section>
+
+    <section class="res-panel" id="panel-install" hidden>
+        <article class="snap-card res-index" id="install-card">
+            <p class="res-kicker">Install</p>
+            <h3>One-liner</h3>
+            <p class="res-note">Paste in a terminal on Linux or macOS. Downloads <code>terpd</code>, then can walk you through joining a network.</p>
+            <pre class="snap-code" id="install-cmd">curl -sL https://terp.network/get/terp-installer.sh | bash</pre>
+            <div class="snap-actions">
+                <button type="button" class="snap-btn primary" id="copy-install">Copy</button>
+                <a class="snap-btn" href="/get" target="_blank" rel="noopener">View installer script</a>
+            </div>
+            <p class="muted" id="install-note">It can download terpd and walk you through joining mainnet or testnet.</p>
+        </article>
+    </section>
+
+    <section class="res-panel" id="panel-upgrades" hidden>
+        <div id="upgrades-host"></div>
+    </section>
+
+    <section class="res-panel" id="panel-releases" hidden>
+        <div id="releases-host"></div>
+    </section>
+    <section class="res-panel" id="panel-graphs" hidden>
+        <div class="graph-stage">
+            <iframe class="graph-frame" id="graph-frame" title="Crate dependency graph" src="/public/graphs/dependency-map.html"></iframe>
+        </div>
+    </section>
+    </div>
+    </div>
+</main>
+
+<script type="module">
+import { applyNavGuard } from '/lib/nav-guard.js';
+applyNavGuard();
+
+const MANIFEST_URL = '/public/snapshots.json';
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function installCmd(net) {
+  if (!net) return 'curl -sL https://terp.network/get/terp-installer.sh | bash';
+  if (net.kind === 'testnet') {
+    return `curl -sL https://terp.network/get/terp-installer.sh | bash -s -- --network ${net.chainId}`;
+  }
+  return `curl -sL https://terp.network/get/terp-installer.sh | bash -s -- --network ${net.chainId}`;
+}
+
+async function main() {
+  let manifest = {};
+  try {
+    const res = await fetch(MANIFEST_URL, { cache: 'no-cache' });
+    if (res.ok) {
+      const t = await res.text();
+      if (t && !/^\s*</.test(t)) manifest = JSON.parse(t);
+    }
+  } catch {
+    /* install tab still has a hardcoded one-liner */
+  }
+
+  if (manifest.install?.oneLiner) {
+    document.getElementById('install-cmd').textContent = manifest.install.oneLiner;
+  }
+  if (manifest.install?.docsNote) {
+    document.getElementById('install-note').textContent = manifest.install.docsNote;
+  }
+
+  document.getElementById('copy-install')?.addEventListener('click', async () => {
+    const cmd = document.getElementById('install-cmd')?.textContent || '';
+    const ok = await copyText(cmd);
+    const btn = document.getElementById('copy-install');
+    if (btn) btn.textContent = ok ? 'Copied' : 'Copy failed';
+    setTimeout(() => { if (btn) btn.textContent = 'Copy'; }, 1500);
+  });
+
+  const { mountChainResource } = await import('/lib/chain-versions.js');
+  const { mountSnapshotPanel } = await import('/lib/snapshots.js');
+  const kinds = ['snapshots', 'install', 'upgrades', 'releases', 'graphs', 'app-state'];
+  const info = {
+    snapshots: {
+      title: 'Snapshot',
+      html: `<p>Download a recent chain pack instead of syncing from genesis. The current pack is <strong>pruned</strong> — enough state to run a node, without historic blocks.</p>
+        <p>Unpack it with <code>lz4</code> and <code>tar</code>, then start <code>terpd</code> v6. Stop the node first. The pack does not contain keys.</p>
+        <p>Archive packs keep full history and are much larger. The archive on this page is older than the v6 upgrade; use pruned to join the live chain.</p>`,
+    },
+    install: {
+      title: 'Install',
+      html: `<p>Paste the one-liner in a terminal on Linux or macOS. It installs <code>terpd</code> and can join mainnet or testnet.</p>`,
+    },
+    releases: {
+      title: 'Releases',
+      html: `<p>Published <code>terpd</code> builds. Pick a version — the address bar keeps that choice so you can share it.</p>
+        <p><strong>Current</strong> is what the live chain is running. <strong>Pending</strong> is named in the live upgrade plan. <strong>Upcoming</strong> is named in a passed governance proposal. <strong>Unverified</strong> is in the bucket but not live, not in the plan, and not in a passed proposal.</p>`,
+    },
+    upgrades: {
+      title: 'Upgrades',
+      html: `<p>Each room is a Cosmovisor plan, ordered by halt height. Applied plans already happened; pending is the live chain plan; unverified has no halt height yet.</p>
+        <p>Cosmovisor wants the archive whose name ends in <code>-cv.tar.gz</code>.</p>`,
+    },
+    graphs: {
+      title: 'Graphs',
+      html: `<p>How Terp software crates depend on each other.</p>`,
+    },
+    'app-state': {
+      title: 'App state',
+      html: `<p>The published address file, by network — live CosmWasm programs (name, address, code ID) plus app state. Mainnet first. Local Abstract accounts stay hidden unless you ask for them.</p>`,
+    },
+  };
+
+  const modal = document.getElementById('res-info-modal');
+  function openInfo(kind) {
+    const pack = info[kind] || info.install;
+    document.getElementById('res-info-title').textContent = pack.title;
+    document.getElementById('res-info-body').innerHTML = pack.html;
+    modal?.classList.add('open');
+  }
+  document.getElementById('res-subtabs')?.addEventListener('click', (e) => {
+    const infoBtn = e.target.closest('[data-info]');
+    if (infoBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      openInfo(infoBtn.dataset.info);
+    }
+  });
+  document.getElementById('res-info-close')?.addEventListener('click', () => modal?.classList.remove('open'));
+  modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') modal?.classList.remove('open');
+  });
+
+  function parseResHash(raw) {
+    const h = String(raw || location.hash || '').replace(/^#/, '');
+    const parts = h.split('/').filter(Boolean);
+    let kind = parts[0] || 'install';
+    if (kind === 'snapshot') kind = 'snapshots';
+    if (kind === 'contracts') kind = 'app-state';
+    if (kind.includes('=')) {
+      const [k, v] = kind.split('=');
+      kind = k;
+      parts[0] = k;
+      if (v) parts[1] = v;
+    }
+    const sub = parts.slice(1).join('/');
+    return { kind, sub };
+  }
+
+  async function showKind(raw) {
+    let { kind, sub } = parseResHash(raw);
+    if (!kinds.includes(kind)) kind = 'install';
+    document.querySelectorAll('.res-panel').forEach((p) => {
+      p.hidden = p.id !== `panel-${kind}`;
+    });
+    const graphOn = kind === 'graphs';
+    document.querySelector('main.main')?.classList.toggle('graphs-wide', graphOn);
+    document.body.classList.toggle('graphs-open', graphOn);
+    document.querySelectorAll('#res-subtabs .res-side-item').forEach((a) => {
+      a.classList.toggle('active', a.dataset.kind === kind);
+    });
+    if (kind === 'snapshots') {
+      const host = document.getElementById('snapshots-host');
+      if (host && !host.dataset.ready) {
+        await mountSnapshotPanel(host);
+        host.dataset.ready = '1';
+      }
+    }
+    if (kind === 'upgrades') {
+      const host = document.getElementById('upgrades-host');
+      if (host && !host.dataset.ready) {
+        await mountChainResource(host, 'upgrades', {});
+        host.dataset.ready = '1';
+      }
+    }
+    if (kind === 'releases') {
+      const host = document.getElementById('releases-host');
+      if (host && !host.dataset.ready) {
+        await mountChainResource(host, 'releases', { selected: sub });
+        host.dataset.ready = '1';
+      } else if (host?.__selectRelease) {
+        host.__selectRelease(sub);
+      }
+    }
+    if (kind === 'app-state') {
+      const host = document.getElementById('app-state-host');
+      if (host && !host.dataset.ready) {
+        const { mountAppState } = await import('/lib/app-state.js');
+        await mountAppState(host, {
+          url: 'https://s3.terp.network/snapshots/mainnet/morocco-1/state.json',
+          defaultChain: 'morocco-1',
+        });
+        host.dataset.ready = '1';
+      }
+      const strip = document.getElementById('contracts-host');
+      if (strip && !strip.dataset.ready) {
+        const { loadSiteConfig } = await import('/lib/config.js');
+        const { mountContractStrip } = await import('/lib/contract-strip.js');
+        const cfg = { pageId: 'resources', chainId: 'morocco-1', rest: 'https://api.terp.network', contracts: {} };
+        await loadSiteConfig(cfg, { pageId: 'resources' }).catch(() => {});
+        await mountContractStrip(strip, cfg);
+        strip.dataset.ready = '1';
+      }
+    }
+  }
+
+  window.addEventListener('hashchange', () => showKind(location.hash));
+  await showKind(location.hash || 'install');
+}
+
+main();
+</script>
+</body>
+</html>

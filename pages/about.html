@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>About | Terp Network</title>
+<meta name="description" content="What Terp Network stands for and how to take part">
+<link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
+<link rel="stylesheet" href="/public/global.css">
+<link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+<style>
+.main { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 3.5rem; min-height: 40vh; }
+.about-lede { font-size: 1.35rem; line-height: 1.5; margin: 0.5rem 0 2rem; }
+.about-lede strong { color: #98e8c1; font-weight: 600; }
+.about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; margin: 0 0 2rem; }
+.about-card { border: 1px solid rgba(152,232,193,0.18); border-radius: 10px; padding: 1rem 1.1rem; background: rgba(255,255,255,0.02); }
+.about-card h2 { font-size: 0.95rem; margin: 0 0 0.4rem; color: #98e8c1; }
+.about-card p { font-size: 0.85rem; line-height: 1.55; margin: 0; color: #d2d3d8; }
+.about-facts { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0 0 2rem; }
+.about-facts td { padding: 0.45rem 0.2rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.about-facts td:first-child { color: #6272a4; width: 38%; }
+.about-facts code { font-size: 0.8rem; }
+.about-cta { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.about-cta a { display: inline-block; padding: 0.55rem 1rem; border-radius: 6px; font-size: 0.85rem; text-decoration: none; border: 1px solid rgba(152,232,193,0.35); color: #98e8c1; }
+.about-cta a.primary { background: rgba(152,232,193,0.14); }
+.about-cta a:hover { border-color: #98e8c1; }
+</style>
+</head>
+<body>
+<script src="/lib/fab.js"></script>
+<canvas id="glow-canvas"></canvas>
+<main class="main">
+<p class="muted" style="font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;">About</p>
+<p class="about-lede">Terp Network exists so anyone can <strong>verify</strong>, <strong>participate</strong>, and <strong>leave with everything</strong> — no permission, no custodian, no trusted bridge in the middle.</p>
+
+<div class="about-grid">
+<div class="about-card">
+<h2>Verifiable before trusted</h2>
+<p>Releases ship checksums next to binaries, builds reproduce from source, and every claim on this site resolves to an endpoint you can query yourself.</p>
+</div>
+<div class="about-card">
+<h2>Permissionless to join</h2>
+<p>Run a node, validate, build, or just query state. Nothing here requires an account with us — your keys are the only credential.</p>
+</div>
+<div class="about-card">
+<h2>Sovereign by default</h2>
+<p>Self-custody, open Hermes relayers anyone can fund, governance decided by stake — not by an admin panel or a bridge multisig.</p>
+</div>
+<div class="about-card">
+<h2>Interoperable, not wrapped</h2>
+<p>IBC light clients carry state between chains. No wrapped IOUs, no bridge operator to trust or to fail.</p>
+</div>
+</div>
+
+<table class="about-facts">
+<tr><td>Network</td><td>Mainnet <code>morocco-1</code> · Testnet <code>120u-1</code></td></tr>
+<tr><td>Consensus</td><td>CometBFT proof-of-stake</td></tr>
+<tr><td>Contracts</td><td>CosmWasm on-chain</td></tr>
+<tr><td>Source</td><td><a href="https://github.com/terpnetwork">github.com/terpnetwork</a></td></tr>
+</table>
+
+<div class="about-cta">
+<a class="primary" href="/eco">Use the network</a>
+<a href="/resources">Run a node</a>
+<a href="https://docs.terp.network">Read the docs</a>
+<a href="https://discord.terp.network">Join the discussion</a>
+</div>
+</main>
+<script type="module">
+  import { applyNavGuard } from '/lib/nav-guard.js';
+  import { startGlowBg } from '/lib/glow-bg.js';
+  applyNavGuard();
+  try { startGlowBg(); } catch { /* optional */ }
+</script>
+</body>
+</html>

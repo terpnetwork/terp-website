@@ -1,0 +1,27 @@
+{
+  "name": "terp.network",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint lib/ pages/*.html",
+    "typecheck": "echo 'No TS; use JSDoc if needed'"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "html-minifier-terser": "^7.2.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": 12,
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-unused-vars": "warn"
+    }
+  }
+}

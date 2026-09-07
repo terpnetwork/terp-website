@@ -1,0 +1,231 @@
+{
+  "chains": {
+    "120u-1": {
+      "bech32Prefix": "terp",
+      "chainId": "120u-1",
+      "chainName": "Local Terp",
+      "configAccount": "terp-official",
+      "contracts": {
+        "accountMinter": "terp14ejqjyq8um4p3xfqj74yld5waqljf88fz25yxnma0cngspxe3les6vkktx",
+        "cw721Svg": "terp19m8rfl69kqyfsdca96gd5tyca3h0tyked8e6hp59z8y0fvs3gzlqcw9ylg",
+        "cwInfusionMinter": "",
+        "cwSvgMinter": "terp1wug8sewp6cedgkmrmvhl3lf3tulagm9hnvy8p0rppz9yjw0g4wtqw39a47",
+        "daoCalendar": "",
+        "headstash": "",
+        "headstashManifold": "",
+        "shitstrapFactory": "terp16jzpxp0e8550c9aht6q9svcux30vtyyyyxv5w2l2djjra46580wsgp89hp",
+        "terp721Account": "terp1w62fp4ndyzegkt3xhxh752gwkatvj84ugmrcrasdd26crtvz4uxqws9hez",
+        "zkWasmvmTest": "terp1kheckry8ha4899htkkvy7tlh3djcchf0zuvq0f7dhdqa0p2je2zqnjw2jz",
+        "zkWasmvmCodeId": 72,
+        "zkWasmvmCircuitId": 1
+      },
+      "defaultApps": [
+        {
+          "disabled": false,
+          "id": "tabs",
+          "title": "Names",
+          "url": "/eco"
+        },
+        {
+          "disabled": false,
+          "id": "no-rick",
+          "title": "No Rick",
+          "url": "/no-rick.html"
+        }
+      ],
+      "denom": {
+        "decimals": 6,
+        "fee": "uthiol",
+        "feeDisplay": "THIOL",
+        "stake": "uterp",
+        "stakeDisplay": "TERP"
+      },
+      "explorer": "",
+      "gasPriceStep": {
+        "average": 0.5,
+        "high": 0.75,
+        "low": 0.25
+      },
+      "grpc": "https://testnet-grpc.terp.network",
+      "rest": "https://testnet-api.terp.network",
+      "rpc": "https://testnet-rpc.terp.network",
+      "services": {
+        "headstashServer": "",
+        "indexer": "",
+        "merkleServer": "",
+        "whitelistTreeId": ""
+      }
+    },
+    "morocco-1": {
+      "bech32Prefix": "terp",
+      "chainId": "morocco-1",
+      "chainName": "Terp Network",
+      "configAccount": "terp-official",
+      "contracts": {
+        "accountMinter": "terp1qavmkqwn0qzu5m06a4ryyj5drtc0ujfm4j276axzcfxkglueqgms79cypw",
+        "cw721Svg": "terp1vp7smemrv846hpsyqrzlnqapmu3sv7hyygf4rrnw3ls26ezk864qupr5zt",
+        "cwInfusionMinter": "terp1xjgagje7l8qjpv0zgf7zml5qre5mhh29dcwl5f8gf68rz56t9mgqusz8ls",
+        "cwSvgMinter": "terp188jpppxtfpf0vvt5gypdj52hk2xuswwcn38auczzxv20fcxz3kss9fhlru",
+        "daoCalendar": "",
+        "headstash": "",
+        "headstashManifold": "",
+        "shitstrapFactory": "terp1cdd3w85507gaw6ljrkqy2urx4u0fwjfgyj6jgahnq0c4wlwmr57selwx65",
+        "terp721Account": "terp143r4y9wn3g06j5z425cunfc6g3fz9gsedptgrxc8w6ktvflpe45s94903c",
+        "zkWasmvmTest": "",
+        "abstractRegistry": "terp1qyl8de7th7n0cjk5zv5tfqq7hcat2pnqxvlqar9h3ek0qsx2h4rseqd03d",
+        "abstractAnsHost": "terp133wf9rysrrwkgga3jxzadnpaky6e8tq0x70gwemzvlvz2k36mq5qy4kur5",
+        "abstractIbcClient": "terp13ct8hfvuxwfulygcjx9xtvhsxd5kjt7qgqhlkqvt5d0khfxnwefsrphmeu",
+        "abstractIbcHost": "terp13rzt9anw8qmf5kqu3ucccuz6ryrg0ca73r3wp0yespr90wmhe4ms86j4qn",
+        "abstractModuleFactory": "terp1lujfwru7t0vuzugqr4s6kt7syyvf4q8d7njym7a2le64p0z4h00s7rxtez"
+      },
+      "defaultApps": [
+        {
+          "id": "tabs",
+          "title": "Ecosystem",
+          "url": "/eco"
+        },
+        {
+          "id": "ibc",
+          "title": "IBC",
+          "url": "/ibc.html"
+        },
+        {
+          "id": "snapshots",
+          "title": "Snapshots",
+          "url": "/snapshots.html"
+        },
+        {
+          "id": "no-rick",
+          "title": "No Rick",
+          "url": "/no-rick.html",
+          "disabled": false
+        }
+      ],
+      "denom": {
+        "decimals": 6,
+        "fee": "uthiol",
+        "feeDisplay": "THIOL",
+        "stake": "uterp",
+        "stakeDisplay": "TERP"
+      },
+      "explorer": "https://ping.pub/terp",
+      "gasPriceStep": {
+        "average": 0.025,
+        "high": 0.04,
+        "low": 0.01
+      },
+      "grpc": "https://grpc.terp.network",
+      "rest": "https://api.terp.network",
+      "rpc": "https://rpc.terp.network",
+      "services": {
+        "headstashServer": "",
+        "indexer": "",
+        "merkleServer": "https://hash.terp.network",
+        "whitelistTreeId": "",
+        "stateJson": "https://s3.terp.network/snapshots/mainnet/morocco-1/state.json",
+        "snapshotMeta": "https://s3.terp.network/snapshots/mainnet/morocco-1/snapshot_full.json",
+        "addrbookUrl": "https://s3.terp.network/snapshots/mainnet/morocco-1/addrbook.json",
+        "s3Base": "https://s3.terp.network/snapshots/mainnet/morocco-1",
+        "snapshotsManifest": "/public/snapshots.json"
+      }
+    }
+  },
+  "checksums": {
+    "bundles": {
+      "lib/account-minter.js": "8b9147543b2970dfa4e2bc0d679188119f7a2c4b586f0c55691ebfd8a9835df9",
+      "lib/cw-infuser-factory.js": "6be6eb065c48129aeb75c5e86138e67993e2f6b301efd7a2aba23d98c7240f7a",
+      "lib/cw-infuser.js": "9893655977c1b8155e7e6cef9d77e731dd08fe63f1d4572982efaa9b5f5393e9",
+      "lib/cw-shitstrap-factory.js": "415aabd65826e047ac5d89ecf8fa9b8c20249e85e57e6a068dbad5c77cb256de",
+      "lib/cw-shitstrap.js": "b375c9f8970fea6180b2e2d97ae0647cda83da26ff89c024b83c1628914ca616",
+      "lib/cw-svg-minter.js": "d5fd8bb9c685cf927efdbc2f3bab548472a18577738b1412423c670524a8b1dc",
+      "lib/cw721-svg.js": "2d83752b4763beacee3408aa8fd500bb8430cab4fe64acae9bdf61ef08d041ca",
+      "lib/oline.js": "13e3a495b202eab3c04db323be21281060906a486622b6cf780776d2f2342c32",
+      "lib/terp721-account.js": "3493d45a99c1ff1ce99bc4b9bcab52e4a54ea734b55f5f504e5dcbe69b6e8790",
+      "lib/whitelist-merkletree.js": "d78a1780b424b847840373be308477e94184c2caa1a11388c0a26b49d21fc036"
+    },
+    "installers": {
+      "get/terp-installer.py": "bf5af3f7a4db0a3695f027254b6e1713aaeff347c85e9669a3c0534819961bf7",
+      "get/terp-installer.sh": "03269a9a63f2bb1d2160b40b4c24521dcaa936be56e4aca372eb4dd2e5a224b1"
+    }
+  },
+  "version": "1.0.0",
+  "ibc": {
+    "proxyUrl": "https://ibc-proxy.terp.network",
+    "proxyUrlFallback": "/ibc-proxy",
+    "stateJson": "https://s3.terp.network/snapshots/mainnet/morocco-1/state.json",
+    "stateJsonLocal": "/public/ibc-state.json",
+    "foundationRelayers": [
+      {
+        "id": "foundation-hermes",
+        "label": "Foundation Hermes",
+        "note": "Public path gas wallets for Hermes relayers. Fund these so community IBC stays live.",
+        "accounts": {
+          "morocco-1": {
+            "chainKey": "terp",
+            "address": "terp1uhf467vxvqywdmqhagq9rq9wygvwsuzkeaev7c",
+            "denom": "uthiol",
+            "minSuggested": "100",
+            "recommendedDisplay": "100 uthiol (~$0.50)"
+          },
+          "juno-1": {
+            "chainKey": "juno",
+            "address": "juno1uhf467vxvqywdmqhagq9rq9wygvwsuzkg9nmnh",
+            "denom": "ujuno",
+            "minSuggested": "1000000",
+            "recommendedDisplay": "1 JUNO"
+          },
+          "osmosis-1": {
+            "chainKey": "osmosis",
+            "address": "osmo1uhf467vxvqywdmqhagq9rq9wygvwsuzkkvrsze",
+            "denom": "uosmo",
+            "minSuggested": "5000000",
+            "recommendedDisplay": "5 OSMO"
+          },
+          "cosmoshub-4": {
+            "chainKey": "cosmoshub",
+            "address": "cosmos1uhf467vxvqywdmqhagq9rq9wygvwsuzk7hsq5t",
+            "denom": "uatom",
+            "minSuggested": "1000000",
+            "recommendedDisplay": "1 ATOM"
+          },
+          "akashnet-2": {
+            "chainKey": "akash",
+            "address": "akash1uhf467vxvqywdmqhagq9rq9wygvwsuzknva8d3",
+            "denom": "uakt",
+            "minSuggested": "5000000",
+            "recommendedDisplay": "5 AKT"
+          },
+          "bitsong-2b": {
+            "chainKey": "bitsong",
+            "address": "bitsong17lx4tzn9y5rvt9slgehcvu48ycchr2gxmz24fr",
+            "denom": "ubtsg",
+            "minSuggested": "1000000000",
+            "recommendedDisplay": "1000 BTSG"
+          },
+          "penumbra-1": {
+            "chainKey": "penumbra",
+            "address": "penumbra1yycpm5t8eyhxqyv5qh7xt0mtch2qyzu9jrn5kcdxw562ya8fjhvylv4enzsgsxqnfnzt97s9ek4mx3748jz5jhstand8g42074f4hc05qqe9xrh8cywwunjs80tljhvt4f2kwz",
+            "denom": "upenumbra",
+            "minSuggested": "1000000",
+            "recommendedDisplay": "1 PEN",
+            "note": "Shielded chain \u2014 fund via Penumbra-compatible wallet / deposit path"
+          },
+          "atomone-1": {
+            "chainKey": "atomone",
+            "address": "atone1uhf467vxvqywdmqhagq9rq9wygvwsuzkshv8zn",
+            "denom": "uatone",
+            "minSuggested": "1000000",
+            "recommendedDisplay": "1 ATONE"
+          },
+          "jackal-1": {
+            "chainKey": "jackal",
+            "address": "jkl1uhf467vxvqywdmqhagq9rq9wygvwsuzk8f73d5",
+            "denom": "ujkl",
+            "minSuggested": "10000000",
+            "recommendedDisplay": "10 JKL"
+          }
+        }
+      }
+    ]
+  }
+}

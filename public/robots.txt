@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://terp.network/sitemap.xml

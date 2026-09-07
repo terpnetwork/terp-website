@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <!-- WIP gate: default OFF. Flip WIP_GATE_ENABLED in /lib/wip-gate.js or use ?wip=1 -->
+  <script src="/lib/wip-gate.js"></script>
+  <title>IBC | Terp Network</title>
+  <meta name="description" content="IBC channels, clients, and modular light-client surfaces on Terp Network.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
+  <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+  <link rel="stylesheet" href="/public/global.css">
+  <!--
+    Static page: read-only LCD/RPC queries + optional wallet deposits.
+    Client types register in /lib/ibc-clients.js (same-origin only).
+  -->
+  <style>
+    :root {
+      --eco-text: 1rem;
+      --eco-text-sm: 0.9375rem;
+      --eco-label: 0.8125rem;
+      --eco-title: clamp(1.95rem, 4vw, 2.35rem);
+    }
+    body {
+      font-weight: var(--tn-font-weight-body, 400);
+      font-size: var(--tn-text-base, 17px);
+    }
+    .main {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .page-title {
+      font-size: var(--eco-title);
+      font-weight: 500;
+      color: #cfffcf;
+      text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
+      text-align: center;
+      margin-bottom: 0.35rem;
+    }
+    .page-subtitle {
+      font-size: var(--eco-text-sm);
+      color: #ffffda;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      line-height: 1.45;
+    }
+    .ibc-chrome {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem 0.65rem;
+      margin-bottom: 1.25rem;
+      font-size: var(--eco-text-sm);
+    }
+    .ibc-chrome a {
+      color: rgba(210, 211, 216, 0.8);
+      text-decoration: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+    }
+    .ibc-chrome a:hover { color: #98e8c1; opacity: 1; }
+
+    /* Stats strip — real LCD numbers */
+    .stat-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      width: 100%;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 560px) {
+      .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat-card {
+      border-radius: 10px;
+      border: 1px solid rgba(152, 232, 193, 0.14);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.75rem 0.85rem;
+      text-align: left;
+    }
+    .stat-label {
+      font-size: var(--eco-label);
+      color: rgba(152, 232, 193, 0.65);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    .stat-val {
+      font-family: var(--tn-font-mono);
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: #cfffcf;
+    }
+    .stat-meta {
+      font-size: 0.75rem;
+      color: rgba(210, 211, 216, 0.5);
+      margin-top: 0.2rem;
+    }
+
+    /* Shared with ecosystem tabs */
+    .plane-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      width: 100%;
+    }
+    .plane-nav.nested {
+      justify-content: flex-start;
+      margin-top: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .plane-tab {
+      background: rgba(152, 232, 193, 0.06);
+      border: 1px solid rgba(152, 232, 193, 0.18);
+      color: rgba(207, 255, 207, 0.85);
+      padding: 0.5rem 0.95rem;
+      font-family: var(--tn-font);
+      font-size: var(--eco-label);
+      font-weight: 500;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .plane-tab:hover {
+      border-color: rgba(152, 232, 193, 0.4);
+      color: #98e8c1;
+    }
+    .plane-tab.active {
+      background: rgba(152, 232, 193, 0.14);
+      border-color: rgba(152, 232, 193, 0.45);
+      color: #cfffcf;
+    }
+    .type-badge {
+      font-size: 0.65rem;
+      opacity: 0.65;
+      margin-left: 0.25rem;
+      text-transform: uppercase;
+    }
+
+    #type-panel-host {
+      width: 100%;
+    }
+    .type-panel {
+      width: 100%;
+      text-align: left;
+    }
+    .type-panel-head {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.35rem;
+    }
+    .type-panel-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #98e8c1;
+      margin: 0;
+    }
+    .type-status {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(152, 232, 193, 0.55);
+    }
+    .type-status.status-planned { color: rgba(189, 147, 249, 0.8); }
+    .type-status.status-live { color: #98e8c1; }
+    .type-panel-blurb {
+      font-size: var(--eco-text-sm);
+      color: rgba(210, 211, 216, 0.72);
+      line-height: 1.5;
+      margin: 0 0 0.85rem;
+    }
+    .type-panel-body { width: 100%; }
+
+    .section-card {
+      border-radius: 12px;
+      border: 1px solid rgba(152, 232, 193, 0.14);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 1rem 1.1rem;
+      backdrop-filter: blur(12px);
+    }
+    .planned-shell .type-panel-blurb { margin-bottom: 0.5rem; }
+
+    /* Data tables */
+    .data-table-wrap {
+      overflow-x: auto;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--eco-label);
+    }
+    table.data-table th {
+      text-align: left;
+      color: rgba(152, 232, 193, 0.7);
+      font-weight: 500;
+      padding: 0.4rem 0.5rem;
+      border-bottom: 1px solid rgba(152, 232, 193, 0.12);
+      position: sticky;
+      top: 0;
+      background: rgba(0, 0, 0, 0.85);
+    }
+    table.data-table td {
+      padding: 0.4rem 0.5rem;
+      border-bottom: 1px solid rgba(152, 232, 193, 0.06);
+      color: #d2d3d8;
+      font-family: var(--tn-font-mono);
+      font-size: 0.78rem;
+      vertical-align: top;
+    }
+    table.data-table td.human {
+      font-family: var(--tn-font);
+      font-size: var(--eco-label);
+    }
+    .muted { color: rgba(210, 211, 216, 0.5); }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.65rem;
+    }
+    .btn-quiet {
+      font-family: var(--tn-font);
+      font-size: var(--eco-label);
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid rgba(152, 232, 193, 0.25);
+      background: rgba(152, 232, 193, 0.08);
+      color: #98e8c1;
+      cursor: pointer;
+    }
+    .btn-quiet:hover { border-color: rgba(152, 232, 193, 0.45); }
+
+    .mesh-panel {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      border-radius: 12px;
+      border: 1px solid rgba(152, 232, 193, 0.12);
+      background: rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      margin-top: 1.5rem;
+    }
+    .mesh-panel canvas { width: 100%; height: 100%; display: block; }
+    .mesh-caption {
+      position: absolute;
+      left: 0.75rem;
+      bottom: 0.45rem;
+      font-size: 0.72rem;
+      color: rgba(152, 232, 193, 0.4);
+      pointer-events: none;
+    }
+    #ibc-fund-mount { margin-top: 0.25rem; }
+
+    /* Loading skeleton */
+    .skeleton {
+      display: inline-block;
+      background: linear-gradient(90deg, rgba(152,232,193,0.06) 25%, rgba(152,232,193,0.14) 50%, rgba(152,232,193,0.06) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+      color: transparent !important;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .stat-val.skeleton { min-width: 4rem; height: 1.3rem; }
+    .stat-meta.skeleton { min-width: 3rem; height: 0.75rem; }
+
+    /* Error state in stat cards */
+    .stat-card.err { border-color: rgba(254, 125, 125, 0.35); }
+    .stat-val.err { color: #fe7d7d; font-size: 0.85rem; font-family: var(--tn-font); }
+
+    /* Mobile improvements */
+    @media (max-width: 480px) {
+      .main { padding: 5rem 0.85rem 3rem; }
+      .stat-card { padding: 0.55rem 0.65rem; }
+      .stat-val { font-size: 1rem; }
+      .data-table-wrap { max-height: 280px; }
+      table.data-table td { font-size: 0.7rem; padding: 0.3rem 0.35rem; }
+      table.data-table th { font-size: 0.7rem; padding: 0.3rem 0.35rem; }
+      .plane-tab { font-size: 0.75rem; padding: 0.4rem 0.7rem; }
+      .section-card { padding: 0.7rem 0.75rem; }
+    }
+
+    /* Capability card grid — modular showcase cards */
+    .ibc-cap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.75rem;
+      width: 100%;
+      margin-top: 0.75rem;
+    }
+    .ibc-cap-card {
+      border-radius: 10px;
+      border: 1px solid rgba(152, 232, 193, 0.12);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.85rem 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .ibc-cap-card:hover {
+      border-color: rgba(152, 232, 193, 0.3);
+      box-shadow: 0 0 16px rgba(152, 232, 193, 0.04);
+    }
+    .ibc-cap-card.planned {
+      border-color: rgba(189, 147, 249, 0.15);
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .ibc-cap-card.planned:hover {
+      border-color: rgba(189, 147, 249, 0.35);
+    }
+    .ibc-cap-card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+    .ibc-cap-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .ibc-cap-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #cfffcf;
+    }
+    .ibc-cap-status {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-left: auto;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(152, 232, 193, 0.1);
+      color: rgba(152, 232, 193, 0.6);
+      flex-shrink: 0;
+    }
+    .ibc-cap-status.planned {
+      background: rgba(189, 147, 249, 0.1);
+      color: rgba(189, 147, 249, 0.6);
+    }
+    .ibc-cap-desc {
+      font-size: 0.82rem;
+      color: rgba(210, 211, 216, 0.72);
+      line-height: 1.5;
+      margin: 0 0 0.5rem;
+      flex: 1;
+    }
+    .ibc-cap-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: auto;
+    }
+    .ibc-cap-tag {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(152, 232, 193, 0.06);
+      border: 1px solid rgba(152, 232, 193, 0.1);
+      color: rgba(152, 232, 193, 0.55);
+      letter-spacing: 0.04em;
+    }
+    .ibc-cap-tag.live {
+      border-color: rgba(152, 232, 193, 0.2);
+      color: rgba(152, 232, 193, 0.7);
+    }
+    .ibc-cap-tag.planned-tag {
+      border-color: rgba(189, 147, 249, 0.15);
+      color: rgba(189, 147, 249, 0.5);
+    }
+    @media (max-width: 560px) {
+      .ibc-cap-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="glow-canvas"></canvas>
+  <script src="/lib/fab.js"></script>
+
+  <main class="main">
+    <h1 class="page-title">IBC</h1>
+    <p class="page-subtitle">Open channels · clients · relayer gas</p>
+
+    <!-- Live inventory strip (wallet via FAB — no redundant Connect button) -->
+    <div class="stat-strip" aria-live="polite">
+      <div class="stat-card">
+        <div class="stat-label">Open channels</div>
+        <div class="stat-val" id="stat-channels">—</div>
+        <div class="stat-meta" id="stat-channels-src">loading</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Connections</div>
+        <div class="stat-val" id="stat-connections">—</div>
+        <div class="stat-meta">LCD</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Clients</div>
+        <div class="stat-val" id="stat-clients">—</div>
+        <div class="stat-meta" id="stat-clients-meta">by type…</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Data source</div>
+        <div class="stat-val" id="stat-source" style="font-size:0.95rem;">—</div>
+        <div class="stat-meta" id="stat-proxy">proxy…</div>
+      </div>
+    </div>
+
+    <!-- Modular client-type tabs (recursive registry) -->
+    <nav id="type-tabs" class="plane-nav" role="tablist" aria-label="IBC client types"></nav>
+    <div id="type-panel-host"></div>
+
+  </main>
+
+  <script type="module">
+    import { startGlowBg } from '/lib/glow-bg.js';
+    import { bootIbcPage } from '/lib/ibc-page.js';
+
+    try { startGlowBg(); } catch { /* optional */ }
+    bootIbcPage().catch((e) => console.error('[ibc] boot', e));
+  </script>
+</body>
+</html>

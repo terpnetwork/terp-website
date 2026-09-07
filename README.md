@@ -2,145 +2,101 @@
 
 Official website for Terp Network, featuring the terp-core installer integration.
 
-## Features
+## Shared frontend runtime (2026-07)
 
-- Responsive dark-themed landing page with animated backgrounds
-- Integrated terp-core installer with tab-based installation options
-- Docker-ready deployment
-- SEO optimized with sitemap and meta tags
+| Module | Role |
+|--------|------|
+| `lib/config.js` | Load `public/config.json`, chain detect, Keplr suggest builders |
+| `lib/wallet.js` | Single session (`terp-wallet-v1` + `terp:wallet` events) |
+| `lib/pmoney-egg.js` | permissionless.money **easter-egg** generative mint inside SVG page |
+| `lib/ibc-core.js` | Live IBC channels (LCD + proxy), balances, foundation relayer helpers |
+| `lib/ibc-fund-bar.js` | Deposit desk UI for foundation relayer gas wallets |
+| `lib/ibc-page.js` | Boots `ibc.html` onto live data + shared wallet |
+| `lib/fab.js` | Nav FAB that listens to shared wallet (no parallel stack) |
 
-## Development
+**Pages wired:** `tabs.html`, `svg.html`, `ibc.html`, `no-rick.html`.
 
-```sh
-python3 -m http.server 8000
+**IBC foundation funding:** addresses + recommended amounts live in `public/config.json` → `ibc.foundationRelayers` (also rendered on the homepage and `ibc.html` fund bar). Balances load live from each chain LCD where available.
+
+**Installer checksums:** homepage “Verify” hashes `get/terp-installer.sh` (+ py) client-side, compares on-chain account TextRecords when queryable, then falls back to `checksums.installers` in config.json (from `scripts/build-config.sh`).
+
+**norick-wasm rebuild:** see comments at top of `lib/norick.js` (`wasm-pack build --target web` into `pkg/`).
+
+**p.money egg unlock (on `/svg.html`):** Konami code, 5× click page title, or `?egg=pmoney`.
+
+```bash
+just serve          # local :3000
+# optional chain: ?chain=120u-1 or localStorage terp-chain-id
 ```
+
+## TODO
+- migrate `no-rick.html` + `ibc.html` onto `TerpWallet`
+- smart-account / text-records UI
+- vendor cosmes (drop esm.sh runtime risk)
+- indexer-backed balance queries
+- IBC tx preview hardening
+
+## Features
+- wallet connecting && chain client via cosmes: <https://www.npmjs.com/package/@goblinhunt/cosmes>
+- zero-config installer for terp-core
+- svg collection mint, browse and view
+- terp-account-billboard (TAB) nft mints
+- local testing suite for development sessions
 
 ## Installation Scripts
 
-The website serves two installation methods:
+### Quick Install (Interactive)
 
-1. **Shell Script** (macOS & Linux): `curl -sL https://terp.network/install | python3`
-2. **UV Tool**: `uvx --from terp-core terpd`
-
-### Verifying Installation Script Integrity
-
-Before running the installation scripts, verify their integrity using checksums:
-
-#### SHA256 Checksums
-
-```
-0e2743c117a3be8e5648427e0e1d8863b7ac59e1e1cff428152eda99cf9dc970  terp-installer.py
-a233f0863b439273e772b14d61b985c8a20e719c72506399adebff03551596c7  terp-installer.sh
-```
-
-#### BLAKE3 Checksums
-
-```
-3113805970499a614c8dda2b8d2730bade6f0b0a3d5a8fa99bac4e9856396cee  terp-installer.py
-8c1826931f3c9c620dddabe6756881a2a51aa977c24b60842eca697dfd40ebb7  terp-installer.sh
-```
-
-#### Verification Instructions
-
-**Using SHA256:**
+**One-line install:**
 
 ```bash
-# Download the script
-curl -sL https://terp.network/install > terp-installer.py
-
-# Verify with sha256sum (Linux)
-echo "0e2743c117a3be8e5648427e0e1d8863b7ac59e1e1cff428152eda99cf9dc970  terp-installer.py" | sha256sum -c
-
-# Verify with shasum (macOS)
-echo "0e2743c117a3be8e5648427e0e1d8863b7ac59e1e1cff428152eda99cf9dc970  terp-installer.py" | shasum -a 256 -c
+curl -fsSL https://terp.network/get/terp-installer.sh | bash
 ```
 
-**Using BLAKE3:**
+The installer will automatically:
+
+1. Check/install Python 3.6+
+2. Guide you through selecting installation type (node/client/localterp)
+3. Help you choose network (mainnet/testnet)
+4. Configure your node settings
+5. Optionally install cosmovisor and systemd service
+
+### Command-Line Options
+
+You can also use flags to skip certain prompts:
 
 ```bash
-# Download the script
-curl -sL https://terp.network/install > terp-installer.py
-
-# Install b3sum if not already installed
-# macOS: brew install b3sum
-# Linux: cargo install b3sum
-# or download from: https://github.com/BLAKE3-team/BLAKE3
-
-# Verify with b3sum
-echo "3113805970499a614c8dda2b8d2730bade6f0b0a3d5a8fa99bac4e9856396cee  terp-installer.py" | b3sum --check
+curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --install node --network morocco-1 --moniker "my-node"
 ```
 
-**Expected output on successful verification:**
+**Available flags:**
 
-```
-terp-installer.py: OK
+- `--install <node|client|localterp>` - Installation type
+- `--network <morocco-1|90u-4>` - Network to join
+- `--home <path>` - Installation directory (default: ~/.terp)
+- `--moniker <name>` - Node moniker (default: terp)
+- `--pruning <default|nothing|everything>` - Pruning settings
+- `--cosmovisor` - Install with cosmovisor
+- `--service` - Setup systemd service (Linux only)
+- `--overwrite` - Overwrite existing installation
+
+### Alternative: UV Tool
+
+```bash
+uvx --from terp-core terpd
 ```
 
 ⚠️ **Security Note:** Always verify checksums from multiple trusted sources (GitHub releases, official documentation, etc.) to ensure the checksums themselves haven't been tampered with.
 
 ## Running Locally
-
-### Using Docker
-
-Build and run the Docker container:
-
-```bash
-docker-compose up --build
-```
-
-The website will be available at `http://localhost:8080`
-
-### Manual Build
-
-Build the Docker image manually:
-
-```bash
-docker build -t terpnetwork/terp-network:latest .
-```
-
-Run the container:
-
-```bash
-docker run -p 8080:80 terpnetwork/terp-network:latest
-```
-
-## Project Structure
-
-```
-terp.network/
-├── index.html              # Main website file
-├── Dockerfile              # Docker configuration
-├── docker-compose.yml      # Docker Compose configuration
-├── nginx.conf              # NGINX server configuration
-├── robots.txt              # SEO robots file
-├── public/                 # Public assets
-│   ├── favicon/           # Favicon files
-│   ├── sitemap.xml        # SEO sitemap
-│   └── site.webmanifest   # PWA manifest
-└── install/                # Installation scripts
-    ├── terp-installer.py  # Python installer script
-    └── terp-installer.sh  # Shell installer script
-```
-
+  
 ## Deployment
-
-### Docker Registry
-
-Push to Docker registry:
-
-```bash
-docker-compose build
-docker push terpnetwork/terp-network:latest
-```
-
-### Akash Network
-
-Deploy to Akash using the provided SDL (see terp-installer repo for SDL examples).
-
+  
 ## Installation Script Endpoints
 
-- `/run` - Shell installation script
-- `/install` - Python installation script
+- `/get` - Shell wrapper script (downloads and runs Python installer)
+- `/run` - Python installer script (main installation logic)
+- `/get/` - Directory access for individual files and checksum verification
 
 ## Development
 

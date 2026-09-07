@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "updated": "2026-07-16",
+  "install": {
+    "oneLiner": "curl -fsSL https://terp.network/get/terp-installer.sh | bash",
+    "scriptUrl": "https://terp.network/get/terp-installer.sh",
+    "docsNote": "Downloads terpd and can walk you through joining mainnet or testnet."
+  },
+  "networks": [
+    {
+      "id": "morocco-1",
+      "label": "Mainnet",
+      "chainId": "morocco-1",
+      "kind": "mainnet",
+      "terpdVersion": "6.0.0",
+      "stateJson": "https://minio.terp.network/snapshots/mainnet/morocco-1/chain.json",
+      "prunedManifest": "https://minio.terp.network/snapshots/mainnet/morocco-1/pruned/snapshot.json",
+      "archiveManifest": "https://minio.terp.network/snapshots/mainnet/morocco-1/archive/snapshot.json",
+      "snapshotLabel": "Current snapshot is the pruned pack for morocco-1.",
+      "addrbookUrl": "https://snapshot-mainnet.terp.network/addrbook.json",
+      "releasesBase": "https://s3.terp.network/releases/terp-core",
+      "rpc": "https://rpc.terp.network",
+      "rest": "https://api.terp.network",
+      "binaryHint": "https://s3.terp.network/releases/terp-core/v6.0.0/terpd-6.0.0-linux-amd64.tar.gz"
+    },
+    {
+      "id": "120u-1",
+      "label": "Testnet",
+      "chainId": "120u-1",
+      "kind": "testnet",
+      "terpdVersion": "6.0.0",
+      "stateJson": "",
+      "snapshotUrl": "https://snapshot-testnet.terp.network/latest",
+      "snapshotLabel": "Latest testnet snapshot",
+      "addrbookUrl": "https://snapshot-testnet.terp.network/addrbook.json",
+      "releasesBase": "https://s3.terp.network/releases/terp-core",
+      "rpc": "https://rpc-testnet.terp.network",
+      "rest": "https://api-testnet.terp.network",
+      "binaryHint": "https://s3.terp.network/releases/terp-core/v6.0.0/terpd-6.0.0-linux-amd64.tar.gz"
+    }
+  ]
+}

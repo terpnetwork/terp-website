@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "updated": "2026-07-16",
+  "filters": {
+    "tags": ["accounts", "nft", "governance", "zk", "ibc", "infra", "agentic", "defi"],
+    "status": ["live", "beta", "soon"]
+  },
+  "projects": [
+    {
+      "id": "abstract",
+      "title": "Abstract Accounts",
+      "summary": "Smart accounts on mainnet: registry, names, IBC, module factory.",
+      "description": "Addresses below. Full account UI is in Abstract JS.",
+      "tags": ["accounts", "agentic", "infra"],
+      "status": "live",
+      "relevance": 100,
+      "component": "abstract",
+      "links": [
+        { "label": "abstract-js", "url": "https://js.abstract.money/" },
+        { "label": "Docs", "url": "https://docs.terp.network" }
+      ]
+    },
+    {
+      "id": "billboards",
+      "title": "Terp Account Billboards (TABS)",
+      "summary": "Buy a username on-chain that points at your wallet.",
+      "description": "Register a name. Other apps can look it up. You can sell it after a cooldown.",
+      "tags": ["accounts", "nft"],
+      "status": "live",
+      "relevance": 95,
+      "component": "billboards",
+      "links": [
+        { "label": "Docs", "url": "https://docs.terp.network" }
+      ]
+    },
+    {
+      "id": "svg",
+      "title": "On-chain SVG collections",
+      "summary": "Mint SVG art that lives on Terp, not a server.",
+      "description": "Open the SVG UI to make a collection or mint.",
+      "tags": ["nft"],
+      "status": "live",
+      "relevance": 85,
+      "component": "svg",
+      "links": [
+        { "label": "Open SVG UI", "url": "/svg" },
+        { "label": "Docs", "url": "https://docs.terp.network" }
+      ]
+    },
+    {
+      "id": "daodao",
+      "title": "DAO-DAO",
+      "summary": "Governance apps on Terp — proposals, voting modules, treasuries.",
+      "description": "DAO-DAO deployment for Terp Network governance: proposals, voting, and multi-sig treasuries.",
+      "tags": ["governance"],
+      "status": "live",
+      "relevance": 90,
+      "component": "daodao",
+      "links": [
+        { "label": "Open", "url": "https://daodao.terp.network" },
+        { "label": "Docs", "url": "https://docs.daodao.zone" }
+      ]
+    },
+    {
+      "id": "no-rick",
+      "title": "No Rick",
+      "summary": "Prove a secret without showing it. Toy demo.",
+      "description": "Your browser makes a proof. Terp checks it. The word never leaves your device.",
+      "tags": ["zk"],
+      "status": "live",
+      "relevance": 80,
+      "component": null,
+      "links": [
+        { "label": "Open demo", "url": "/no-rick" },
+        { "label": "permissionless.money hub", "url": "https://permissionless.money/zk" }
+      ]
+    },
+    {
+      "id": "ibc",
+      "title": "IBC inventory",
+      "summary": "See which other chains Terp talks to, and fund relayer gas.",
+      "description": "Live IBC clients and channels. Optional deposits to keep relayers funded.",
+      "tags": ["ibc", "infra"],
+      "status": "live",
+      "relevance": 88,
+      "component": null,
+      "links": [
+        { "label": "Open IBC", "url": "/ibc" }
+      ]
+    },
+    {
+      "id": "snapshots",
+      "title": "Snapshots & install",
+      "summary": "Install terpd and skip genesis with a snapshot.",
+      "description": "Copy-paste installer plus the latest chain-state packs.",
+      "tags": ["infra"],
+      "status": "live",
+      "relevance": 92,
+      "component": null,
+      "links": [
+        { "label": "Open snapshots", "url": "/snapshots" },
+        { "label": "Installer", "url": "/get" }
+      ]
+    },
+    {
+      "id": "bounties",
+      "title": "Community bounties",
+      "summary": "Cross-chain coordination for open work — multi-chain payouts without single-chain lock-in.",
+      "description": "Fund tasks in native or IBC assets, attract builders across Cosmos, settle when acceptance criteria land on-chain. Surface reserved at bounties.terp.network.",
+      "tags": ["governance", "defi"],
+      "status": "soon",
+      "relevance": 50,
+      "component": "bounties",
+      "links": [
+        { "label": "bounties.terp.network", "url": "https://bounties.terp.network" },
+        { "label": "Discord", "url": "https://discord.gg/W3QnHe77S6" }
+      ]
+    },
+    {
+      "id": "permissionless",
+      "title": "Permissionless.Money",
+      "summary": "Sister site: art mints and ZK demos.",
+      "description": "permissionless.money — fractals, minting, and the ZK hub.",
+      "tags": ["nft", "zk", "defi"],
+      "status": "live",
+      "relevance": 75,
+      "component": null,
+      "links": [
+        { "label": "permissionless.money", "url": "https://permissionless.money" },
+        { "label": "ZK hub", "url": "https://permissionless.money/zk" }
+      ]
+    }
+  ]
+}

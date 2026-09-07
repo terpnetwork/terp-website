@@ -1,0 +1,26 @@
+{
+  "name": "PermissionlessWeb",
+  "short_name": "Permissionless",
+  "description": "Building tools that value AND respect users",
+  "icons": [
+    {
+      "src": "p-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "p-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "p-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#08090d",
+  "background_color": "#08090d",
+  "display": "standalone",
+  "start_url": "/"
+}

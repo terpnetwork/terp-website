@@ -1,0 +1,31 @@
+{
+  "name": "Terp Network",
+  "short_name": "Terp",
+  "description": "A L1 Blockchain dedicated to programmable censorship-resistance",
+  "icons": [
+    {
+      "src": "favicons/terp-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "favicons/terp-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "favicons/terp-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "favicons/terp-apple-touch.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone",
+  "start_url": "/"
+}

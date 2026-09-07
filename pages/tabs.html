@@ -1,0 +1,2185 @@
+<!--  make this stateless tab in dao-dao-ui , wire in querie design with indexers and wallet support with existing wallet support -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description"
+        content="Register your Terp Account Billboard on-chain. Human-readable identities for Terp Network addresses.">
+    <title>TABS | Terp Network</title>
+
+    <meta property="og:title" content="TABS | Terp Network">
+    <meta property="og:description"
+        content="Register your on-chain identity. Terp Account Billboards for Terp Network.">
+    <meta property="og:type" content="website">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="TABS | Terp Network">
+    <meta name="twitter:creator" content="@terpculture">
+
+    <link rel="icon" type="image/x-icon" href="/public/favicons/terp-32x32.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png">
+
+    <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
+    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+    <link rel="stylesheet" href="/public/global.css">
+
+    <style>
+        /* Main */
+        .main {
+            position: relative;
+            z-index: 1;
+            max-width: 920px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 1.25rem 3rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Unified type scale for ecosystem + docs modal */
+        :root {
+            --eco-text: 0.92rem;
+            --eco-text-sm: 0.88rem;
+            --eco-text-xs: 0.82rem;
+            --eco-label: 0.8rem;
+            --eco-title: clamp(1.65rem, 3.5vw, 2rem);
+        }
+
+        /*
+         * Critical layout inlined so static S3 + CDN cache misses cannot leave
+         * the catalog unstyled when public/global.css is stale (30d cache).
+         * Full design tokens still come from global.css when fresh.
+         */
+        .eco-catalog { width: 100%; margin-bottom: 1.25rem; }
+        .eco-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem; width: 100%; align-items: start;
+        }
+        @media (min-width: 900px) { .eco-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (max-width: 560px) { .eco-grid { grid-template-columns: 1fr; } }
+        .eco-card {
+            border: 1px solid rgba(152, 232, 193, 0.14); border-radius: 12px;
+            padding: 0.95rem 1rem; background: rgba(0, 0, 0, 0.32);
+            text-align: left; min-width: 0;
+        }
+        .eco-card.is-open {
+            grid-column: 1 / -1; border-color: rgba(152, 232, 193, 0.35);
+            box-shadow: 0 0 32px rgba(152, 232, 193, 0.06); background: rgba(0, 0, 0, 0.45);
+        }
+        .eco-card h3 { font-size: 0.98rem; font-weight: 600; color: #cfffcf; margin: 0; line-height: 1.3; overflow-wrap: anywhere; }
+        .eco-summary { font-size: 0.88rem; color: #d2d3d8; line-height: 1.5; margin: 0.4rem 0 0.55rem; }
+        .eco-card-top { display: flex; justify-content: space-between; gap: 0.5rem; align-items: flex-start; }
+        .eco-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+        .eco-open, .eco-link {
+            font-size: 0.82rem; font-weight: 500; padding: 0.35rem 0.65rem; border-radius: 999px;
+            cursor: pointer; font-family: inherit; text-decoration: none;
+        }
+        .eco-open {
+            border: 1px solid rgba(152, 232, 193, 0.4); background: rgba(152, 232, 193, 0.12); color: #98e8c1;
+        }
+        .eco-card.is-open .eco-open {
+            border-color: rgba(254, 125, 125, 0.35); background: rgba(254, 125, 125, 0.08); color: #fe7d7d;
+        }
+        .eco-link { border: 1px solid rgba(152, 232, 193, 0.22); color: #98e8c1; background: transparent; }
+        .eco-status {
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em;
+            padding: 0.15rem 0.4rem; border-radius: 999px; border: 1px solid; white-space: nowrap; flex-shrink: 0;
+        }
+        .eco-status--live { color: #98e8c1; border-color: rgba(152, 232, 193, 0.35); background: rgba(152, 232, 193, 0.08); }
+        .eco-status--soon { color: #bd93f9; border-color: rgba(189, 147, 249, 0.35); background: rgba(189, 147, 249, 0.08); }
+        .eco-status--beta { color: #ffb86c; border-color: rgba(255, 184, 108, 0.35); background: rgba(255, 184, 108, 0.08); }
+        .eco-pills { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.65rem; }
+        .eco-pill {
+            font-size: 0.72rem; color: rgba(152, 232, 193, 0.75);
+            border: 1px solid rgba(152, 232, 193, 0.15); border-radius: 999px; padding: 0.12rem 0.4rem;
+        }
+        .eco-card-detail {
+            margin-top: 0.85rem; padding-top: 0.85rem;
+            border-top: 1px solid rgba(152, 232, 193, 0.12); min-width: 0;
+        }
+        .eco-card-detail[hidden] { display: none !important; }
+        .eco-card-detail .plane { display: block !important; width: 100%; }
+        .plane-nav { display: none !important; }
+        #plane-storage {
+            position: absolute !important; width: 1px !important; height: 1px !important;
+            padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important;
+        }
+        .site-chrome {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+            gap: 0.15rem 0.35rem; margin: 0 auto 1.25rem; max-width: 40rem; width: 100%;
+        }
+        .site-chrome a, .site-chrome-pill {
+            font-size: 0.9rem; font-weight: 500; letter-spacing: 0.03em;
+            padding: 0.4rem 0.75rem; border-radius: 999px; border: 1px solid transparent;
+            color: rgba(210, 211, 216, 0.85); text-decoration: none; background: transparent;
+            font-family: inherit; cursor: pointer; line-height: 1.25;
+        }
+        .site-chrome a:hover, .site-chrome-pill:hover {
+            color: #cfffcf; border-color: rgba(152, 232, 193, 0.28); background: rgba(152, 232, 193, 0.06);
+        }
+        .site-chrome a.active, .site-chrome-pill.connected {
+            color: #cfffcf; border-color: rgba(152, 232, 193, 0.35); background: rgba(152, 232, 193, 0.08);
+        }
+        .site-chrome .dot {
+            width: 3px; height: 3px; border-radius: 50%; background: rgba(152, 232, 193, 0.35); flex-shrink: 0;
+        }
+        .site-chrome-wallet { position: relative; display: inline-flex; }
+
+        .page-title {
+            font-size: var(--eco-title);
+            font-weight: 500;
+            color: #cfffcf;
+            text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            overflow-wrap: anywhere;
+            max-width: 100%;
+        }
+
+        .btn-docs {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(152, 232, 193, 0.2);
+            background: rgba(152, 232, 193, 0.06);
+            color: rgba(152, 232, 193, 0.75);
+            font-family: var(--tn-font);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-docs:hover {
+            background: rgba(152, 232, 193, 0.12);
+            border-color: rgba(152, 232, 193, 0.4);
+            color: #98e8c1;
+        }
+
+        .page-subtitle {
+            font-size: var(--eco-text-sm);
+            color: #ffffda;
+            text-shadow: 0 0 3px rgba(71, 50, 102, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: center;
+            margin-bottom: 1.25rem;
+            max-width: 100%;
+            line-height: 1.45;
+        }
+
+        /* Live contracts — elegant table at page footer */
+        .contract-strip {
+            width: 100%;
+            margin: 1.5rem 0 0.5rem;
+            padding: 0;
+            border-radius: 10px;
+            border: 1px solid rgba(152, 232, 193, 0.12);
+            background: rgba(0, 0, 0, 0.28);
+            text-align: left;
+            overflow: hidden;
+        }
+        .contract-strip summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0.75rem 1.1rem;
+            color: rgba(152, 232, 193, 0.8);
+            font-weight: 500;
+            font-size: var(--eco-label);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            user-select: none;
+            background: rgba(152, 232, 193, 0.04);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .contract-strip summary::-webkit-details-marker { display: none; }
+        .contract-strip summary::after {
+            content: "▸";
+            color: rgba(152, 232, 193, 0.45);
+            font-size: 0.85rem;
+            transition: transform 0.2s ease;
+        }
+        .contract-strip[open] summary::after {
+            content: "▾";
+            transform: rotate(0);
+        }
+        .contract-strip[open] summary {
+            border-bottom-color: rgba(152, 232, 193, 0.1);
+        }
+        .contract-strip summary:hover {
+            color: #98e8c1;
+            background: rgba(152, 232, 193, 0.07);
+        }
+        .contract-strip .summary-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .contract-strip .summary-count {
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            opacity: 0.6;
+            font-size: 0.8rem;
+        }
+        .contract-strip .checksum-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: var(--tn-font-mono);
+            font-size: 0.68rem;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            color: rgba(152, 232, 193, 0.5);
+            padding: 0.15rem 0.5rem;
+            border: 1px solid rgba(152, 232, 193, 0.15);
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .contract-strip .checksum-label:hover {
+            color: #98e8c1;
+            border-color: rgba(152, 232, 193, 0.35);
+        }
+        .contract-strip .checksum-label .checksum-icon {
+            width: 12px;
+            height: 12px;
+            fill: rgba(152, 232, 193, 0.5);
+            flex-shrink: 0;
+        }
+        .contract-strip .checksum-label:hover .checksum-icon { fill: #98e8c1; }
+        .contract-strip .checksum-label .checksum-value {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .contract-strip .checksum-label.computing {
+            color: rgba(210, 211, 216, 0.4);
+            border-color: rgba(210, 211, 216, 0.12);
+        }
+        .contract-strip .checksum-label.error {
+            color: #fe7d7d;
+            border-color: rgba(254, 125, 125, 0.2);
+        }
+        .contract-strip .contract-body {
+            padding: 0;
+        }
+        .contract-strip .contract-meta {
+            padding: 0.6rem 1.1rem;
+            font-size: 0.8rem;
+            color: rgba(210, 211, 216, 0.45);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 1rem;
+            align-items: center;
+            border-bottom: 1px solid rgba(152, 232, 193, 0.06);
+        }
+        .contract-strip .contract-meta a {
+            color: #98e8c1;
+            text-decoration: none;
+        }
+        .contract-strip .contract-meta a:hover { text-decoration: underline; }
+        .contract-strip .contract-meta code {
+            font-family: var(--tn-font-mono);
+            color: #cfffcf;
+            font-size: 0.8rem;
+        }
+        .contract-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .contract-table th,
+        .contract-table td {
+            text-align: left;
+            padding: 0.5rem 1.1rem;
+            border-bottom: 1px solid rgba(152, 232, 193, 0.06);
+            vertical-align: top;
+        }
+        .contract-table th {
+            font-weight: 500;
+            color: rgba(152, 232, 193, 0.7);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: rgba(152, 232, 193, 0.03);
+        }
+        .contract-table td.module {
+            color: #cfffcf;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .contract-table td.module .module-tag {
+            display: inline-block;
+            font-size: 0.62rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.1rem 0.35rem;
+            border-radius: 3px;
+            margin-left: 0.4rem;
+            vertical-align: middle;
+            border: 1px solid rgba(152, 232, 193, 0.2);
+            color: rgba(152, 232, 193, 0.6);
+        }
+        .contract-table td.module .module-tag.abstract {
+            border-color: rgba(189, 147, 249, 0.3);
+            color: rgba(189, 147, 249, 0.8);
+        }
+        .contract-table td.addr code,
+        .contract-table td.codeid code {
+            font-family: var(--tn-font-mono);
+            font-size: 0.82rem;
+            color: #d2d3d8;
+            word-break: break-all;
+        }
+        .contract-table td.codeid code { color: #bd93f9; }
+        .contract-table tr:last-child td { border-bottom: none; }
+        .contract-table tr:hover td { background: rgba(152, 232, 193, 0.03); }
+        .contract-strip .contract-empty {
+            padding: 1rem 1.1rem;
+            font-size: 0.85rem;
+            color: rgba(210, 211, 216, 0.4);
+        }
+
+        /* Search / Mint Card */
+        .name-card {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(152, 232, 193, 0.15);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 0 40px rgba(152, 232, 193, 0.03);
+        }
+
+        .name-input-wrap {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .name-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(152, 232, 193, 0.2);
+            border-radius: 6px;
+            color: #f8f8f2;
+            padding: 0.8rem 1rem;
+            font-family: var(--tn-font);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .name-input::placeholder {
+            color: rgba(210, 211, 216, 0.4);
+        }
+
+        .name-input:focus {
+            border-color: rgba(152, 232, 193, 0.5);
+            box-shadow: 0 0 15px rgba(152, 232, 193, 0.08);
+        }
+
+        .btn-check {
+            background: rgba(152, 232, 193, 0.1);
+            border: 1px solid rgba(152, 232, 193, 0.3);
+            color: #98e8c1;
+            padding: 0.8rem 1.2rem;
+            font-family: var(--tn-font);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-check:hover {
+            background: rgba(152, 232, 193, 0.2);
+            border-color: rgba(152, 232, 193, 0.5);
+        }
+
+        .btn-check:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Status display */
+        .name-status {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .name-status.available {
+            display: block;
+            background: rgba(152, 232, 193, 0.08);
+            border: 1px solid rgba(152, 232, 193, 0.25);
+            color: #98e8c1;
+        }
+
+        .name-status.taken {
+            display: block;
+            background: rgba(254, 125, 125, 0.08);
+            border: 1px solid rgba(254, 125, 125, 0.25);
+            color: #fe7d7d;
+        }
+
+        .name-status.error {
+            display: block;
+            background: rgba(189, 147, 249, 0.08);
+            border: 1px solid rgba(189, 147, 249, 0.25);
+            color: #bd93f9;
+        }
+
+        /* Pricing info */
+        .pricing-info {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .pricing-label {
+            font-size: var(--eco-label);
+            color: rgba(207, 255, 207, 0.55);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .pricing-value {
+            font-size: 1rem;
+            color: #98e8c1;
+            font-weight: 500;
+        }
+
+        /* Mint button */
+        .btn-mint {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(152, 232, 193, 0.15), rgba(152, 232, 193, 0.08));
+            border: 1px solid rgba(152, 232, 193, 0.4);
+            color: #cfffcf;
+            padding: 0.9rem 1.5rem;
+            font-family: var(--tn-font);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .btn-mint:hover {
+            background: linear-gradient(135deg, rgba(152, 232, 193, 0.25), rgba(152, 232, 193, 0.15));
+            border-color: rgba(152, 232, 193, 0.6);
+            box-shadow: 0 0 25px rgba(152, 232, 193, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-mint:active {
+            transform: translateY(0);
+        }
+
+        .btn-mint:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 360px;
+        }
+
+        .toast {
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            backdrop-filter: blur(12px);
+            animation: toast-in 0.3s ease forwards;
+            border: 1px solid;
+        }
+
+        .toast.success {
+            background: rgba(152, 232, 193, 0.1);
+            border-color: rgba(152, 232, 193, 0.3);
+            color: #98e8c1;
+        }
+
+        .toast.error {
+            background: rgba(254, 125, 125, 0.1);
+            border-color: rgba(254, 125, 125, 0.3);
+            color: #fe7d7d;
+        }
+
+        .toast.info {
+            background: rgba(189, 147, 249, 0.1);
+            border-color: rgba(189, 147, 249, 0.3);
+            color: #bd93f9;
+        }
+
+        .toast.removing {
+            animation: toast-out 0.3s ease forwards;
+        }
+
+        @keyframes toast-in {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toast-out {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem 0;
+            color: #d2d3d8;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 2px solid rgba(152, 232, 193, 0.2);
+            border-top-color: #98e8c1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.6rem;
+            }
+
+            .page-subtitle {
+                font-size: 0.7rem;
+            }
+
+            .header {
+                padding: 0.5rem 1rem;
+            }
+
+            .header-nav {
+                gap: 1rem;
+            }
+
+            .nav-link {
+                font-size: 0.75rem;
+            }
+
+            .name-card {
+                padding: 1.5rem;
+            }
+
+            .name-input-wrap {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn-wallet {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.6rem;
+            }
+        }
+
+        /* ─── Documentation Modal ─── */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            position: relative;
+            z-index: 1;
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid rgba(152, 232, 193, 0.15);
+            border-radius: 12px;
+            width: 90vw;
+            max-width: 580px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(152, 232, 193, 0.1);
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #cfffcf;
+        }
+
+        .modal-close {
+            background: none;
+            border: 1px solid rgba(152, 232, 193, 0.12);
+            color: #d2d3d8;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: #fe7d7d;
+            border-color: rgba(254, 125, 125, 0.3);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .doc-section {
+            margin-bottom: 1.75rem;
+        }
+
+        .doc-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .doc-heading {
+            font-size: var(--eco-text-sm, 0.95rem);
+            font-weight: 500;
+            color: #98e8c1;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .doc-text {
+            font-size: var(--eco-text, 1rem);
+            color: #d2d3d8;
+            line-height: 1.65;
+        }
+
+        .doc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .doc-list li {
+            font-size: var(--eco-text, 1rem);
+            color: #d2d3d8;
+            line-height: 1.6;
+            padding: 0.25rem 0 0.25rem 1.2rem;
+            position: relative;
+        }
+
+        .doc-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: rgba(152, 232, 193, 0.4);
+            font-size: 0.75rem;
+        }
+
+        .doc-code {
+            font-family: var(--tn-font-mono);
+            font-size: 0.8rem;
+            background: rgba(152, 232, 193, 0.06);
+            border: 1px solid rgba(152, 232, 193, 0.15);
+            border-radius: 3px;
+            padding: 0.1rem 0.4rem;
+            color: #98e8c1;
+        }
+
+        .doc-pricing-table {
+            margin-top: 0.75rem;
+            border: 1px solid rgba(152, 232, 193, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .doc-pricing-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(152, 232, 193, 0.06);
+            color: #d2d3d8;
+        }
+
+        .doc-pricing-row:last-child {
+            border-bottom: none;
+        }
+
+        .doc-pricing-row span:last-child {
+            color: #98e8c1;
+            font-weight: 500;
+        }
+
+        .doc-pricing-header {
+            background: rgba(152, 232, 193, 0.04);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(207, 255, 207, 0.5);
+        }
+
+        .doc-pricing-header span:last-child {
+            color: rgba(207, 255, 207, 0.5);
+            font-weight: 400;
+        }
+
+        /* ─── Unified Wallet Dock ─── */
+        .wallet-dock {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .wallet-dock-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid rgba(152, 232, 193, 0.25);
+            border-radius: 999px;
+            color: #98e8c1;
+            font-family: var(--tn-font);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .wallet-dock-btn:hover {
+            border-color: rgba(152, 232, 193, 0.5);
+            background: rgba(152, 232, 193, 0.08);
+        }
+
+        .wallet-dock-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(152, 232, 193, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .wallet-dock-label {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .wallet-dock-btn.connected {
+            border-color: rgba(152, 232, 193, 0.35);
+        }
+
+        .wallet-dock-btn.connected .wallet-dock-icon {
+            background: rgba(152, 232, 193, 0.2);
+        }
+
+        .wallet-dock-fab {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(254, 125, 125, 0.25);
+            background: rgba(254, 125, 125, 0.08);
+            color: #fe7d7d;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .wallet-dock-fab:hover {
+            background: rgba(254, 125, 125, 0.15);
+            border-color: rgba(254, 125, 125, 0.4);
+        }
+
+        @media (max-width: 480px) {
+            .wallet-dock-label {
+                display: none;
+            }
+
+            .wallet-dock-btn {
+                padding: 0.55rem;
+                border-radius: 50%;
+            }
+        }
+
+        /* Planes live in storage until a catalog card opens them */
+        .plane-nav { display: none !important; }
+
+        #plane-storage {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+            padding: 0;
+            margin: -1px;
+        }
+
+        .plane {
+            width: 100%;
+            display: block;
+        }
+
+        .plane-card {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            text-align: left;
+        }
+
+        .plane-card h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #cfffcf;
+            margin: 0 0 0.55rem;
+            overflow-wrap: anywhere;
+        }
+
+        .plane-card p {
+            font-size: var(--eco-text);
+            color: #d2d3d8;
+            line-height: 1.55;
+            margin: 0 0 0.75rem;
+        }
+
+        .plane-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem;
+        }
+
+        .plane-card li {
+            font-size: var(--eco-text);
+            color: #d2d3d8;
+            line-height: 1.5;
+            padding: 0.15rem 0 0.15rem 1rem;
+            position: relative;
+        }
+
+        .plane-card li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: rgba(152, 232, 193, 0.45);
+            font-size: 0.9rem;
+        }
+
+        .plane-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .plane-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.55rem 1rem;
+            border-radius: 6px;
+            border: 1px solid rgba(152, 232, 193, 0.3);
+            background: rgba(152, 232, 193, 0.08);
+            color: #98e8c1;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .plane-link:hover {
+            background: rgba(152, 232, 193, 0.16);
+            border-color: rgba(152, 232, 193, 0.5);
+        }
+
+        .plane-link.secondary {
+            border-color: rgba(189, 147, 249, 0.35);
+            background: rgba(189, 147, 249, 0.08);
+            color: #bd93f9;
+        }
+
+        .plane-link.secondary:hover {
+            background: rgba(189, 147, 249, 0.16);
+        }
+
+        /* Abstract plane: subhead + state table */
+        .abstract-subhead {
+            font-size: 1.0625rem;
+            font-weight: 500;
+            color: #cfffcf;
+            margin: 1.1rem 0 0.5rem;
+        }
+        .abstract-state {
+            margin: 1rem 0 1.1rem;
+            border: 1px solid rgba(152, 232, 193, 0.14);
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.28);
+        }
+        .abstract-state-loading {
+            padding: 0.85rem 1rem;
+            font-size: 0.9rem;
+            color: rgba(210, 211, 216, 0.6);
+        }
+        .abstract-state-error {
+            padding: 0.85rem 1rem;
+            font-size: 0.9rem;
+            color: #fe7d7d;
+        }
+        .abstract-state-meta {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            color: rgba(210, 211, 216, 0.5);
+            border-bottom: 1px solid rgba(152, 232, 193, 0.08);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 1rem;
+            align-items: center;
+        }
+        .abstract-state-meta a { color: #98e8c1; text-decoration: none; }
+        .abstract-state-meta a:hover { text-decoration: underline; }
+        .abstract-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .abstract-table th,
+        .abstract-table td {
+            text-align: left;
+            padding: 0.55rem 1rem;
+            border-bottom: 1px solid rgba(152, 232, 193, 0.07);
+            vertical-align: top;
+        }
+        .abstract-table th {
+            font-weight: 500;
+            color: rgba(152, 232, 193, 0.8);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: rgba(152, 232, 193, 0.04);
+        }
+        .abstract-table td.module {
+            color: #cfffcf;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .abstract-table td.addr code,
+        .abstract-table td.codeid code {
+            font-family: var(--tn-font-mono);
+            font-size: 0.82rem;
+            color: #d2d3d8;
+            word-break: break-all;
+        }
+        .abstract-table td.codeid code { color: #bd93f9; }
+        .abstract-table tr:last-child td { border-bottom: none; }
+
+        .badge-soon {
+            display: inline-block;
+            margin-left: 0.4rem;
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.15rem 0.45rem;
+            border-radius: 3px;
+            border: 1px solid rgba(255, 184, 108, 0.4);
+            color: #ffb86c;
+            background: rgba(255, 184, 108, 0.08);
+            vertical-align: middle;
+        }
+
+        .lifecycle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 520px) {
+            .lifecycle-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lifecycle-item {
+            border: 1px solid rgba(152, 232, 193, 0.12);
+            border-radius: 8px;
+            padding: 0.75rem 0.85rem;
+            background: rgba(152, 232, 193, 0.03);
+        }
+
+        .lifecycle-item strong {
+            display: block;
+            color: #98e8c1;
+            font-size: 0.78rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .lifecycle-item span {
+            font-size: 0.78rem;
+            color: #d2d3d8;
+            line-height: 1.5;
+        }
+
+        .code-inline {
+            font-family: var(--tn-font-mono);
+            font-size: 0.75rem;
+            background: rgba(152, 232, 193, 0.06);
+            border: 1px solid rgba(152, 232, 193, 0.15);
+            border-radius: 3px;
+            padding: 0.1rem 0.35rem;
+            color: #98e8c1;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="/lib/fab.js"></script>
+    <canvas id="main-canvas"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+    <main class="main">
+
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <h1 class="page-title" style="margin-bottom:0;">Ecosystem</h1>
+            <button class="btn-docs" onclick="document.getElementById('modal-docs').style.display='flex'"
+                aria-label="Documentation" title="Documentation">?</button>
+        </div>
+        <!-- Expandable: catalog from public/ecosystem.json — filter by tag / status / search -->
+        <div class="page-subtitle">On-chain surfaces · filterable catalog</div>
+
+        <div id="eco-catalog-host" style="width:100%;"></div>
+
+        <!-- Planes parked here; opened cards host them via ecosystem.js -->
+        <div id="plane-storage" aria-hidden="true">
+
+        <!-- ─── Abstract Accounts plane ─── -->
+        <section class="plane" id="plane-abstract" role="tabpanel">
+            <div class="plane-card">
+                <h3>Abstract Accounts</h3>
+                <p>
+                    Smart accounts on mainnet: a registry, names, IBC, and a module factory.
+                    Addresses are below. To create and run an account, use Abstract JS.
+                </p>
+                <div class="abstract-state" id="abstract-state" aria-live="polite">
+                    <div class="abstract-state-loading">Loading addresses…</div>
+                </div>
+                <div class="plane-links">
+                    <a class="plane-link" href="https://js.abstract.money/" target="_blank" rel="noopener">Abstract JS</a>
+                    <a class="plane-link" href="https://docs.terp.network" target="_blank" rel="noopener">Docs · abstract &amp; modules</a>
+                    <a class="plane-link secondary" href="/" title="Install terpd">Installer (terp-core)</a>
+                    <a class="plane-link secondary" href="https://github.com/terpnetwork" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Billboards plane ─── -->
+        <section class="plane" id="plane-billboards" role="tabpanel">
+            <div class="plane-card" style="margin-bottom:1rem;">
+                <h3>Terp Account Billboards (TABS)</h3>
+                <p>
+                    Check a name, then register it. Shorter names cost more.
+                </p>
+                <div class="lifecycle-grid">
+                    <div class="lifecycle-item">
+                        <strong>Mint &amp; list</strong>
+                        <span>Mint the name and list it for sale.</span>
+                    </div>
+                    <div class="lifecycle-item">
+                        <strong>Bid / rebid</strong>
+                        <span>Place or update asks on the marketplace; higher bids replace prior open asks per contract rules.</span>
+                    </div>
+                    <div class="lifecycle-item">
+                        <strong>Accept bid</strong>
+                        <span>Accept a bid. There is a cooldown before the name settles.</span>
+                    </div>
+                    <div class="lifecycle-item">
+                        <strong>Cooldown</strong>
+                        <span>During cooldown you cannot transfer the name. The seller can cancel for a fee.</span>
+                    </div>
+                </div>
+                <p style="margin-bottom:0;font-size:0.78rem;color:rgba(210,211,216,0.75);">
+                    Contract sources: <span class="code-inline">terp-account-billboards</span>
+                    (terp721-account + manifold). Prefer pure JS clients / ts-codegen bindings over a full React rewrite.
+                </p>
+            </div>
+
+            <div class="name-card">
+                <div class="name-input-wrap">
+                    <input type="text" class="name-input" id="name-input" placeholder="your-name" maxlength="64"
+                        autocomplete="off">
+                    <button class="btn-check" id="btn-check" onclick="checkName()">Check</button>
+                </div>
+
+                <div class="name-status" id="name-status"></div>
+
+                <div class="pricing-info" id="pricing-info" style="display:none">
+                    <div class="pricing-item">
+                        <div class="pricing-label">Base price</div>
+                        <div class="pricing-value" id="base-price">--</div>
+                    </div>
+                    <div class="pricing-item">
+                        <div class="pricing-label">Length (min / max)</div>
+                        <div class="pricing-value" id="name-limits">--</div>
+                    </div>
+                    <div class="pricing-item">
+                        <div class="pricing-label">Characters</div>
+                        <div class="pricing-value" id="name-length">--</div>
+                    </div>
+                    <div class="pricing-item" id="mint-price-item" style="display:none">
+                        <div class="pricing-label">Your price</div>
+                        <div class="pricing-value" id="mint-price-display">--</div>
+                    </div>
+                </div>
+
+                <button class="btn-mint" id="btn-mint" onclick="mintName()" disabled style="display:none">
+                    Register Name
+                </button>
+            </div>
+        </section>
+
+        <!-- ─── SVG (same ecosystem surface as billboards / abstract) ─── -->
+        <section class="plane" id="plane-svg" role="tabpanel">
+            <div class="plane-card">
+                <h3>SVG mint</h3>
+                <p>
+                    Collections from the live SVG minter. Open the SVG UI to mint.
+                </p>
+                <div class="plane-links">
+                    <a class="plane-link" href="/svg">Open SVG UI</a>
+                    <a class="plane-link secondary" href="https://docs.terp.network" target="_blank" rel="noopener">Docs</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── DAO-DAO plane ─── -->
+        <section class="plane" id="plane-daodao" role="tabpanel">
+            <div class="plane-card">
+                <h3>DAO-DAO</h3>
+                <p>Governance apps on Terp — proposals, voting modules, treasuries.</p>
+                <div class="plane-links">
+                    <a class="plane-link" href="https://daodao.terp.network" target="_blank" rel="noopener">Open</a>
+                    <a class="plane-link secondary" href="https://docs.daodao.zone" target="_blank" rel="noopener">Docs</a>
+                </div>
+            </div>
+        </section>
+
+
+
+        <section class="plane" id="plane-ibc" role="tabpanel">
+            <div class="plane-card">
+                <h3>IBC</h3>
+                <p>Open channels and clients from LCD. Relayer gas lives on the full IBC page.</p>
+                <div id="eco-ibc-mount"></div>
+                <div class="plane-links">
+                    <a class="plane-link" href="/ibc">Full IBC page</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="plane" id="plane-explorer" role="tabpanel">
+            <div id="eco-explorer-mount"></div>
+        </section>
+        <section class="plane" id="plane-upgrades" role="tabpanel">
+            <div id="eco-upgrades-mount"></div>
+        </section>
+        <section class="plane" id="plane-releases" role="tabpanel">
+            <div id="eco-releases-mount"></div>
+        </section>
+
+        <!-- ─── Bounties plane ─── -->
+        <section class="plane" id="plane-bounties" role="tabpanel">
+            <div class="plane-card">
+                <h3>Community bounties <span class="badge-soon">Coming soon</span></h3>
+                <p>
+                    Cross-chain coordination for open work: fund tasks in native or IBC assets,
+                    attract builders across Cosmos, and settle when acceptance criteria land on-chain.
+                    The dedicated surface will live at
+                    <a href="https://bounties.terp.network" style="color:#bd93f9;text-decoration:none;">bounties.terp.network</a>.
+                </p>
+                <ul>
+                    <li>Intent: multi-chain payouts without single-chain lock-in</li>
+                    <li>Coordination with DAOs and abstract accounts for escrow / acceptance</li>
+                    <li>UI and indexer not shipped yet — link reserved for launch</li>
+                </ul>
+                <div class="plane-links">
+                    <a class="plane-link" href="https://bounties.terp.network" target="_blank" rel="noopener">bounties.terp.network</a>
+                    <a class="plane-link secondary" href="https://discord.gg/W3QnHe77S6" target="_blank" rel="noopener">Discuss on Discord</a>
+                </div>
+            </div>
+        </section>
+
+        </div><!-- /#plane-storage -->
+
+        <div class="loading" id="loading" style="display:none">
+            <div class="spinner"></div>
+            <p id="loading-text">Loading...</p>
+        </div>
+
+        <p class="muted" style="margin-top:1.25rem;font-size:0.88rem;color:#6272a4;">
+            Live contract table lives under <a href="/resources#contracts" style="color:#98e8c1;">Resources → Contracts</a>.
+        </p>
+    </main>
+
+    <div class="toast-container" id="toasts"></div>
+
+    <script type="module">
+        import { loadSiteConfig, missingContracts, useBrowserSafeChainEndpoints } from '/lib/config.js';
+        import { applyNavGuard } from '/lib/nav-guard.js';
+        import * as TerpWallet from '/lib/wallet.js';
+
+        applyNavGuard();
+        // ═══════════════════════════════════════════════════════════════
+        // CONFIGURATION (from public/config.json via shared loader)
+        // ═══════════════════════════════════════════════════════════════
+        const CONFIG = {
+            pageId: "tabs",
+            chainId: "morocco-1",
+            chainName: "Terp Network",
+            rpc: "https://rpc.terp.network",
+            rest: "https://api.terp.network",
+            minterContract: "",
+            accountMinterContract: "",
+            accountContract: "",
+            explorerBase: "https://ping.pub/terp",
+            bech32Prefix: "terp",
+            denom: "uthiol",
+            denomDisplay: "THIOL",
+            denomDecimals: 6,
+        };
+        await loadSiteConfig(CONFIG, { pageId: "tabs", chainId: "morocco-1" });
+        // Same-origin RPC/LCD first: public Tendermint RPC rejects browser
+        // preflights, so prefer /rpc /lcd proxies and only fall back to the
+        // public hosts when no proxy mapping applies.
+        useBrowserSafeChainEndpoints(CONFIG);
+        if (!CONFIG.rest) {
+            CONFIG.rest = "https://api.terp.network";
+        }
+        if (!CONFIG.rpc) {
+            CONFIG.rpc = "https://rpc.terp.network";
+        }
+        if (!CONFIG.minterContract) {
+            CONFIG.minterContract = CONFIG.accountMinterContract || CONFIG.contracts?.accountMinter || "";
+        }
+        window.__TERP_CONFIG = CONFIG;
+
+        if (missingContracts(CONFIG, ["accountMinter", "terp721Account"]).length) {
+            console.warn("[tabs] missing contracts from config.json");
+        }
+
+        // ── Filterable catalog: open cards host plane content in-grid ──
+        const planeStorage = document.getElementById('plane-storage');
+        function returnPlane(componentId) {
+            const plane = document.getElementById(`plane-${componentId}`);
+            if (plane && planeStorage && plane.parentElement !== planeStorage) {
+                planeStorage.appendChild(plane);
+            }
+        }
+        try {
+            const { loadEcosystem, mountEcosystemCatalog } = await import('/lib/ecosystem.js');
+            const catalog = await loadEcosystem();
+            const host = document.getElementById('eco-catalog-host');
+            mountEcosystemCatalog(host, catalog, {
+                onOpenComponent(componentId, _project, detailEl) {
+                    const plane = document.getElementById(`plane-${componentId}`);
+                    if (!plane || !detailEl) return;
+                    document.querySelectorAll('.eco-card-detail .plane').forEach((p) => {
+                        if (p !== plane && planeStorage) planeStorage.appendChild(p);
+                    });
+                    detailEl.appendChild(plane);
+                    detailEl.hidden = false;
+                    if (componentId === 'upgrades' || componentId === 'releases') {
+                        import('/lib/ops-modal.js').then((m) => m.openOpsModal(componentId));
+                    }
+                    if (componentId === 'ibc') {
+                        import('/lib/ibc-core.js').then(async ({ loadIbcContext, loadIbcSnapshot }) => {
+                            const mount = document.getElementById('eco-ibc-mount');
+                            if (!mount || mount.dataset.ready) return;
+                            mount.textContent = 'Querying LCD…';
+                            try {
+                                const ctx = await loadIbcContext();
+                                const snap = await loadIbcSnapshot(ctx);
+                                const ch = snap.channels || [];
+                                mount.innerHTML = `<p>${ch.length} open channels · ${snap.clients?.length || 0} clients · source ${snap.source || 'lcd'}</p>
+                                  <ul>${ch.slice(0, 12).map((c) => `<li>${c.port}/${c.id} → ${c.counterparty?.chain || '?'}</li>`).join('')}</ul>`;
+                                mount.dataset.ready = '1';
+                            } catch (err) {
+                                mount.textContent = String(err.message || err);
+                            }
+                        });
+                    }
+                    if (['explorer', 'upgrades', 'releases'].includes(componentId)) {
+                        import('/lib/chain-versions.js').then(({ mountChainResource }) => {
+                            const el = document.getElementById(`eco-${componentId}-mount`);
+                            if (el) mountChainResource(el, componentId, CONFIG);
+                        });
+                    }
+                },
+                onCloseComponent(componentId) {
+                    returnPlane(componentId);
+                },
+            });
+        } catch (e) {
+            console.warn('[tabs] ecosystem catalog', e);
+        }
+
+        /** Paint live contracts as an elegant table from state.json. Auto-expands as new contracts are added. */
+        async function paintContractStrip() {
+            const body = document.getElementById("contract-strip-body");
+            const countEl = document.getElementById("contract-strip-count");
+            const checksumEl = document.getElementById("contract-strip-checksum");
+            const checksumValEl = document.getElementById("contract-strip-checksum-value");
+            if (!body) return;
+
+            const stateUrl = CONFIG.stateJsonUrl || CONFIG.services?.stateJson || null;
+            const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+            // Compute SHA-256 of the raw state.json file for the header checksum label
+            async function computeChecksum(url) {
+                if (!url || !window.crypto?.subtle) return null;
+                try {
+                    const res = await fetch(url, { cache: 'no-cache', mode: 'cors' });
+                    if (!res.ok) return null;
+                    const buf = await res.arrayBuffer();
+                    const hash = await crypto.subtle.digest('SHA-256', buf);
+                    return Array.from(new Uint8Array(hash))
+                        .map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch { return null; }
+            }
+
+            // Kick off checksum computation in parallel
+            computeChecksum(stateUrl).then(hash => {
+                if (!hash) {
+                    if (checksumEl) {
+                        checksumEl.classList.remove('computing');
+                        checksumEl.classList.add('error');
+                    }
+                    if (checksumValEl) checksumValEl.textContent = 'unavailable';
+                    return;
+                }
+                if (checksumEl) {
+                    checksumEl.classList.remove('computing');
+                    checksumEl.title = `SHA-256: ${hash} — click to copy`;
+                    checksumEl.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(hash).then(() => {
+                            const orig = checksumValEl.textContent;
+                            checksumValEl.textContent = 'copied!';
+                            setTimeout(() => { checksumValEl.textContent = orig; }, 1500);
+                        }).catch(() => {});
+                    };
+                }
+                if (checksumValEl) checksumValEl.textContent = hash.slice(0, 12) + '…';
+            });
+
+            // Fetch contract data via assets-registry (state.json → { contracts, codeIds, raw })
+            let contracts = {}, codeIds = {}, raw = {}, chainId = CONFIG.chainId || 'morocco-1', url = stateUrl;
+            try {
+                const { loadStateContracts, STATE_JSON_URL } = await import('/lib/assets-registry.js');
+                url = stateUrl || STATE_JSON_URL;
+                const result = await loadStateContracts(url, chainId);
+                contracts = result.contracts || {};
+                codeIds = result.codeIds || {};
+                raw = result.raw || {};
+            } catch (err) {
+                body.innerHTML = `<div class="contract-empty">Could not load the address list.</div>`;
+                if (countEl) countEl.textContent = '';
+                return;
+            }
+
+            // Build a unified table from state.json default + code_ids.
+            // state.json keys like "abstract:registry" → addr in `raw`, code_id in `codeIds`.
+            // Also overlay config.json contracts (already merged into CONFIG.contracts by loadSiteConfig).
+            const KEY_MAP = {
+                'cw-shitstrap-factory': { label: 'Shitstrap Factory', alias: 'shitstrapFactory', tag: '' },
+                'cw-svg-minter':        { label: 'SVG Minter',        alias: 'cwSvgMinter',       tag: '' },
+                'cw721_svg':            { label: 'SVG Collection',    alias: 'cw721Svg',          tag: '' },
+                'crates.io:terp721-account-manifold': { label: 'Account Minter (Manifold)', alias: 'accountMinter', tag: '' },
+                'crates.io:terp721-account':          { label: 'terp721 Account',           alias: 'terp721Account', tag: '' },
+                'cw-infuser':           { label: 'Infuser',           alias: 'cwInfusionMinter',  tag: '' },
+                'abstract:registry':        { label: 'Abstract Registry',       alias: 'abstractRegistry',      tag: 'abstract' },
+                'abstract:ans-host':        { label: 'Abstract ANS Host',       alias: 'abstractAnsHost',       tag: 'abstract' },
+                'abstract:ibc-client':      { label: 'Abstract IBC Client',     alias: 'abstractIbcClient',     tag: 'abstract' },
+                'abstract:ibc-host':        { label: 'Abstract IBC Host',       alias: 'abstractIbcHost',       tag: 'abstract' },
+                'abstract:module-factory':  { label: 'Abstract Module Factory', alias: 'abstractModuleFactory', tag: 'abstract' },
+            };
+
+            // Collect all unique keys from both state.json raw and config.json contracts
+            const allKeys = new Set([...Object.keys(raw), ...Object.keys(KEY_MAP)]);
+
+            const rows = [];
+            for (const key of allKeys) {
+                const meta = KEY_MAP[key];
+                // Skip account-local-N keys (instantiated accounts, not infrastructure)
+                if (key.startsWith('abstract:account-local-')) continue;
+                const label = meta?.label || key;
+                const alias = meta?.alias;
+                const tag = meta?.tag || '';
+                const addr = (alias && contracts[alias]) || contracts[key] || raw[key] || '';
+                const codeId = codeIds[key] || '';
+                // Only show rows that have at least an address or code ID
+                if (!addr && !codeId) continue;
+                // Only show terp-prefixed addresses (skip non-terp if somehow present)
+                if (addr && !String(addr).startsWith('terp')) continue;
+                rows.push({ label, addr, codeId, tag });
+            }
+
+            // Also include config.json-only contracts not in state.json
+            const configOnly = [
+                { key: 'accountMinter', label: 'Account Minter (Manifold)', tag: '' },
+                { key: 'terp721Account', label: 'terp721 Account', tag: '' },
+                { key: 'cw721Svg', label: 'SVG Collection', tag: '' },
+                { key: 'cwSvgMinter', label: 'SVG Minter', tag: '' },
+                { key: 'cwInfusionMinter', label: 'Infuser', tag: '' },
+                { key: 'shitstrapFactory', label: 'Shitstrap Factory', tag: '' },
+            ];
+            const existingAddrs = new Set(rows.map(r => r.addr).filter(Boolean));
+            for (const { key, label, tag } of configOnly) {
+                const addr = CONFIG.contracts?.[key] || '';
+                if (addr && String(addr).startsWith('terp') && !existingAddrs.has(addr)) {
+                    rows.push({ label, addr, codeId: '', tag });
+                    existingAddrs.add(addr);
+                }
+            }
+
+            if (countEl) countEl.textContent = rows.length ? `· ${rows.length}` : '';
+
+            if (!rows.length) {
+                body.innerHTML = `<div class="contract-empty">No contracts listed yet.</div>`;
+                return;
+            }
+
+            const tagHtml = (tag) => tag ? `<span class="module-tag ${tag}">${tag}</span>` : '';
+            const cellHtml = (val, cls) => val
+                ? `<td class="${cls}"><code>${esc(val)}</code></td>`
+                : `<td class="${cls}"><span style="color:rgba(210,211,216,0.3)">—</span></td>`;
+
+            body.innerHTML =
+                `<div class="contract-meta">
+                    <span>chain: <code>${esc(chainId)}</code></span>
+                    <span><a href="${esc(url)}" target="_blank" rel="noopener">Raw list</a></span>
+                </div>
+                <table class="contract-table">
+                    <thead><tr><th>Module</th><th>Contract address</th><th>Code ID</th></tr></thead>
+                    <tbody>
+                        ${rows.map(r =>
+                            `<tr>
+                                <td class="module">${esc(r.label)}${tagHtml(r.tag)}</td>
+                                ${cellHtml(r.addr, 'addr')}
+                                ${cellHtml(r.codeId, 'codeid')}
+                            </tr>`
+                        ).join('')}
+                    </tbody>
+                </table>`;
+        }
+        // Live contracts table moved to /resources#contracts
+
+        /** Paint Abstract mainnet contracts + code IDs from state.json into the Abstract plane. */
+        async function paintAbstractState() {
+            const host = document.getElementById('abstract-state');
+            if (!host) return;
+            const stateUrl = CONFIG.stateJsonUrl || CONFIG.services?.stateJson || null;
+            try {
+                const { loadStateContracts, STATE_JSON_URL } = await import('/lib/assets-registry.js');
+                const url = stateUrl || STATE_JSON_URL;
+                const { contracts, codeIds } = await loadStateContracts(url, CONFIG.chainId || 'morocco-1');
+                // Ordered module list — registry, ans-host, ibc-client, ibc-host, module-factory
+                const MODULES = [
+                    ['Registry',          'abstract:registry',        'abstractRegistry'],
+                    ['ANS Host',          'abstract:ans-host',        'abstractAnsHost'],
+                    ['IBC Client',        'abstract:ibc-client',      'abstractIbcClient'],
+                    ['IBC Host',          'abstract:ibc-host',        'abstractIbcHost'],
+                    ['Module Factory',    'abstract:module-factory',  'abstractModuleFactory'],
+                ];
+                const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+                const rows = MODULES
+                    .map(([label, rawKey, alias]) => {
+                        const addr = contracts[alias] || contracts[rawKey] || '';
+                        const codeId = codeIds[rawKey] || '';
+                        if (!addr && !codeId) return null;
+                        return `<tr>
+                            <td class="module">${label}</td>
+                            <td class="addr">${addr ? `<code>${esc(addr)}</code>` : '<span style="color:rgba(210,211,216,0.4)">—</span>'}</td>
+                            <td class="codeid">${codeId ? `<code>${esc(codeId)}</code>` : '<span style="color:rgba(210,211,216,0.4)">—</span>'}</td>
+                        </tr>`;
+                    })
+                    .filter(Boolean);
+                if (!rows.length) {
+                    host.innerHTML = `<div class="abstract-state-error">No Abstract contracts found.</div>`;
+                    return;
+                }
+                host.innerHTML =
+                    `<div class="abstract-state-meta">
+                        <span>chain: <code style="font-family:var(--tn-font-mono);color:#cfffcf">${esc(CONFIG.chainId || 'morocco-1')}</code></span>
+                        <span><a href="${esc(url)}" target="_blank" rel="noopener">Raw list</a></span>
+                    </div>
+                    <table class="abstract-table">
+                        <thead><tr><th>Module</th><th>Contract address</th><th>Code ID</th></tr></thead>
+                        <tbody>${rows.join('')}</tbody>
+                    </table>`;
+            } catch (err) {
+                host.innerHTML = `<div class="abstract-state-error">Could not load addresses.</div>`;
+            }
+        }
+        paintAbstractState();
+
+        // ═══════════════════════════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════════════════════════
+
+        const state = {
+            address: null,
+            wallet: null,
+            libsLoaded: false,
+            checkedName: null,
+            nameAvailable: false,
+            sudoParams: null,
+        };
+
+        let AccountMinterQueryClient, AccountMinterClient;
+        let MsgExecuteContract;
+
+        async function loadLibs() {
+            try {
+                const ok = await TerpWallet.ensureLibs(CONFIG, { pageId: "tabs" });
+                if (!ok) throw new Error("cosmes load failed");
+
+                MsgExecuteContract = TerpWallet.getState().MsgExecuteContract;
+
+                const minterMod = await import("/lib/account-minter.js");
+                AccountMinterQueryClient = minterMod.AccountMinterQueryClient;
+                AccountMinterClient = minterMod.AccountMinterClient;
+
+                state.libsLoaded = true;
+                return true;
+            } catch (err) {
+                console.error("Failed to load libraries:", err);
+                // Query clients can still work via LCD without cosmes
+                try {
+                    const minterMod = await import("/lib/account-minter.js");
+                    AccountMinterQueryClient = minterMod.AccountMinterQueryClient;
+                    AccountMinterClient = minterMod.AccountMinterClient;
+                } catch (e2) {
+                    showToast("Failed to load blockchain libraries.", "error");
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        function createQueryAdapter(rpc) {
+            return TerpWallet.createQueryAdapter(rpc || CONFIG.rpc, CONFIG.rest);
+        }
+
+        function createSigningAdapter(wallet, rpc) {
+            return TerpWallet.createSigningAdapter(wallet || state.wallet, rpc || CONFIG.rpc);
+        }
+
+        function syncWalletFromShared(snap) {
+            state.address = snap.address;
+            state.wallet = snap.wallet;
+            updateMintButton();
+        }
+
+        TerpWallet.bindWalletButton("btn-wallet", CONFIG, {
+            onToast: (msg, type) => showToast(msg, type),
+            onChange: syncWalletFromShared,
+        });
+        TerpWallet.onWalletChange(syncWalletFromShared);
+
+        // ═══════════════════════════════════════════════════════════════
+        // NAME LOOKUP & MINTING
+        // ═══════════════════════════════════════════════════════════════
+
+        window.checkName = async function () {
+            const input = document.getElementById("name-input");
+            const statusEl = document.getElementById("name-status");
+            const name = input.value.trim().toLowerCase();
+
+            if (!name) {
+                statusEl.className = "name-status error";
+                statusEl.textContent = "Please enter a name.";
+                statusEl.style.display = "block";
+                return;
+            }
+
+            const minter = CONFIG.accountMinterContract || CONFIG.minterContract || CONFIG.contracts?.accountMinter;
+            if (!minter) {
+                statusEl.className = "name-status error";
+                statusEl.textContent = "Name registry not configured yet.";
+                statusEl.style.display = "block";
+                return;
+            }
+
+            if (!AccountMinterQueryClient) {
+                statusEl.className = "name-status error";
+                statusEl.textContent = "Query client not loaded.";
+                statusEl.style.display = "block";
+                return;
+            }
+
+            // Validate length against params
+            if (state.sudoParams) {
+                if (name.length < state.sudoParams.min_account_length) {
+                    statusEl.className = "name-status error";
+                    statusEl.textContent = `Name too short. Minimum ${state.sudoParams.min_account_length} characters.`;
+                    statusEl.style.display = "block";
+                    return;
+                }
+                if (name.length > state.sudoParams.max_account_length) {
+                    statusEl.className = "name-status error";
+                    statusEl.textContent = `Name too long. Maximum ${state.sudoParams.max_account_length} characters.`;
+                    statusEl.style.display = "block";
+                    return;
+                }
+            }
+
+            const btn = document.getElementById("btn-check");
+            btn.disabled = true;
+            btn.textContent = "Checking...";
+            statusEl.style.display = "none";
+
+            try {
+                const adapter = createQueryAdapter(CONFIG.rpc);
+                const minterQuery = new AccountMinterQueryClient(adapter, minter);
+
+                // Check if name has an existing ask (means it's minted)
+                const ask = await minterQuery.ask({ tokenId: name });
+
+                if (ask) {
+                    state.checkedName = name;
+                    state.nameAvailable = false;
+                    statusEl.className = "name-status taken";
+                    statusEl.textContent = `"${name}" is already taken.`;
+                    statusEl.style.display = "block";
+                } else {
+                    state.checkedName = name;
+                    state.nameAvailable = true;
+                    statusEl.className = "name-status available";
+                    statusEl.textContent = `"${name}" is available!`;
+                    statusEl.style.display = "block";
+                }
+            } catch (err) {
+                // A missing ask means the name is unminted (available).
+                // A network failure means we know nothing — never mark available.
+                const errStr = (err.message || "").toLowerCase();
+                const networkFailure =
+                    errStr.includes("failed to fetch") ||
+                    errStr.includes("networkerror") ||
+                    errStr.includes("network error") ||
+                    errStr.includes("load failed") ||
+                    errStr.includes("timeout") ||
+                    errStr.includes("cors");
+                if (!networkFailure && (errStr.includes("not found") || errStr.includes("does not exist"))) {
+                    state.checkedName = name;
+                    state.nameAvailable = true;
+                    statusEl.className = "name-status available";
+                    statusEl.textContent = `"${name}" is available!`;
+                    statusEl.style.display = "block";
+                } else if (networkFailure) {
+                    state.checkedName = "";
+                    state.nameAvailable = false;
+                    statusEl.className = "name-status error";
+                    statusEl.textContent = `Network error checking name (tried RPC then LCD). Check your connection and retry — this does not mean the name is available.`;
+                    statusEl.style.display = "block";
+                } else {
+                    statusEl.className = "name-status error";
+                    statusEl.textContent = `Error checking name: ${err.message || err}`;
+                    statusEl.style.display = "block";
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Check";
+                updateMintButton();
+            }
+        };
+
+        function updateMintButton() {
+            const btn = document.getElementById("btn-mint");
+            if (state.nameAvailable && state.checkedName) {
+                btn.style.display = "block";
+                btn.disabled = !state.address;
+                btn.textContent = state.address
+                    ? `Register "${state.checkedName}"`
+                    : "Connect Wallet to Register";
+            } else {
+                btn.style.display = "none";
+            }
+        }
+
+        window.mintName = async function () {
+            if (!state.address || !state.wallet || !state.checkedName || !state.nameAvailable) return;
+
+            if (!CONFIG.minterContract) {
+                showToast("Name registry not configured (minter contract missing).", "error");
+                return;
+            }
+            if (!CONFIG.accountContract) {
+                showToast("Name registry not configured (collection contract missing).", "error");
+                return;
+            }
+
+            const btn = document.getElementById("btn-mint");
+            btn.textContent = "Registering...";
+            btn.disabled = true;
+
+            try {
+                const funds = [];
+                // Price is length-multiplied (short names pay a premium);
+                // sending raw base_price underpays and fails on-chain.
+                const priced = computeNamePrice(state.checkedName.length, state.sudoParams);
+                if (priced) {
+                    funds.push({ denom: priced.denom, amount: priced.amount });
+                } else if (state.sudoParams?.base_price) {
+                    funds.push({ denom: CONFIG.denom, amount: state.sudoParams.base_price });
+                }
+
+                // 1. approve_all: grant the manifold contract operator rights on the collection
+                const approveMsg = new MsgExecuteContract({
+                    sender: state.address,
+                    contract: CONFIG.accountContract,
+                    msg: { approve_all: { operator: CONFIG.minterContract } },
+                    funds: [],
+                });
+
+                // 2. mint_and_list: mint the name through the manifold
+                const mintMsg = new MsgExecuteContract({
+                    sender: state.address,
+                    contract: CONFIG.minterContract,
+                    msg: { mint_and_list: { account: state.checkedName } },
+                    funds: funds,
+                });
+
+                const result = await state.wallet.broadcastTxSync(
+                    { msgs: [approveMsg, mintMsg], memo: "" }, 1.4
+                );
+
+                const txHash = result?.hash || result?.transactionHash || result || "";
+                showToast(`Name "${state.checkedName}" registered! TX: ${typeof txHash === "string" ? txHash.slice(0, 12) + "..." : ""}`, "success");
+
+                state.nameAvailable = false;
+                state.checkedName = null;
+                document.getElementById("name-input").value = "";
+                document.getElementById("name-status").style.display = "none";
+                updateMintButton();
+            } catch (err) {
+                console.error("Mint failed:", err);
+                const errStr = (err.message || "").toLowerCase();
+                if (errStr.includes("reject")) {
+                    showToast("Transaction rejected", "info");
+                } else if (errStr.includes("insufficient")) {
+                    showToast("Insufficient funds for registration.", "error");
+                } else {
+                    showToast(`Registration failed: ${err.message || err}`, "error");
+                }
+            } finally {
+                btn.disabled = false;
+                updateMintButton();
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRICING
+        // ═══════════════════════════════════════════════════════════════
+
+        function computeNamePrice(len, params) {
+            if (!params || !len) return null;
+            const base = parseInt(params.base_price || "0");
+            const mult = len <= 3 ? 100 : len === 4 ? 10 : 1;
+            return { amount: String(base * mult), denom: CONFIG.denom };
+        }
+
+        function formatPrice(amountStr) {
+            const num = parseInt(amountStr || "0") / Math.pow(10, CONFIG.denomDecimals);
+            return num.toLocaleString(undefined, { maximumFractionDigits: 6 }) + " " + CONFIG.denomDisplay;
+        }
+
+        function updateLivePrice() {
+            const len = document.getElementById("name-input").value.trim().length;
+            const item = document.getElementById("mint-price-item");
+            const display = document.getElementById("mint-price-display");
+            if (!state.sudoParams || len < 3) { item.style.display = "none"; return; }
+            const price = computeNamePrice(len, state.sudoParams);
+            if (!price) { item.style.display = "none"; return; }
+            display.textContent = formatPrice(price.amount);
+            item.style.display = "";
+        }
+
+        async function fetchParams() {
+            const minter = CONFIG.accountMinterContract || CONFIG.minterContract || CONFIG.contracts?.accountMinter;
+            if (!minter || !AccountMinterQueryClient) return;
+
+            try {
+                const adapter = createQueryAdapter(CONFIG.rpc);
+                const minterQuery = new AccountMinterQueryClient(adapter, minter);
+                state.sudoParams = await minterQuery.params();
+
+                const pricingEl = document.getElementById("pricing-info");
+                const priceNum = parseInt(state.sudoParams.base_price || "0") / Math.pow(10, CONFIG.denomDecimals);
+                document.getElementById("base-price").textContent = priceNum.toLocaleString() + " " + CONFIG.denomDisplay;
+                document.getElementById("name-limits").textContent = `${state.sudoParams.min_account_length} / ${state.sudoParams.max_account_length}`;
+                pricingEl.style.display = "flex";
+            } catch (err) {
+                console.warn("Failed to fetch params:", err);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TOASTS
+        // ═══════════════════════════════════════════════════════════════
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toasts");
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add("removing");
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // BACKGROUND CANVAS
+        // ═══════════════════════════════════════════════════════════════
+
+        (function initBackground() {
+            const canvas = document.getElementById("main-canvas");
+            const ctx = canvas.getContext("2d");
+            let width, height, centerX, centerY, time = 0;
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                centerX = width / 2;
+                centerY = height / 2;
+            }
+            resize();
+            window.addEventListener("resize", resize);
+
+            const orbPositions = [
+                { x: 0, y: 0, size: 0.9, brightness: 1.0 },
+                { x: -1, y: 0, size: 0.85, brightness: 0.9 },
+                { x: 1, y: 0, size: 0.85, brightness: 0.9 },
+                { x: 0, y: -1, size: 0.85, brightness: 0.9 },
+                { x: 0, y: 1, size: 0.85, brightness: 0.9 },
+                { x: -1, y: -1, size: 0.8, brightness: 0.85 },
+                { x: 1, y: -1, size: 0.8, brightness: 0.85 },
+                { x: -1, y: 1, size: 0.8, brightness: 0.85 },
+                { x: 1, y: 1, size: 0.8, brightness: 0.85 },
+                { x: -2, y: 0, size: 0.75, brightness: 0.75 },
+                { x: 2, y: 0, size: 0.75, brightness: 0.75 },
+                { x: 0, y: -2, size: 0.75, brightness: 0.75 },
+                { x: 0, y: 2, size: 0.75, brightness: 0.75 },
+            ];
+
+            const glowColor = { r: 200, g: 255, b: 210 };
+
+            function drawOrb(x, y, baseRadius, brightness, pulseOffset) {
+                const pulse = 1 + 0.03 * Math.sin(time * 0.0008 + pulseOffset);
+                const radius = baseRadius * pulse;
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                const alpha = brightness * 0.7;
+                gradient.addColorStop(0, `rgba(${glowColor.r},${glowColor.g},${glowColor.b},${alpha})`);
+                gradient.addColorStop(0.15, `rgba(${glowColor.r},${glowColor.g},${glowColor.b},${alpha * 0.85})`);
+                gradient.addColorStop(0.35, `rgba(${glowColor.r},${glowColor.g},${glowColor.b},${alpha * 0.55})`);
+                gradient.addColorStop(0.55, `rgba(${glowColor.r},${glowColor.g},${glowColor.b},${alpha * 0.3})`);
+                gradient.addColorStop(0.75, `rgba(${glowColor.r},${glowColor.g},${glowColor.b},${alpha * 0.12})`);
+                gradient.addColorStop(1, `rgba(${glowColor.r},${glowColor.g},${glowColor.b},0)`);
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+
+            function draw(timestamp) {
+                time = timestamp;
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(0, 0, width, height);
+                const gridUnit = Math.min(width, height) * 0.14;
+                const orbRadius = gridUnit * 1.1;
+
+                orbPositions.forEach((orb, i) => {
+                    drawOrb(
+                        centerX + orb.x * gridUnit,
+                        centerY + orb.y * gridUnit,
+                        orbRadius * orb.size,
+                        orb.brightness,
+                        i * 0.4
+                    );
+                });
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+        })();
+
+        // ═══════════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════════
+
+        // Plane switcher
+        document.querySelectorAll('.plane-tab').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-plane');
+                document.querySelectorAll('.plane-tab').forEach((b) => {
+                    b.classList.toggle('active', b === btn);
+                    b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+                });
+                document.querySelectorAll('.plane').forEach((p) => {
+                    p.classList.toggle('active', p.id === `plane-${id}`);
+                });
+                if (id === 'billboards' && location.hash !== '#billboards') {
+                    history.replaceState(null, '', '#billboards');
+                } else if (id !== 'billboards') {
+                    history.replaceState(null, '', `#${id}`);
+                }
+            });
+        });
+
+        function applyHashPlane() {
+            const h = (location.hash || '').replace(/^#/, '');
+            if (!h) return;
+            const map = {
+                abstract: 'abstract',
+                billboards: 'billboards',
+                tabs: 'billboards',
+                svg: 'svg',
+                mint: 'svg',
+                daodao: 'daodao',
+                dao: 'daodao',
+                bounties: 'bounties',
+            };
+            const plane = map[h];
+            if (!plane) return;
+            const btn = document.querySelector(`.plane-tab[data-plane="${plane}"]`);
+            if (btn) btn.click();
+        }
+
+        async function init() {
+            applyHashPlane();
+            await loadLibs();
+            await TerpWallet.tryReconnect(CONFIG);
+            syncWalletFromShared(TerpWallet.getSnapshot());
+            await fetchParams();
+
+            // Update name-length display on input
+            const nameInput = document.getElementById("name-input");
+            if (nameInput) {
+                nameInput.addEventListener("input", () => {
+                    const len = nameInput.value.trim().length;
+                    document.getElementById("name-length").textContent = len > 0 ? `${len} chars` : "--";
+                    updateLivePrice();
+                    // Reset availability if name changed
+                    if (state.checkedName && nameInput.value.trim().toLowerCase() !== state.checkedName) {
+                        state.nameAvailable = false;
+                        state.checkedName = null;
+                        document.getElementById("name-status").style.display = "none";
+                        updateMintButton();
+                    }
+                });
+            }
+        }
+
+        init().catch(err => {
+            console.error("Init failed:", err);
+        });
+
+
+    </script>
+
+    <script>
+        window.openDocModal = function () {
+            document.getElementById('modal-docs').style.display = 'flex';
+        };
+        window.closeDocModal = function () {
+            document.getElementById('modal-docs').style.display = 'none';
+        };
+    </script>
+
+    <!-- ─── Documentation Modal ─── -->
+    <div class="modal" id="modal-docs" style="display:none">
+        <div class="modal-backdrop" onclick="closeDocModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Documentation</h2>
+                <button class="modal-close" onclick="closeDocModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="doc-section">
+                    <h3 class="doc-heading">Ecosystem</h3>
+                    <p class="doc-text">This page is the apps on Terp: names, accounts, art, DAOs. More will land here.</p>
+                </div>
+
+                <div class="doc-section">
+                    <h3 class="doc-heading">What are TABS?</h3>
+                    <p class="doc-text">A name you buy on-chain that points at your wallet, like a username.
+                        After you accept a bid, there is a cooldown before the name settles.</p>
+                </div>
+
+                <div class="doc-section">
+                    <h3 class="doc-heading">Pricing</h3>
+                    <p class="doc-text">Cost is calculated from the length of the name you register. Shorter names
+                        require a higher premium. The price components are derived from the contract's configured
+                        tier rates.</p>
+                    <div class="doc-pricing-table">
+                        <div class="doc-pricing-row doc-pricing-header">
+                            <span>Name Length</span>
+                            <span>Base Cost</span>
+                        </div>
+                        <div class="doc-pricing-row">
+                            <span>1 – 3 chars</span>
+                            <span id="doc-tier-1">--</span>
+                        </div>
+                        <div class="doc-pricing-row">
+                            <span>4 – 6 chars</span>
+                            <span id="doc-tier-2">--</span>
+                        </div>
+                        <div class="doc-pricing-row">
+                            <span>7 – 9 chars</span>
+                            <span id="doc-tier-3">--</span>
+                        </div>
+                        <div class="doc-pricing-row">
+                            <span>10+ chars</span>
+                            <span id="doc-tier-4">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-section">
+                    <h3 class="doc-heading">Rules</h3>
+                    <ul class="doc-list">
+                        <li>Only lowercase alphanumeric characters and hyphens</li>
+                        <li>Must start with a letter</li>
+                        <li>Cannot end with a hyphen</li>
+                        <li>Minimum 1 character, maximum 64 characters</li>
+                        <li>You can sell a name through the marketplace</li>
+                    </ul>
+                </div>
+
+                <div class="doc-section">
+                    <h3 class="doc-heading">Resolution</h3>
+                    <p class="doc-text">Apps can look up <code class="doc-code">your-name</code> and find the wallet that owns it.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
