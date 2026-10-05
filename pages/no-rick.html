@@ -3,6 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/config.js">
+<link rel="modulepreload" href="/lib/nav-guard.js">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="description"
         content="No-Rick ZK proof demo on Terp Network. Client-side halo2 proof generation with on-chain verification via custom wasmvm.">
@@ -16,6 +22,10 @@
     <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
     <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
     <link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script>
 
     <style>
         .main {
@@ -34,11 +44,11 @@
 
         .nr-card {
             width: 100%;
-            background: rgba(8, 10, 14, 0.72);
-            border: 1px solid rgba(152, 232, 193, 0.16);
+            background: rgb(var(--tn-bg-deep-rgb) / 0.72);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.16);
             border-radius: 14px;
             padding: 1.15rem 1.2rem 1.2rem;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+            box-shadow: 0 12px 40px rgb(var(--tn-shadow-rgb) / calc(0.28 * var(--tn-shadow-k)));
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
         }
@@ -47,19 +57,22 @@
             text-align: center;
         }
         .page-title {
-            font-size: 2.35rem;
-            font-weight: 500;
-            color: #cfffcf;
+            font-size: var(--tn-size-display);
+            font-weight: var(--tn-weight-display);
+            color: var(--tn-mint);
             text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
             text-align: center;
             margin: 0 0 0.4rem;
             display: block;
             width: 100%;
+            letter-spacing: var(--tn-track-display);
+            font-family: var(--tn-font-display);
         }
+        html[data-theme="permissionless"] .page-title { text-shadow: 0 0 9.2px rgb(var(--tn-glow-rgb) / calc(0.070 * var(--tn-glow-tk))), 0 0 30px rgb(var(--tn-glow-rgb) / calc(0.084 * var(--tn-glow-tk))); }
 
         .page-subtitle {
             font-size: 1rem;
-            color: #a0a8c0;
+            color: var(--tn-text-muted);
             text-align: center;
             margin: 0 auto;
             line-height: 1.5;
@@ -73,15 +86,15 @@
             display: inline-block;
             margin: 0.7rem auto 0;
             padding: 0.35rem 0.7rem;
-            border-radius: 999px;
-            border: 1px solid rgba(152, 232, 193, 0.28);
+            border-radius: var(--tn-radius-ctl);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.28);
             background: transparent;
-            color: #98e8c1;
+            color: var(--tn-teal);
             font: inherit;
             font-size: 0.82rem;
             cursor: pointer;
         }
-        .btn-info:hover { background: rgba(152, 232, 193, 0.12); }
+        .btn-info:hover { background: rgb(var(--tn-teal-rgb) / 0.12); }
         dialog.info-modal {
             position: fixed;
             inset: 0;
@@ -90,56 +103,57 @@
             width: calc(100% - 2rem);
             height: fit-content;
             max-height: min(80vh, 32rem);
-            border: 1px solid rgba(152, 232, 193, 0.22);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.22);
             border-radius: 12px;
             padding: 1.25rem 1.35rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             background: #0c0e12;
             font-size: 1rem;
             line-height: 1.6;
         }
         dialog.info-modal::backdrop {
-            background: rgba(0, 0, 0, 0.72);
+            background: rgb(var(--tn-shade-rgb) / 0.72);
         }
         dialog.info-modal h3 {
-            color: #cfffcf; margin: 0 0 0.7rem; font-size: 1.1rem; font-weight: 500;
+            color: var(--tn-mint); margin: 0 0 0.7rem; font-size: 1.1rem; font-weight: 500;
         }
         dialog.info-modal p { margin: 0 0 0.7rem; }
         dialog.info-modal .close-info {
             margin-top: 0.4rem; width: 100%; padding: 0.55rem;
-            border-radius: 8px; border: 1px solid rgba(152, 232, 193, 0.3);
-            background: rgba(152, 232, 193, 0.1); color: #98e8c1; cursor: pointer;
+            border-radius: 8px; border: 1px solid rgb(var(--tn-teal-rgb) / 0.3);
+            background: rgb(var(--tn-teal-rgb) / 0.1); color: var(--tn-teal); cursor: pointer;
             font-family: inherit;
         }
 
         .proof-card {
             width: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-shade-rgb) / 0.4);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 12px;
             padding: 2rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 0 40px rgba(152, 232, 193, 0.03);
+            box-shadow: 0 0 40px rgb(var(--tn-halo-rgb) / calc(0.03 * var(--tn-halo-k)));
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
         }
+        html[data-theme="permissionless"] .proof-card { box-shadow: 0 0 8.8px rgb(var(--tn-glow-rgb) / calc(0.04 * var(--tn-glow-k))), 0 0 20px rgb(var(--tn-glow-rgb) / calc(0.03 * var(--tn-glow-k))), 0 0 40px rgb(var(--tn-glow-2-rgb) / calc(0.02 * var(--tn-glow-k))); }
 
         .proof-card label {
             display: block;
             font-size: 0.92rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             margin-bottom: 0.55rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .proof-card input[type="text"] {
             width: 100%;
             padding: 0.85rem 1.1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-tint-rgb) / 0.05);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 8px;
-            color: #f8f8f2;
+            color: var(--tn-text-bright);
             font-family: var(--tn-font-mono);
             font-size: 1.1rem;
             margin-bottom: 1rem;
@@ -148,7 +162,7 @@
         }
 
         .proof-card input[type="text"]:focus {
-            border-color: rgba(152, 232, 193, 0.4);
+            border-color: rgb(var(--tn-teal-rgb) / 0.4);
         }
 
         .nr-session summary {
@@ -159,36 +173,36 @@
             justify-content: space-between;
             gap: 0.75rem;
             font-size: 0.85rem;
-            color: #a0a8c0;
+            color: var(--tn-text-muted);
         }
         .nr-session summary::-webkit-details-marker { display: none; }
         .nr-session .session-pill {
             font-family: var(--tn-font-mono, ui-monospace, monospace);
             font-size: 0.78rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
         .nr-session[open] summary { margin-bottom: 0.75rem; }
         .boot-row {
             display: flex; align-items: center; justify-content: space-between;
-            gap: 0.6rem; margin-bottom: 0.45rem; font-size: 0.84rem; color: #d2d3d8;
+            gap: 0.6rem; margin-bottom: 0.45rem; font-size: 0.84rem; color: var(--tn-text);
         }
         .boot-k {
-            text-transform: uppercase; letter-spacing: 0.06em; color: #6272a4; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: var(--tn-track-label); color: var(--tn-text-dim); font-size: var(--tn-size-label);
         }
-        .boot-ok { color: #98e8c1; }
-        .boot-wait { color: #ffb86c; }
-        .boot-err { color: #ff5555; word-break: break-word; text-align: right; max-width: 62%; }
+        .boot-ok { color: var(--tn-teal); }
+        .boot-wait { color: var(--tn-amber); }
+        .boot-err { color: var(--tn-danger); word-break: break-word; text-align: right; max-width: 62%; }
         .btn-bind {
             width: 100%; margin-top: 0.65rem; padding: 0.6rem 0.8rem;
             border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.9rem;
-            border: 1px solid rgba(189, 147, 249, 0.35);
-            background: rgba(189, 147, 249, 0.1); color: #bd93f9;
+            border: 1px solid rgb(var(--tn-purple-rgb) / 0.35);
+            background: rgb(var(--tn-purple-rgb) / 0.1); color: var(--tn-purple);
         }
         .btn-bind:disabled { opacity: 0.4; cursor: not-allowed; }
         .play-status {
             margin: 0.7rem 0 0;
             font-size: 0.82rem;
-            color: #6272a4;
+            color: var(--tn-text-dim);
             min-height: 1.2em;
         }
 
@@ -198,34 +212,34 @@
             gap: 0.75rem;
             margin-bottom: 1.5rem;
             padding: 0.75rem 1rem;
-            background: rgba(255, 85, 85, 0.08);
-            border: 1px solid rgba(255, 85, 85, 0.2);
+            background: rgb(var(--tn-danger-rgb) / 0.08);
+            border: 1px solid rgb(var(--tn-danger-rgb) / 0.2);
             border-radius: 10px;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 0 24px rgba(255, 85, 85, 0.04);
+            box-shadow: 0 0 24px rgb(var(--tn-danger-rgb) / 0.04);
         }
 
         .forbidden-display .label {
             font-size: 0.9rem;
-            color: #ff5555;
+            color: var(--tn-danger);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .forbidden-display .word {
             font-family: var(--tn-font-mono);
             font-size: 1.2rem;
-            color: #ff5555;
+            color: var(--tn-danger);
             font-weight: 500;
         }
 
         .btn-prove {
             width: 100%;
             padding: 0.9rem 1.1rem;
-            background: rgba(152, 232, 193, 0.12);
-            border: 1px solid rgba(152, 232, 193, 0.3);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.3);
+            color: var(--tn-teal);
             font-family: var(--tn-font);
             font-size: 1.05rem;
             font-weight: 500;
@@ -235,10 +249,11 @@
         }
 
         .btn-prove:hover:not(:disabled) {
-            background: rgba(152, 232, 193, 0.2);
-            border-color: rgba(152, 232, 193, 0.5);
-            box-shadow: 0 0 20px rgba(152, 232, 193, 0.1);
+            background: rgb(var(--tn-teal-rgb) / 0.2);
+            border-color: rgb(var(--tn-teal-rgb) / 0.5);
+            box-shadow: 0 0 20px rgb(var(--tn-halo-rgb) / calc(0.1 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .btn-prove:hover:not(:disabled) { box-shadow: 0 0 4.4px rgb(var(--tn-glow-rgb) / calc(0.13 * var(--tn-glow-k))), 0 0 10px rgb(var(--tn-glow-rgb) / calc(0.1 * var(--tn-glow-k))), 0 0 20px rgb(var(--tn-glow-2-rgb) / calc(0.07 * var(--tn-glow-k))); }
 
         .btn-prove:disabled {
             opacity: 0.4;
@@ -249,14 +264,15 @@
             width: 100%;
             min-height: 80px;
             padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(152, 232, 193, 0.12);
+            background: rgb(var(--tn-shade-rgb) / 0.35);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
             border-radius: 12px;
             text-align: center;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 0 28px rgba(152, 232, 193, 0.025);
+            box-shadow: 0 0 28px rgb(var(--tn-halo-rgb) / calc(0.025 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .result-area { box-shadow: 0 0 6.16px rgb(var(--tn-glow-rgb) / calc(0.03 * var(--tn-glow-k))), 0 0 14px rgb(var(--tn-glow-rgb) / calc(0.03 * var(--tn-glow-k))), 0 0 28px rgb(var(--tn-glow-2-rgb) / calc(0.02 * var(--tn-glow-k))); }
 
         .result-area .verdict {
             font-size: 2rem;
@@ -265,34 +281,34 @@
         }
 
         .result-area .verdict.randy {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .result-area .verdict.rick {
-            color: #ff5555;
+            color: var(--tn-danger);
         }
 
         .result-area .tx-hash {
             font-size: 0.75rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             font-family: var(--tn-font-mono);
             word-break: break-all;
         }
 
         .result-area .error-msg {
-            color: #ff5555;
+            color: var(--tn-danger);
             font-size: 0.85rem;
         }
 
         .wasm-status {
             font-size: 0.9rem;
-            color: #6272a4;
+            color: var(--tn-text-dim);
             text-align: center;
             margin-top: 1rem;
         }
 
         .wasm-status.ready {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         /* ── Progress pipeline ────────────────────────────────── */
@@ -316,53 +332,54 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #6272a4;
+            background: var(--tn-text-dim);
             transition: background 0.3s, box-shadow 0.3s;
         }
 
         .step .label {
-            font-size: 0.7rem;
-            color: #6272a4;
+            font-size: var(--tn-size-label);
+            color: var(--tn-text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: var(--tn-track-label);
             transition: color 0.3s;
         }
 
         .step .elapsed {
             font-size: 0.65rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             font-family: var(--tn-font-mono);
             min-height: 1em;
         }
 
         .step.active .circle {
-            background: #98e8c1;
-            box-shadow: 0 0 12px rgba(152, 232, 193, 0.5);
+            background: var(--tn-teal);
+            box-shadow: 0 0 12px rgb(var(--tn-halo-rgb) / calc(0.5 * var(--tn-halo-k)));
             animation: throb 1.2s ease infinite;
         }
+        html[data-theme="permissionless"] .step.active .circle { box-shadow: 0 0 2.64px rgb(var(--tn-glow-rgb) / calc(0.65 * var(--tn-glow-k))), 0 0 6px rgb(var(--tn-glow-rgb) / calc(0.5 * var(--tn-glow-k))), 0 0 12px rgb(var(--tn-glow-2-rgb) / calc(0.35 * var(--tn-glow-k))); }
 
         .step.active .label {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .step.done .circle {
-            background: #98e8c1;
+            background: var(--tn-teal);
             box-shadow: none;
             animation: none;
         }
 
         .step.done .label {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .step.error .circle {
-            background: #ff5555;
-            box-shadow: 0 0 10px rgba(255, 85, 85, 0.4);
+            background: var(--tn-danger);
+            box-shadow: 0 0 10px rgb(var(--tn-danger-rgb) / 0.4);
             animation: none;
         }
 
         .step.error .label {
-            color: #ff5555;
+            color: var(--tn-danger);
         }
 
         @keyframes throb {
@@ -382,7 +399,7 @@
         .step-line {
             width: 40px;
             height: 2px;
-            background: #6272a4;
+            background: var(--tn-text-dim);
             margin-top: 9px;
             flex-shrink: 0;
         }
@@ -390,8 +407,8 @@
         /* ── Proof data display ──────────────────────────────── */
         .proof-display {
             width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-shade-rgb) / 0.3);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 6px;
             margin-bottom: 1rem;
             overflow: hidden;
@@ -400,13 +417,13 @@
         .proof-toggle {
             padding: 0.6rem 0.8rem;
             font-size: 0.8rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
             cursor: pointer;
             user-select: none;
         }
 
         .proof-toggle:hover {
-            color: #cfffcf;
+            color: var(--tn-mint);
         }
 
         .proof-content {
@@ -421,17 +438,17 @@
         }
 
         .proof-label {
-            font-size: 0.65rem;
-            color: #6272a4;
+            font-size: var(--tn-size-label);
+            color: var(--tn-text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: var(--tn-track-label);
             margin-bottom: 0.2rem;
         }
 
         .proof-b64 {
             font-family: var(--tn-font-mono);
             font-size: 0.75rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             word-break: break-all;
             line-height: 1.4;
         }
@@ -439,7 +456,7 @@
         .proof-msg {
             font-family: var(--tn-font-mono);
             font-size: 0.72rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             white-space: pre-wrap;
             word-break: break-all;
             margin: 0;
@@ -448,7 +465,7 @@
 
         #status-text {
             font-size: 0.82rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             text-align: center;
             margin-bottom: 0.75rem;
         }
@@ -474,37 +491,39 @@
         }
 
         .reward-card.randy-card {
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(152, 232, 193, 0.18);
-            box-shadow: 0 0 24px rgba(152, 232, 193, 0.04);
+            background: rgb(var(--tn-shade-rgb) / 0.35);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.18);
+            box-shadow: 0 0 24px rgb(var(--tn-halo-rgb) / calc(0.04 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .reward-card.randy-card { box-shadow: 0 0 5.28px rgb(var(--tn-glow-rgb) / calc(0.05 * var(--tn-glow-k))), 0 0 12px rgb(var(--tn-glow-rgb) / calc(0.04 * var(--tn-glow-k))), 0 0 24px rgb(var(--tn-glow-2-rgb) / calc(0.03 * var(--tn-glow-k))); }
 
         .reward-card.rick-card {
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 85, 85, 0.2);
-            box-shadow: 0 0 24px rgba(255, 85, 85, 0.04);
+            background: rgb(var(--tn-shade-rgb) / 0.35);
+            border: 1px solid rgb(var(--tn-danger-rgb) / 0.2);
+            box-shadow: 0 0 24px rgb(var(--tn-danger-rgb) / 0.04);
         }
 
         .reward-card.highlight {
-            box-shadow: 0 0 16px rgba(152, 232, 193, 0.25);
+            box-shadow: 0 0 16px rgb(var(--tn-halo-rgb) / calc(0.25 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .reward-card.highlight { box-shadow: 0 0 3.52px rgb(var(--tn-glow-rgb) / calc(0.33 * var(--tn-glow-k))), 0 0 8px rgb(var(--tn-glow-rgb) / calc(0.25 * var(--tn-glow-k))), 0 0 16px rgb(var(--tn-glow-2-rgb) / calc(0.17 * var(--tn-glow-k))); }
 
         .reward-card.highlight.rick-card {
-            box-shadow: 0 0 16px rgba(255, 85, 85, 0.25);
+            box-shadow: 0 0 16px rgb(var(--tn-danger-rgb) / 0.25);
         }
 
         .reward-card .reward-outcome {
             font-size: 0.78rem;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .randy-card .reward-outcome {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .rick-card .reward-outcome {
-            color: #ff5555;
+            color: var(--tn-danger);
         }
 
         .reward-card .reward-token {
@@ -514,23 +533,23 @@
         }
 
         .randy-card .reward-token {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .rick-card .reward-token {
-            color: #ff5555;
+            color: var(--tn-danger);
         }
 
         .reward-card .reward-condition {
             font-size: 0.88rem;
-            color: #6272a4;
+            color: var(--tn-text-dim);
             line-height: 1.4;
         }
 
         .reward-card .reward-balance {
             font-size: 0.88rem;
             font-family: var(--tn-font-mono);
-            color: #d2d3d8;
+            color: var(--tn-text);
             margin-top: 0.25rem;
             min-height: 1em;
         }
@@ -540,11 +559,11 @@
         }
 
         .randy-card .bal-change {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .rick-card .bal-change {
-            color: #ff5555;
+            color: var(--tn-danger);
         }
 
         @media (max-width: 600px) {
@@ -553,7 +572,9 @@
             }
 
             .page-title {
-                font-size: 1.6rem;
+                font-size: var(--tn-size-display);
+                letter-spacing: var(--tn-track-display);
+                font-family: var(--tn-font-display);
             }
 
             .proof-card {
@@ -576,12 +597,10 @@
 </head>
 
 <body>
-    <canvas id="glow-canvas"></canvas>
-    <script type="module" src="/lib/glow-bg.js"></script>
 
     <main class="main">
         <script src="/lib/fab.js"></script>
-        <article class="nr-card nr-hero">
+        <article class="nr-card nr-hero" data-tn-head>
             <h1 class="page-title">No Rick</h1>
             <p class="page-subtitle">Keep the word. Prove it isn’t rick.</p>
             <button type="button" class="btn-info" id="info-btn" aria-haspopup="dialog" aria-controls="info-modal">
@@ -694,7 +713,7 @@
         <h3 id="info-modal-title">What’s No Rick?</h3>
         <p>
             Type a word. Your browser builds a proof that the word is
-            <em>not</em> <code style="color:#fe7d7d;">rick</code>. The chain checks the proof.
+            <em>not</em> <code style="color:var(--tn-coral);">rick</code>. The chain checks the proof.
             Nobody else sees the word.
         </p>
         <p>
@@ -721,7 +740,7 @@
     </script>
 
     <script type="module">
-        import { loadSiteConfig, preferHubIfContractMissing, useLocalChainProxies } from '/lib/config.js?v=local-proxy';
+        import { loadSiteConfig, preferHubIfContractMissing, useLocalChainProxies } from '/lib/config.js';
         import * as TerpWallet from '/lib/wallet.js';
 
 

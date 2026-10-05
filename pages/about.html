@@ -2,75 +2,507 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/nav-guard.js">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>About | Terp Network</title>
 <meta name="description" content="What Terp Network stands for and how to take part">
 <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
 <link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script>
+<script type="module" src="/lib/fractal/about-network.js"></script>
+<script type="module" src="/lib/fractal/about-people.js"></script>
+<script type="module" src="/lib/section-shield.js"></script>
 <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
 <style>
 .main { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 3.5rem; min-height: 40vh; }
 .about-lede { font-size: 1.35rem; line-height: 1.5; margin: 0.5rem 0 2rem; }
-.about-lede strong { color: #98e8c1; font-weight: 600; }
-.about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; margin: 0 0 2rem; }
-.about-card { border: 1px solid rgba(152,232,193,0.18); border-radius: 10px; padding: 1rem 1.1rem; background: rgba(255,255,255,0.02); }
-.about-card h2 { font-size: 0.95rem; margin: 0 0 0.4rem; color: #98e8c1; }
-.about-card p { font-size: 0.85rem; line-height: 1.55; margin: 0; color: #d2d3d8; }
-.about-facts { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0 0 2rem; }
-.about-facts td { padding: 0.45rem 0.2rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
-.about-facts td:first-child { color: #6272a4; width: 38%; }
-.about-facts code { font-size: 0.8rem; }
+.about-lede strong { color: var(--tn-teal); font-weight: 600; }
+html[data-theme="permissionless"] .about-lede strong { background: linear-gradient(transparent 62%, rgb(var(--tn-glow-rgb) / calc(0.22 * var(--tn-glow-k))) 62%, rgb(var(--tn-glow-2-rgb) / calc(0.18 * var(--tn-glow-k))) 94%, transparent 94%); text-shadow: var(--tn-glow-text); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .about-cta { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-.about-cta a { display: inline-block; padding: 0.55rem 1rem; border-radius: 6px; font-size: 0.85rem; text-decoration: none; border: 1px solid rgba(152,232,193,0.35); color: #98e8c1; }
-.about-cta a.primary { background: rgba(152,232,193,0.14); }
-.about-cta a:hover { border-color: #98e8c1; }
+.about-cta a, .nw .nw-btn { display: inline-block; font-family: var(--tn-font); font-size: 0.88rem; font-weight: var(--tn-font-weight-medium); letter-spacing: var(--tn-track-nav); line-height: 1.25; padding: 0.36rem 0.7rem; border-radius: var(--tn-radius-ctl, 2px); border: 1px solid rgb(var(--tn-teal-rgb) / 0.45); background: transparent; color: var(--tn-text-bright); text-decoration: none; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+html[data-theme="permissionless"] :is(.about-cta a, .nw .nw-btn):hover { box-shadow: var(--tn-glow-ring); }
+:is(.about-cta a, .nw .nw-btn):focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+.about-cta a:hover, .nw .nw-btn:hover { color: var(--tn-mint); border-color: var(--tn-teal); background: rgb(var(--tn-teal-rgb) / 0.06); }
+
+/* overview */
+.ov h3 { font-size: 1rem; font-weight: 600; color: rgb(var(--tnw-tint, 152, 232, 193)); margin: 2rem 0 0.5rem; }
+.ov p { line-height: 1.6; margin: 0 0 0.75rem; }
+.ov .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ov dl.ov-stack { display: grid; grid-template-columns: minmax(10rem, 30%) 1fr; gap: 0.7rem 1.25rem; margin: 0.75rem 0 1.25rem; font-size: 0.95rem; line-height: 1.55; }
+.ov dl.ov-stack dt, .ov dl.ov-stack dd { margin: 0; }
+.ov dl.ov-stack dt { font-weight: 600; }
+.ov dl.ov-stack dt a { color: var(--tnw-ink, var(--tn-text)); text-decoration: none; }
+.ov dl.ov-stack dt a:hover, .ov dl.ov-stack dt a:focus-visible { color: var(--tn-mint); text-decoration: underline; text-underline-offset: 3px; }
+.ov dl.ov-stack code, .ov .ov-ids code { font-size: 0.85em; }
+.ov .ov-ids { font-size: 0.85rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); margin: 0 0 1.5rem; }
+@media (max-width: 599px) {
+  .ov dl.ov-stack { grid-template-columns: 1fr; gap: 0.1rem; }
+  .ov dl.ov-stack dd { margin-bottom: 0.7rem; }
+}
+/* tabs: the page shows one at a time with the navigation (html[data-tn-section]); without it, both, one after the other */
+.about-tabs { display: flex; gap: 1.25rem; margin: 0 0 1.5rem; font-size: 0.9rem; }
+.about-tabs a { color: var(--tn-teal); }
+html[data-tn-world] .about-tabs { display: none; }
+html[data-tn-world="panel"][data-tn-section] .about-tab { display: none; }
+html[data-tn-world="panel"][data-tn-section="overview"] #about-overview,
+html[data-tn-world="panel"][data-tn-section="genesis"] #about-genesis,
+html[data-tn-world="panel"][data-tn-section="network"] #about-network,
+html[data-tn-world="panel"][data-tn-section="people"] #about-people { display: block; }
+.about-tab + .about-tab { margin-top: 3rem; }
+html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
+/* genesis distribution */
+.gd h2 { font-size: 1.5rem; font-weight: 500; margin: 0.25rem 0 0.5rem; }
+.gd h3 { font-size: 1rem; font-weight: 600; color: rgb(var(--tnw-tint, 152, 232, 193)); margin: 2.25rem 0 0.5rem; }
+.gd p { line-height: 1.6; margin: 0 0 0.75rem; }
+.gd .gd-lede { font-size: 1.1rem; }
+.gd .gd-src { font-size: 0.78rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); margin-top: 0.35rem; }
+.gd .gd-src code, .gd code { font-size: 0.8em; }
+.gd .n { font-family: var(--tn-font-mono, ui-monospace, monospace); font-size: 0.92em; white-space: nowrap; }
+.gd .gd-tokens { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem 2rem; margin: 0.5rem 0; }
+.gd .gd-tokens h4 { margin: 0 0 0.2rem; font-size: 1.05rem; font-weight: 600; }
+.gd .gd-tokens p { font-size: 0.9rem; margin: 0; }
+.gd dl.gd-facts { display: grid; grid-template-columns: minmax(9rem, 34%) 1fr; gap: 0; margin: 0.5rem 0; font-size: 0.9rem; }
+.gd dl.gd-facts dt, .gd dl.gd-facts dd { margin: 0; padding: 0.45rem 0; border-bottom: 1px solid rgba(var(--tnw-tint, 152, 232, 193), .12); }
+.gd dl.gd-facts dt { color: var(--tnw-ink-dim, var(--tn-text-muted)); padding-right: 1rem; }
+.gd dl.gd-facts dd small { display: block; color: var(--tnw-ink-dim, var(--tn-text-muted)); font-size: 0.8rem; margin-top: 0.15rem; }
+.gd .gd-bar { display: flex; height: 22px; margin: 0.75rem 0 0.5rem; }
+.gd .gd-bar > span { position: relative; display: block; height: 100%; min-width: 3px; }
+.gd .gd-bar .gd-vest { position: absolute; top: 0; bottom: 0; left: 0; background: repeating-linear-gradient(135deg, rgb(var(--tn-canvas-rgb) / .55) 0 3px, transparent 3px 7px); }
+.gd .gd-key { list-style: none; margin: 0.25rem 0 0; padding: 0; font-size: 0.9rem; }
+.gd .gd-key li { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.3rem 0; }
+.gd .gd-key i { flex: none; width: 10px; height: 10px; border-radius: 2px; transform: translateY(1px); }
+.gd .gd-key .hatch { background: repeating-linear-gradient(135deg, var(--tn-canvas) 0 2px, var(--tn-success) 2px 4px); }
+.gd .gd-scroll { overflow-x: auto; margin: 0.5rem 0; }
+.gd table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.gd th { text-align: left; font-weight: 500; color: var(--tnw-ink-dim, var(--tn-text-muted)); padding: 0.4rem 0.75rem 0.4rem 0; border-bottom: 1px solid rgba(var(--tnw-tint, 152, 232, 193), .25); white-space: nowrap; }
+.gd td { padding: 0.4rem 0.75rem 0.4rem 0; border-bottom: 1px solid rgba(var(--tnw-tint, 152, 232, 193), .1); vertical-align: top; }
+.gd td.r, .gd th.r { text-align: right; }
+.gd .gd-addr { font-family: var(--tn-font-mono, ui-monospace, monospace); font-size: 0.78rem; overflow-wrap: anywhere; }
+.gd .gd-hist td.bars { width: 38%; min-width: 120px; }
+.gd .gd-hist .b { display: block; height: 6px; margin: 3px 0; min-width: 0; }
+.gd .gd-hist .b.acc { background: #78dcc4; }
+.gd .gd-hist .b.sup { background: var(--tn-success); }
+.gd ol.gd-time { list-style: none; margin: 0.75rem 0; padding: 0 0 0 1.1rem; border-left: 1px dashed rgba(var(--tnw-tint, 152, 232, 193), .45); }
+.gd ol.gd-time li { position: relative; padding: 0 0 1rem; font-size: 0.9rem; }
+.gd ol.gd-time li::before { content: ""; position: absolute; left: calc(-1.1rem - 5px); top: 0.45em; width: 9px; height: 9px; border-radius: 50%; background: rgb(var(--tnw-tint, 152, 232, 193)); }
+.gd ol.gd-time b { font-weight: 600; }
+.gd details { margin: 0.5rem 0; font-size: 0.9rem; }
+.gd summary { cursor: pointer; color: var(--tn-teal); }
+.gd pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8rem; padding: 0.4rem 0 0.4rem 0.75rem; border-left: 2px solid rgba(var(--tnw-tint, 152, 232, 193), .3); margin: 0.5rem 0; }
+.gd .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.gd ul.gd-links { padding-left: 1.1rem; font-size: 0.9rem; }
+.gd ul.gd-links li { margin: 0.35rem 0; }
+/* genesis history timeline (lib/fractal/about-people.js): one event open at a time; without the script every panel shows */
+.tl { margin: 0.75rem 0 0.5rem; }
+.tl-rail { list-style: none; margin: 0 0 0.75rem; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.4rem; position: relative; }
+.tl-rail::before { content: ""; position: absolute; left: 0.5rem; right: 0.5rem; top: 0.6rem; border-top: 1px dashed rgba(var(--tnw-tint, 152, 232, 193), .45); }
+.tl-rail li { position: relative; display: flex; }
+.tl-ev { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; width: 100%; margin: 0; padding: 1.2rem 0.5rem 0.5rem; font: inherit; text-align: left; color: var(--tn-text); background: transparent; border: 1px solid transparent; border-radius: var(--tn-radius-ctl, 2px); cursor: pointer; }
+.tl-ev::before { content: ""; position: absolute; left: 0.5rem; top: calc(0.6rem - 4px); width: 9px; height: 9px; border-radius: 50%; background: var(--tn-canvas, #0b0f0d); border: 1px solid rgb(var(--tnw-tint, 152, 232, 193)); }
+.tl-ev .tl-date { font-family: var(--tn-font-mono, ui-monospace, monospace); font-size: 0.72rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); }
+.tl-ev .tl-name { font-size: 0.86rem; font-weight: 500; line-height: 1.3; }
+.tl-ev:hover { border-color: rgba(var(--tnw-tint, 152, 232, 193), .35); }
+.tl-ev:focus-visible { outline: 2px solid var(--tnw-focus, var(--tn-teal)); outline-offset: 1px; }
+[data-tl-on] .tl-ev[aria-expanded="true"] { border-color: rgba(var(--tnw-tint, 152, 232, 193), .6); background: rgba(var(--tnw-tint, 152, 232, 193), .08); }
+[data-tl-on] .tl-ev[aria-expanded="true"]::before { background: rgb(var(--tnw-tint, 152, 232, 193)); }
+.tl-panel { border: 1px solid rgba(var(--tnw-tint, 152, 232, 193), .25); padding: 0.9rem 1rem 0.6rem; margin: 0 0 0.6rem; }
+.tl-panel[hidden] { display: none; }
+.tl-panel h4 { margin: 0 0 0.45rem; font-size: 1rem; font-weight: 600; }
+.tl-panel p { font-size: 0.92rem; }
+.gd dl.tl-facts { display: grid; grid-template-columns: minmax(7rem, 28%) 1fr; margin: 0.25rem 0 0.6rem; font-size: 0.86rem; }
+.gd dl.tl-facts dt, .gd dl.tl-facts dd { margin: 0; padding: 0.35rem 0; border-bottom: 1px solid rgba(var(--tnw-tint, 152, 232, 193), .12); }
+.gd dl.tl-facts dt { color: var(--tnw-ink-dim, var(--tn-text-muted)); padding-right: 0.75rem; }
+@media (max-width: 599px) {
+  .tl-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 0.6rem; }
+  .tl-rail::before { display: none; }
+  .gd dl.tl-facts { grid-template-columns: 1fr; }
+  .gd dl.tl-facts dt { border-bottom: 0; padding-bottom: 0; }
+}
+/* people */
+.pp .nw-status { font-size: 0.78rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); margin: 0 0 0.5rem; }
+.pp .nw-live { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem 1.5rem; margin: 1.25rem 0 0.5rem; }
+.pp .nw-live > div { padding: 0.35rem 0; min-width: 0; }
+.pp .nw-live b { display: block; font-weight: 500; font-size: 1.3rem; line-height: 1.25; text-shadow: var(--tnw-halo); color: var(--tn-mint); font-family: var(--tn-font-mono, ui-monospace, monospace); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp .nw-live span { font-size: 0.78rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); }
+.pp .pp-members tfoot td { border-bottom: 0; color: var(--tnw-ink-dim, var(--tn-text-muted)); }
+.pp .pp-members td b { font-weight: 600; }
+@media (max-width: 599px) {
+  .pp .nw-live { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pp .nw-live > div:last-child { grid-column: 1 / -1; }
+}
+/* network */
+.nw h2 { font-size: 1.5rem; font-weight: 500; margin: 0.25rem 0 0.5rem; }
+.nw h3 { font-size: 1rem; font-weight: 600; color: rgb(var(--tnw-tint, 152, 232, 193)); margin: 2.25rem 0 0.5rem; }
+.nw p { line-height: 1.6; margin: 0 0 0.75rem; }
+.nw .nw-lede { font-size: 1.1rem; }
+.nw .n, .nw [data-live] { font-family: var(--tn-font-mono, ui-monospace, monospace); font-size: 0.92em; }
+.nw .nw-live { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem 1.5rem; margin: 1.25rem 0 0.5rem; }
+.nw .nw-live > div { padding: 0.35rem 0; min-width: 0; } /* no tile boxes: figure over label on the page background */
+.nw .nw-live b { display: block; font-weight: 500; font-size: 1.3rem; line-height: 1.25; text-shadow: var(--tnw-halo); color: var(--tn-mint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nw .nw-live span { font-size: 0.78rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); }
+.nw .nw-status { font-size: 0.78rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); margin: 0 0 0.5rem; }
+.nw dl.nw-facts { display: grid; grid-template-columns: minmax(9rem, 38%) 1fr; margin: 0.5rem 0; font-size: 0.9rem; }
+.nw dl.nw-facts dt, .nw dl.nw-facts dd { margin: 0; padding: 0.4rem 0; border-bottom: 1px solid rgba(var(--tnw-tint, 152, 232, 193), .12); }
+.nw dl.nw-facts dt { color: var(--tnw-ink-dim, var(--tn-text-muted)); padding-right: 1rem; }
+.nw ul { padding-left: 1.1rem; margin: 0 0 0.75rem; }
+.nw li { margin: 0.3rem 0; line-height: 1.55; }
+.nw code { font-size: 0.8em; }
+.nw h4 { font-size: 0.95rem; font-weight: 600; margin: 1.75rem 0 0.4rem; }
+.nw .shield-panel > h3:first-child { margin-top: 0.5rem; }
+.nw .nw-more { margin: 1rem 0 0.75rem; }
+.nw .nw-src { font-size: 0.78rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); margin-top: 0.35rem; }
+@media (max-width: 599px) {
+  .nw .nw-live { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nw dl.nw-facts { grid-template-columns: 1fr; }
+  .nw dl.nw-facts dt { border-bottom: 0; padding-bottom: 0; }
+}
+@media (max-width: 599px) {
+  .gd dl.gd-facts { grid-template-columns: 1fr; }
+  .gd dl.gd-facts dt { border-bottom: 0; padding-bottom: 0; }
+}
 </style>
 </head>
 <body>
 <script src="/lib/fab.js"></script>
-<canvas id="glow-canvas"></canvas>
 <main class="main">
-<p class="muted" style="font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;">About</p>
-<p class="about-lede">Terp Network exists so anyone can <strong>verify</strong>, <strong>participate</strong>, and <strong>leave with everything</strong> — no permission, no custodian, no trusted bridge in the middle.</p>
+<p class="muted" data-tn-head style="font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;">About</p>
+<nav class="about-tabs" aria-label="About sections"><a href="#about-overview">Overview</a><a href="#about-network">Network</a><a href="#about-genesis">Genesis &amp; distribution</a><a href="#about-people">People</a></nav>
+<section class="about-tab ov" id="about-overview" aria-labelledby="ov-title">
+<h2 id="ov-title" class="sr-only">Overview</h2>
+<p class="about-lede">Terp Network is a public <strong>proof-of-stake</strong> blockchain built with the Cosmos SDK. Anyone can run a node, verify the history, stake, vote, deploy CosmWasm contracts, or move tokens over IBC — without an account with us and without a bridge operator in the middle.</p>
+<p>It uses two tokens: <strong>TERP</strong> to secure the chain and carry the vote, and <strong>THIOL</strong>, minted every block, to pay for transactions. Mainnet is <code>morocco-1</code>; the testnet is <code>120u-1</code>. Source is public.</p>
 
-<div class="about-grid">
-<div class="about-card">
-<h2>Verifiable before trusted</h2>
-<p>Releases ship checksums next to binaries, builds reproduce from source, and every claim on this site resolves to an endpoint you can query yourself.</p>
-</div>
-<div class="about-card">
-<h2>Permissionless to join</h2>
-<p>Run a node, validate, build, or just query state. Nothing here requires an account with us — your keys are the only credential.</p>
-</div>
-<div class="about-card">
-<h2>Sovereign by default</h2>
-<p>Self-custody, open Hermes relayers anyone can fund, governance decided by stake — not by an admin panel or a bridge multisig.</p>
-</div>
-<div class="about-card">
-<h2>Interoperable, not wrapped</h2>
-<p>IBC light clients carry state between chains. No wrapped IOUs, no bridge operator to trust or to fail.</p>
-</div>
-</div>
-
-<table class="about-facts">
-<tr><td>Network</td><td>Mainnet <code>morocco-1</code> · Testnet <code>120u-1</code></td></tr>
-<tr><td>Consensus</td><td>CometBFT proof-of-stake</td></tr>
-<tr><td>Contracts</td><td>CosmWasm on-chain</td></tr>
-<tr><td>Source</td><td><a href="https://github.com/terpnetwork">github.com/terpnetwork</a></td></tr>
-</table>
+<h3>The stack</h3>
+<p>Eight parts, each open to inspect and use directly.</p>
+<dl class="ov-stack">
+<dt><a href="#network/consensus">Validators and nodes</a></dt><dd>Validators agree on each block with CometBFT. Any node can join, replay every block and serve the chain.</dd>
+<dt><a href="#network/tokens">Two tokens</a></dt><dd>TERP secures the chain and carries the vote. THIOL is minted every block and pays for transactions.</dd>
+<dt><a href="#network/governance">Governance</a></dt><dd>Stakers vote in public on parameters, community-pool spending and software upgrades.</dd>
+<dt><a href="#network/cosmwasm">CosmWasm contracts</a></dt><dd>Rust programs compiled to WebAssembly and run by every validator, plus native tokens anyone can create.</dd>
+<dt><a href="#network/accounts">Smart accounts</a></dt><dd>An account can set its own signing rules: extra keys, contract checks, limits on what it may send.</dd>
+<dt><a href="#network/ibc">IBC</a></dt><dd>Light clients move tokens and messages between chains, with no bridge operator to trust.</dd>
+<dt><a href="/resources">Public APIs and archives</a></dt><dd><code>api.terp.network</code> and <code>rpc.terp.network</code> answer any query. Node snapshots and their history are published for anyone.</dd>
+<dt><a href="/eco">Wallets and apps</a></dt><dd>Connect a wallet from the top of any page. The apps under Eco run on the same public chain.</dd>
+</dl>
+<p class="ov-ids">Mainnet <code>morocco-1</code> · testnet <code>120u-1</code> · source at <a href="https://github.com/terpnetwork">github.com/terpnetwork</a></p>
 
 <div class="about-cta">
-<a class="primary" href="/eco">Use the network</a>
+<a href="/eco">Use the network</a>
 <a href="/resources">Run a node</a>
 <a href="https://docs.terp.network">Read the docs</a>
 <a href="https://discord.terp.network">Join the discussion</a>
 </div>
+</section>
+
+<section class="about-tab nw" id="about-network" aria-labelledby="nw-title">
+<h2 id="nw-title">The network</h2>
+<p class="nw-lede">Terp Network is a proof-of-stake blockchain built with the Cosmos SDK. Validators agree on each block with CometBFT, programs run as CosmWasm contracts, and IBC connects it to other chains. Here is what it can do, with live figures from mainnet <code>morocco-1</code>.</p>
+
+<div class="nw-live">
+<div><b data-live="height">—</b><span>Block height</span></div>
+<div><b data-live="blocktime">—</b><span>Block time, last 100 blocks</span></div>
+<div><b data-live="validators">—</b><span>Validators active / registered</span></div>
+<div><b data-live="bonded">—</b><span>Share of TERP staked</span></div>
+<div><b data-live="supply-terp">—</b><span>TERP supply</span></div>
+<div><b data-live="supply-thiol">—</b><span>THIOL supply</span></div>
+</div>
+<p class="nw-status" data-live="status" aria-live="polite">Live figures load from api.terp.network.</p>
+
+<div class="nw-shield" data-shield data-shield-hash="network" data-shield-label="Network topics">
+<div data-shield-orbs></div>
+
+<section data-shield-panel="consensus" data-shield-title="Consensus" id="nw-consensus" aria-label="Consensus and staking">
+<h3>Consensus and staking</h3>
+<p>Validators propose blocks and vote on them in two rounds. A block is final once validators holding more than two-thirds of the staked TERP have signed it, so the chain stays safe as long as less than one-third of that stake misbehaves. A validator caught signing two different blocks at the same height is jailed and slashed.</p>
+<p>Anyone holding TERP can delegate it to a validator and share in its rewards. Staked TERP is also voting weight in governance.</p>
+<dl class="nw-facts">
+<dt>Active set</dt><dd>Up to <span data-live="max-validators">—</span> validators</dd>
+<dt>TERP staked</dt><dd><span data-live="bonded-amt">—</span></dd>
+<dt>Unstaking takes</dt><dd><span data-live="unbonding">—</span></dd>
+</dl>
+<h4>A history anyone can check</h4>
+<p>Each block records the hash of the block before it, together with the signatures of the validators that committed that block, who hold more than two-thirds of the stake. Changing any past block would change its hash and break every block and signature after it, so a rewritten history cannot pass as the real one.</p>
+<p>You do not have to trust whoever serves you the data. A full node checks those signatures and replays every transaction itself; if its result differs from what the validators signed, it stops instead of following along. A light client, such as a wallet or another chain over IBC, checks the validator signatures on each new block header as it arrives.</p>
+<p>Older history is kept in public archive snapshots. Start a node from one, compare its block hashes with any other node, and replay forward from there. Mainnet has produced blocks since <span class="n">2023-04-10</span>; the snapshot history lists which heights each archive covers, with every upgrade halt marked.</p>
+<p class="nw-more"><a class="nw-btn" href="/resources#snapshot-history">Snapshot history</a></p>
+</section>
+
+<section data-shield-panel="tokens" data-shield-title="Two tokens" id="nw-tokens" aria-label="Two tokens">
+<h3>Two tokens</h3>
+<p><strong>TERP</strong> (<code>uterp</code>) secures the chain: validators bond it, delegators stake it, and governance deposits are paid in it. <strong>THIOL</strong> (<code>uthiol</code>) is the working token: the chain mints it every block and it pays for transactions. How both started is on the <a href="#genesis">Genesis</a> tab.</p>
+<dl class="nw-facts">
+<dt>THIOL inflation now</dt><dd><span data-live="inflation">—</span><br><small>Adjusts between <span data-live="inflation-range">—</span> a year with the share of TERP staked.</small></dd>
+</dl>
+</section>
+
+<section data-shield-panel="governance" data-shield-title="Governance" id="nw-governance" aria-label="Governance">
+<h3>Governance</h3>
+<p>Changes to the chain are proposed and voted on openly. TERP stakers vote Yes, No, Abstain or No with veto on parameter changes, community-pool spending and software upgrades; a validator's vote counts for its delegators unless they vote themselves. A passed upgrade names a halt height, and node operators switch binaries there, often automatically with Cosmovisor.</p>
+<dl class="nw-facts">
+<dt>Deposit to open voting</dt><dd><span data-live="gov-deposit">—</span></dd>
+<dt>Voting period</dt><dd><span data-live="gov-voting">—</span></dd>
+<dt>Quorum · pass · veto</dt><dd><span data-live="gov-quorum">—</span> · <span data-live="gov-threshold">—</span> · <span data-live="gov-veto">—</span></dd>
+<dt>Expedited proposals</dt><dd><span data-live="gov-expedited">—</span></dd>
+<dt>Latest proposal</dt><dd><span data-live="gov-latest">—</span></dd>
+</dl>
+<p class="nw-more"><a class="nw-btn" href="/resources#upgrades">Every upgrade by halt height</a></p>
+</section>
+
+<section data-shield-panel="cosmwasm" data-shield-title="CosmWasm" id="nw-cosmwasm" aria-label="CosmWasm smart contracts">
+<h3>CosmWasm smart contracts</h3>
+<p>Programs are written in Rust, compiled to WebAssembly and run by every validator. A contract can hold funds, call other contracts and send IBC messages. Any account can also create its own native token with <strong>tokenfactory</strong>; it behaves like any other coin in balances, transfers and IBC.</p>
+<dl class="nw-facts">
+<dt>Who can upload code</dt><dd><span data-live="wasm-upload">—</span></dd>
+<dt>Who can instantiate by default</dt><dd><span data-live="wasm-inst">—</span></dd>
+<dt>Fee share for contract developers</dt><dd><span data-live="feeshare">—</span> of the fees their registered contracts generate</dd>
+<dt>Cost to create a token</dt><dd><span data-live="tf-fee">—</span></dd>
+</dl>
+</section>
+
+<section data-shield-panel="accounts" data-shield-title="Smart accounts" id="nw-accounts" aria-label="Smart accounts and authenticators">
+<h3>Smart accounts and authenticators</h3>
+<p>Any account can register <strong>authenticators</strong>: rules that decide which signatures and which messages the account accepts. A transaction names the authenticator it wants checked. The building blocks are:</p>
+<ul>
+<li><strong>SignatureVerification</strong>: a public key that may sign for the account, such as a second device key.</li>
+<li><strong>CosmwasmAuthenticatorV1</strong>: a CosmWasm contract judges the transaction, for example one that accepts signatures from an Ethereum key.</li>
+<li><strong>MessageFilter</strong>: limits which messages may be sent.</li>
+<li><strong>AllOf</strong> and <strong>AnyOf</strong>: combine others, so every member or any one of them must approve.</li>
+</ul>
+<p>You can add and remove authenticators for your own account from the wallet panel under Connect.</p>
+<dl class="nw-facts">
+<dt>Smart accounts</dt><dd><span data-live="sa-active">—</span></dd>
+<dt>Gas allowed before an authenticator approves</dt><dd><span data-live="sa-gas">—</span></dd>
+</dl>
+</section>
+
+<section data-shield-panel="ibc" data-shield-title="IBC" id="nw-ibc" aria-label="IBC">
+<h3>IBC</h3>
+<p>The Inter-Blockchain Communication protocol moves tokens and messages between chains. Each side runs a light client of the other and checks its consensus proofs, so there is no bridge operator to trust. Tokens arriving from another chain appear as <code>ibc/…</code> denoms. With <strong>Interchain Accounts</strong>, an account or contract on one chain can control an account on another.</p>
+<dl class="nw-facts">
+<dt>Open transfer channels</dt><dd><span data-live="channels">—</span></dd>
+<dt>Token transfers</dt><dd><span data-live="transfer">—</span></dd>
+<dt>Interchain Accounts</dt><dd><span data-live="ica">—</span></dd>
+</dl>
+<p class="nw-more"><a class="nw-btn" href="/ibc">Move tokens over IBC</a></p>
+</section>
+</div>
+
+<p class="nw-src">Live figures: <code>api.terp.network</code> (staking, bank, mint, gov, IBC, wasm and smart-account queries) with <code>rpc.terp.network</code> as the fallback for the block height.</p>
+</section>
+
+<section class="about-tab gd" id="about-genesis" aria-labelledby="gd-title">
+<h2 id="gd-title">Genesis &amp; distribution</h2>
+<p class="gd-lede">Terp Network launched on <span class="n">2023-04-10</span> from one public genesis file for chain <code>morocco-1</code>. Here is how it got there and where its supply started.</p>
+
+<h3 id="tl-title">History</h3>
+<p>From an Ethereum token, through Chronic Chain, to Terp Network. Select an event for details and sources.</p>
+<div class="tl" data-tl>
+<ol class="tl-rail" aria-labelledby="tl-title">
+<li><button type="button" class="tl-ev" id="tl-b-cht" aria-expanded="true" aria-controls="tl-p-cht"><span class="tl-date">2021-07-20</span><span class="tl-name">Chronic Token</span></button></li>
+<li><button type="button" class="tl-ev" id="tl-b-exploit" aria-expanded="false" aria-controls="tl-p-exploit"><span class="tl-date">2021-10-26</span><span class="tl-name">CHT exploit</span></button></li>
+<li><button type="button" class="tl-ev" id="tl-b-chain" aria-expanded="false" aria-controls="tl-p-chain"><span class="tl-date">2022-04-16</span><span class="tl-name">Chronic Chain</span></button></li>
+<li><button type="button" class="tl-ev" id="tl-b-sunset" aria-expanded="false" aria-controls="tl-p-sunset"><span class="tl-date">By governance</span><span class="tl-name">Chain shut down</span></button></li>
+<li><button type="button" class="tl-ev" id="tl-b-terp" aria-expanded="false" aria-controls="tl-p-terp"><span class="tl-date">2023-04-10</span><span class="tl-name">Terp Network</span></button></li>
+<li><button type="button" class="tl-ev" id="tl-b-foundation" aria-expanded="false" aria-controls="tl-p-foundation"><span class="tl-date">2022-10-25</span><span class="tl-name">Foundation</span></button></li>
+</ol>
+<div class="tl-panels">
+<section class="tl-panel" id="tl-p-cht" aria-labelledby="tl-b-cht">
+<h4>Chronic Token (CHT) on Ethereum</h4>
+<p>An ERC-20 token, CHT, was deployed on Ethereum on <span class="n">2021-07-20</span> at <span class="n">23:39:44 UTC</span> (block <span class="n">12,866,394</span>). Uniswap liquidity was added eleven minutes later. Its supply was <span class="n">420,000,000</span> CHT. The token had its own internal team.</p>
+<dl class="tl-facts"><dt>Contract</dt><dd><span class="gd-addr">0x19fAb8f7dfFfF38268644eAEBd3d538F68036000</span></dd><dt>Holders today</dt><dd><span class="n">1,478</span></dd></dl>
+<p class="gd-src">Sources: <a href="https://eth.blockscout.com/token/0x19fAb8f7dfFfF38268644eAEBd3d538F68036000" target="_blank" rel="noopener">CHT token on Blockscout</a> (creation block and time) · <a href="https://github.com/ChronicNetwork/net" target="_blank" rel="noopener">Chronic Chain README</a> (420 million CHT).</p>
+</section>
+<section class="tl-panel" id="tl-p-exploit" aria-labelledby="tl-b-exploit">
+<h4>The CHT exploit</h4>
+<p>On <span class="n">2021-10-26</span> an address used the token contract’s <code>_burn</code> function on the CHT/WETH Uniswap pair. At <span class="n">08:49:36 UTC</span> (block <span class="n">13,492,015</span>) a contract it had deployed burned <span class="n">55,782,062</span> CHT held by the pair, then sold <span class="n">1,881.8</span> CHT into it for <span class="n">167.94</span> WETH. The next day the token was publicly reported as hacked.</p>
+<p class="gd-src">Sources: <a href="https://eth.blockscout.com/tx/0x8fa2b7a584d6a495cd4d5214b1758ef52c4d0954cbb6d969b48eb43970ab4cdd" target="_blank" rel="noopener">burn and swap transaction</a> · <a href="https://eth.blockscout.com/tx/0x082f24db1d7749d430b095f69ea45fd177160956e15dd82ece28a657b4369f9d" target="_blank" rel="noopener">first <code>_burn</code> call</a> · <a href="https://www.reddit.com/r/etherscan/comments/qgwnfn/chronic_token_cht_hacked_etherscan_can_you_help/" target="_blank" rel="noopener">“Chronic Token CHT hacked” report</a>, 2021-10-27.</p>
+</section>
+<section class="tl-panel" id="tl-p-chain" aria-labelledby="tl-b-chain">
+<h4>Chronic Chain</h4>
+<p>Chronic Chain was built by the Chronic Token team together with active members of its community. It was a Cosmos SDK chain with two tokens: CHT (<span class="n">420,000,000</span>) and CGAS. Earlier ERC-20 CHT holders were offered a presale and a one-to-one CGAS distribution. Its mainnet, chain <code>morocco-1</code>, started on <span class="n">2022-04-16 16:00 UTC</span> and was relaunched from a new genesis on <span class="n">2022-07-06 17:00 UTC</span>.</p>
+<dl class="tl-facts"><dt>Planned split</dt><dd>Community pool <span class="n">140,800,000</span> · Foundation wallet <span class="n">100,800,000</span> · Ecosystem <span class="n">63,540,000</span> · Previous community <span class="n">26,720,000</span> CHT</dd><dt>Relaunch</dt><dd><span class="n">220</span> accounts; gentxs from BloClick, PandaTeam, hdmiimdh, xiti, Lit and Blockscope.net</dd></dl>
+<p class="gd-src">Sources: <a href="https://github.com/ChronicNetwork/net" target="_blank" rel="noopener">ChronicNetwork/net</a> (README, <code>mainnet/genesis.json</code>, <code>mainnet/v1.1/genesis.json</code>) · <a href="https://github.com/cosmos/chain-registry/blob/master/chronicnetwork/chain.json" target="_blank" rel="noopener">chain registry entry</a>.</p>
+</section>
+<section class="tl-panel" id="tl-p-sunset" aria-labelledby="tl-b-sunset">
+<h4>Chronic Chain shut down by governance</h4>
+<p>Chronic Chain’s governance voted to shut the chain down. Its presale had used distribution methods that could not be verified, so the priority became transparent, retroactive integrity for every initial distribution and allocation, the standard Terp Network’s public genesis file is held to.</p>
+<p class="gd-src">Source: <a href="https://github.com/cosmos/chain-registry/pull/757" target="_blank" rel="noopener">chain-registry #757</a> (“sunset via governance”).</p>
+</section>
+<section class="tl-panel" id="tl-p-terp" aria-labelledby="tl-b-terp">
+<h4>Terp Network launch</h4>
+<p>Terp Network went live on <span class="n">2023-04-10</span> as chain <code>morocco-1</code> (the chain id Chronic Chain had used). Both TERP and THIOL start at <span class="n">420,000,000</span>.</p>
+<p>The genesis file came out of a public ceremony: the Terp testnet <code>athena-1</code> was submitted to the chain registry in October 2022, validators submitted their genesis transactions between <span class="n">4</span> and <span class="n">7 April 2023</span>, and the final genesis file was published on <span class="n">2023-04-10</span>. The network started from that file after the ceremony.</p>
+<p>The file’s <code>genesis_time</code> field is set to <span class="n">2022-04-10 12:00:00 UTC</span>; the launch date of the live network is the ceremony date above.</p>
+<p class="gd-src">Sources: <a href="https://github.com/cosmos/chain-registry/pull/890" target="_blank" rel="noopener">chain-registry #890</a> · <a href="https://github.com/terpnetwork/genesis-prelaunch" target="_blank" rel="noopener">terpnetwork/genesis-prelaunch</a> (gentxs, final genesis commit) · <a href="https://raw.githubusercontent.com/terpnetwork/networks/main/mainnet/morocco-1/genesis.json" target="_blank" rel="noopener">genesis file</a>.</p>
+</section>
+<section class="tl-panel" id="tl-p-foundation" aria-labelledby="tl-b-foundation">
+<h4>TerpNET Foundation</h4>
+<p>The TerpNET Foundation started as a DAO DAO organisation on Juno, created on <span class="n">2022-10-25 16:46 UTC</span>. Its first proposal, adding the Terp Network logo, passed on <span class="n">2022-10-26</span>. It has since moved to a DAO on Terp Network itself, created at block <span class="n">20,972,857</span>. The genesis plan lists <code>63000000UTERP &amp; 63000000UTHIOL</code> for the Foundation DAO, with <q>50% at 7 years</q> vesting. See People for its members and holdings.</p>
+<dl class="tl-facts"><dt>On Juno</dt><dd><span class="gd-addr">juno13u0gljkpsdmr5nxepxcwua4xeyzapt52x2stf0lnge9m2fhppqvs2ltftm</span></dd><dt>On Terp</dt><dd><span class="gd-addr">terp14w2qva6dx6wcsmq5fvplh7cr7nvptejznyvpe5hp5mtyqhxxjamsz3kw2w</span></dd></dl>
+<p class="gd-src">Sources: <a href="https://daodao.zone/dao/juno13u0gljkpsdmr5nxepxcwua4xeyzapt52x2stf0lnge9m2fhppqvs2ltftm" target="_blank" rel="noopener">DAO DAO record</a> · <a href="https://github.com/terpnetwork/genesis-prelaunch" target="_blank" rel="noopener">genesis-prelaunch</a> (distribution parameters).</p>
+</section>
+</div>
+</div>
+
+<h3>Two tokens, one network</h3>
+<div class="gd-tokens">
+<div><h4>TERP</h4><p>The staking token. Validators bond it and delegators stake it to secure the chain. Denom <code>uterp</code>.</p></div>
+<div><h4>THIOL</h4><p>The working token, minted by the chain and used for fees. Denom <code>uthiol</code>. Early documents call it PERSY.</p></div>
+</div>
+<p>At genesis each token had a supply of exactly <span class="n">420,000,000</span>, and every funded account received the same amount of TERP as of THIOL.</p>
+
+<h3>At launch</h3>
+<dl class="gd-facts">
+<dt>Chain</dt><dd><code>morocco-1</code>, starting at block <span class="n">1</span></dd>
+<dt>Network launch</dt><dd><span class="n">2023-04-10</span></dd>
+<dt>genesis_time in file</dt><dd><span class="n">2022-04-10 12:00:00 UTC</span></dd>
+<dt>Supply</dt><dd><span class="n">420,000,000</span> TERP · <span class="n">420,000,000</span> THIOL</dd>
+<dt>Funded accounts</dt><dd><span class="n">160,816</span><small>Each holds equal TERP and THIOL.</small></dd>
+<dt>Accounts in total</dt><dd><span class="n">165,816</span><small><span class="n">165,812</span> delayed-vesting accounts and <span class="n">4</span> base accounts.</small></dd>
+<dt>Validators</dt><dd><span class="n">8</span>, each self-bonding <span class="n">1</span> TERP<small>BloClick, Leonoor’s Cryptoman, Blockscope.net, kjnodes, NODEJUMPER, NodeStake, High Stakes 🇨🇭, ZenChainLabs.</small></dd>
+<dt>Community pool</dt><dd>Empty in the file<small>According to the team, the Foundation wallet made the first community pool deposit from the treasury in the first moments of mainnet. That deposit is not part of the genesis file.</small></dd>
+</dl>
+
+<h3>Where the supply started</h3>
+<p>One account, the treasury, held <span class="n">82.63%</span> of each token at launch. A second account held <span class="n">8.76%</span>. The other <span class="n">160,814</span> accounts shared the remaining <span class="n">8.62%</span>.</p>
+<div class="gd-bar" role="img" aria-label="Genesis supply: treasury 82.63%, second account 8.76%, 160,814 other accounts 8.62% of 420,000,000 of each token.">
+<span style="width:82.625167%;background:var(--tn-success)" title="Treasury: 347,025,702.544547 (82.63%)"><span class="gd-vest" style="width:13.3131%"></span></span>
+<span style="width:8.756888%;background:#78dcc4" title="Second account: 36,778,930.043588 (8.76%)"></span>
+<span style="width:8.617945%;background:#e8d08a" title="160,814 other accounts: 36,195,367.411865 (8.62%)"></span>
+</div>
+<ul class="gd-key">
+<li><i style="background:var(--tn-success)"></i><span>Treasury · <span class="n">347,025,702.544547</span> of each token</span></li>
+<li><i class="hatch"></i><span>of which <span class="n">46,200,000</span> TERP vesting until <span class="n">2030-04-20</span>.</span></li>
+<li><i style="background:#78dcc4"></i><span>Second account · <span class="n">36,778,930.043588</span> of each token</span></li>
+<li><i style="background:#e8d08a"></i><span><span class="n">160,814</span> other accounts · <span class="n">36,195,367.411865</span> of each token</span></li>
+</ul>
+<details>
+<summary>Show the numbers</summary>
+<div class="gd-scroll"><table>
+<thead><tr><th>Account</th><th class="r">TERP and THIOL (each)</th><th class="r">Share</th><th>Vesting</th></tr></thead>
+<tbody>
+<tr><td>Treasury<br><a class="gd-addr" href="https://ping.pub/terp/account/terp1qfpnat6kc99gsc3233cw6fq0s0fdv7cq06alqu" target="_blank" rel="noopener">terp1qfpnat6kc99gsc3233cw6fq0s0fdv7cq06alqu</a></td><td class="r n">347,025,702.544547</td><td class="r n">82.6252%</td><td><span class="n">46,200,000</span> TERP until <span class="n">2030-04-20 15:12:02 UTC</span></td></tr>
+<tr><td>Second account<br><a class="gd-addr" href="https://ping.pub/terp/account/terp1l7n595wvgxq88pukk5q3y3xgsqfq6cft9n5ujt" target="_blank" rel="noopener">terp1l7n595wvgxq88pukk5q3y3xgsqfq6cft9n5ujt</a></td><td class="r n">36,778,930.043588</td><td class="r n">8.7569%</td><td><span class="n">5,553.406723</span> TERP until <span class="n">2023-10-20 12:00:00 UTC</span></td></tr>
+<tr><td>Other accounts (<span class="n">160,814</span>)</td><td class="r n">36,195,367.411865</td><td class="r n">8.6179%</td><td>See Vesting below</td></tr>
+<tr><td>Top <span class="n">1,000</span> accounts together</td><td></td><td class="r n">92.8593%</td><td></td></tr>
+</tbody></table></div>
+</details>
+<p>Half of all funded accounts received <span class="n">115.601845</span> of each token or less. The 90th percentile is <span class="n">231.20369</span> and the 99th is <span class="n">5,437.804878</span>. The most common amount, <span class="n">115.601845</span>, went to <span class="n">109,846</span> accounts.</p>
+
+<h3>How much each account received</h3>
+<div class="gd-scroll"><table class="gd-hist">
+<caption class="gd-src" style="caption-side:bottom;text-align:left">Bars: share of funded accounts (upper) and share of supply (lower).</caption>
+<thead><tr><th>TERP received</th><th class="r">Accounts</th><th class="r">Share of supply</th><th><span class="sr-only">Bars</span></th></tr></thead>
+<tbody>
+<tr><td>Under 1</td><td class="r n">0</td><td class="r n" title="0.000000 TERP">0%</td><td class="bars"><span class="b acc" style="width:0.000%"></span><span class="b sup" style="width:0.000%"></span></td></tr>
+<tr><td>1 to 10</td><td class="r n">4</td><td class="r n" title="4.000000 TERP">under 0.01%</td><td class="bars"><span class="b acc" style="width:0.002%"></span><span class="b sup" style="width:0.000%"></span></td></tr>
+<tr><td>10 to 100</td><td class="r n">0</td><td class="r n" title="0.000000 TERP">0%</td><td class="bars"><span class="b acc" style="width:0.000%"></span><span class="b sup" style="width:0.000%"></span></td></tr>
+<tr><td>100 to 1,000</td><td class="r n">158,867</td><td class="r n" title="24,974,044.592722 TERP">5.95%</td><td class="bars"><span class="b acc" style="width:98.788%"></span><span class="b sup" style="width:5.946%"></span></td></tr>
+<tr><td>1,000 to 10,000</td><td class="r n">1,828</td><td class="r n" title="9,946,329.236713 TERP">2.37%</td><td class="bars"><span class="b acc" style="width:1.137%"></span><span class="b sup" style="width:2.368%"></span></td></tr>
+<tr><td>10,000 to 100,000</td><td class="r n">115</td><td class="r n" title="1,274,989.582430 TERP">0.30%</td><td class="bars"><span class="b acc" style="width:0.072%"></span><span class="b sup" style="width:0.304%"></span></td></tr>
+<tr><td>100,000 to 1M</td><td class="r n">0</td><td class="r n" title="0.000000 TERP">0%</td><td class="bars"><span class="b acc" style="width:0.000%"></span><span class="b sup" style="width:0.000%"></span></td></tr>
+<tr><td>1M to 10M</td><td class="r n">0</td><td class="r n" title="0.000000 TERP">0%</td><td class="bars"><span class="b acc" style="width:0.000%"></span><span class="b sup" style="width:0.000%"></span></td></tr>
+<tr><td>10M to 100M</td><td class="r n">1</td><td class="r n" title="36,778,930.043588 TERP">8.76%</td><td class="bars"><span class="b acc" style="width:0.001%"></span><span class="b sup" style="width:8.757%"></span></td></tr>
+<tr><td>100M to 1B</td><td class="r n">1</td><td class="r n" title="347,025,702.544547 TERP">82.63%</td><td class="bars"><span class="b acc" style="width:0.001%"></span><span class="b sup" style="width:82.625%"></span></td></tr>
+</tbody></table></div>
+
+<h3>Vesting</h3>
+<ol class="gd-time">
+<li><b>2022-04-10 12:00 UTC</b> · <code>genesis_time</code> in the file. <span class="n">165,812</span> of the accounts start as delayed-vesting accounts from that clock.</li>
+<li><b>2023-10-20 12:00 UTC</b> · <span class="n">165,811</span> accounts finish vesting.</li>
+<li><b>2030-04-20 15:12:02 UTC</b> · The <span class="n">46,200,000</span> TERP vesting in the treasury account finishes vesting.</li>
+</ol>
+
+<h3>Chain rules at launch</h3>
+<dl class="gd-facts">
+<dt>THIOL inflation</dt><dd><span class="n">93%</span> a year, fixed (minimum and maximum both <span class="n">93%</span>)<small><span class="n">6,311,520</span> blocks a year.</small></dd>
+<dt>Staking</dt><dd>Up to <span class="n">69</span> validators · unbonding takes <span class="n">21</span> days (<span class="n">1,814,400</span> s)</dd>
+<dt>Governance</dt><dd>Deposit <span class="n">100</span> TERP · voting <span class="n">4</span> days · quorum <span class="n">33.4%</span> · pass <span class="n">50%</span> · veto <span class="n">33.4%</span></dd>
+<dt>Community tax</dt><dd><span class="n">2%</span> of rewards</dd>
+<dt>Smart contracts</dt><dd>Uploading and instantiating contracts goes through governance by default</dd>
+</dl>
+
+<h3>Check it yourself</h3>
+<p>Download the genesis file and compare its fingerprint. It is <span class="n">80,023,148</span> bytes.</p>
+<pre data-lang="bash">curl -sL https://raw.githubusercontent.com/terpnetwork/networks/main/mainnet/morocco-1/genesis.json | sha256sum
+ab6c68c50d45cb9a145edf6b37c05cb9eefc2a0488d08498b8f827c2471ba843</pre>
+<ul class="gd-links">
+<li><a href="https://raw.githubusercontent.com/terpnetwork/networks/main/mainnet/morocco-1/genesis.json" target="_blank" rel="noopener">Genesis file</a>: the launch figures on this tab</li>
+<li><a href="https://github.com/cosmos/chain-registry/blob/master/terpnetwork/chain.json" target="_blank" rel="noopener">Cosmos chain registry</a>: points to the same file as Terp’s genesis</li>
+<li><a href="https://ping.pub/terp" target="_blank" rel="noopener">Explorer</a>: accounts and their activity since launch</li>
+</ul>
+</section>
+
+<section class="about-tab gd pp" id="about-people" aria-labelledby="pp-title">
+<h2 id="pp-title">People</h2>
+<p class="gd-lede">The TerpNET Foundation is a DAO on Terp Network. Its members vote on its proposals and its treasury is held by the DAO contract, so its membership, rules and holdings are all public.</p>
+<p class="nw-status" data-live="status">Figures as of <span class="n">2026-10-04 19:00 UTC</span>. Live figures load from api.terp.network when this tab is open.</p>
+<div class="nw-live">
+<div><b data-live="members">3</b><span>members</span></div>
+<div><b data-live="proposals">6</b><span>proposals</span></div>
+<div><b data-live="tre-terp">16,762,945</b><span>TERP in the treasury</span></div>
+</div>
+
+<h3>Members</h3>
+<p>Three addresses hold the vote today, with weights <span class="n">1,000</span>, <span class="n">1,000</span> and <span class="n">999</span> (total <span class="n">2,999</span>). A Terp Account Billboards name is shown when one is set for an address.</p>
+<div class="gd-scroll"><table class="pp-members">
+<thead><tr><th>Member</th><th class="r">Voting weight</th><th class="r">Share</th></tr></thead>
+<tbody data-live="member-rows">
+<tr><td><a class="gd-addr" href="https://ping.pub/terp/account/terp1fxccvvhhy43tvet2ah7jqwq4cwl9k3dxmww052" target="_blank" rel="noopener">terp1fxccvvhhy43tvet2ah7jqwq4cwl9k3dxmww052</a></td><td class="r n">1,000</td><td class="r n">33.34%</td></tr>
+<tr><td><a class="gd-addr" href="https://ping.pub/terp/account/terp1fpdz820lcfze3alx2gukhp7yrnhshe4dv96wgj" target="_blank" rel="noopener">terp1fpdz820lcfze3alx2gukhp7yrnhshe4dv96wgj</a></td><td class="r n">1,000</td><td class="r n">33.34%</td></tr>
+<tr><td><a class="gd-addr" href="https://ping.pub/terp/account/terp14eygcfdmwpl00nw2amqpujg73nyy59azqu55em" target="_blank" rel="noopener">terp14eygcfdmwpl00nw2amqpujg73nyy59azqu55em</a></td><td class="r n">999</td><td class="r n">33.31%</td></tr>
+</tbody>
+<tfoot><tr><td>Total</td><td class="r n" data-live="total-weight">2,999</td><td></td></tr></tfoot>
+</table></div>
+<p>On-chain governance created this DAO with <a href="https://ping.pub/terp/gov/56" target="_blank" rel="noopener">proposal <span class="n">56</span></a>, <q>Create TerpNET DAO</q>, which passed on <span class="n">2026-06-17</span>. The proposal’s message is sent by the governance module and instantiates the DAO contract (code <span class="n">23</span>) at block <span class="n">20,972,857</span>.</p>
+<p class="gd-src">Proposal: <a href="https://ping.pub/terp/gov/56" target="_blank" rel="noopener">ping.pub/terp/gov/56</a> · contract <a class="gd-addr" href="https://ping.pub/terp/account/terp14w2qva6dx6wcsmq5fvplh7cr7nvptejznyvpe5hp5mtyqhxxjamsz3kw2w" target="_blank" rel="noopener">terp14w2qva6dx6wcsmq5fvplh7cr7nvptejznyvpe5hp5mtyqhxxjamsz3kw2w</a>.</p>
+
+<h3>How it decides</h3>
+<dl class="gd-facts">
+<dt>Passing</dt><dd>A majority of votes cast, with at least <span class="n" data-live="quorum">20%</span> of the voting weight taking part</dd>
+<dt>Voting period</dt><dd><span class="n" data-live="voting">32 hours</span></dd>
+<dt>After it passes</dt><dd>A proposal waits <span class="n" data-live="timelock">7 days</span> before it can run<small>During that time Terp’s on-chain governance (the chain’s governance module account) can veto it, or let it run early.</small></dd>
+<dt>Admin</dt><dd>The DAO is its own admin; no outside account can change it</dd>
+</dl>
+
+<h3>Treasury</h3>
+<dl class="gd-facts" data-live="treasury">
+<dt>TERP</dt><dd><span class="n">16,762,945.299495</span></dd>
+<dt>THIOL</dt><dd><span class="n">200,927,462.487541</span></dd>
+<dt>BTSG</dt><dd><span class="n">100</span><small>From BitSong over IBC.</small></dd>
+<dt>allZEC</dt><dd><span class="n">417,579</span> base units<small>Osmosis alloyed ZEC over IBC.</small></dd>
+</dl>
+<p class="gd-src">DAO contract: <a class="gd-addr" href="https://ping.pub/terp/account/terp14w2qva6dx6wcsmq5fvplh7cr7nvptejznyvpe5hp5mtyqhxxjamsz3kw2w" target="_blank" rel="noopener">terp14w2qva6dx6wcsmq5fvplh7cr7nvptejznyvpe5hp5mtyqhxxjamsz3kw2w</a>.</p>
+
+<h3>Foundation allocation</h3>
+<p>The treasury account on the Genesis tab holds the Foundation’s vesting allocation: <span class="n">46,200,000</span> TERP that unlock all at once on <span class="n">2030-04-20 15:12:02 UTC</span>. Until then it can be staked but not sent.</p>
+<dl class="gd-facts">
+<dt>Account</dt><dd><a class="gd-addr" href="https://ping.pub/terp/account/terp1qfpnat6kc99gsc3233cw6fq0s0fdv7cq06alqu" target="_blank" rel="noopener">terp1qfpnat6kc99gsc3233cw6fq0s0fdv7cq06alqu</a></dd>
+<dt>Vesting</dt><dd><span class="n" data-live="v-orig">46,200,000</span> TERP until <span class="n" data-live="v-end">2030-04-20 15:12:02 UTC</span><small>A delayed-vesting account: nothing unlocks before the end date.</small></dd>
+<dt>Staked</dt><dd><span class="n" data-live="a-staked">6,610,289.96</span> TERP with <span class="n" data-live="a-vals">29</span> validators</dd>
+<dt>Not staked</dt><dd><span class="n" data-live="a-bank">39,484,990</span> TERP · spendable <span class="n" data-live="a-spend">0</span> TERP</dd>
+<dt>THIOL</dt><dd><span class="n" data-live="a-thiol">2,044,807.67</span> THIOL</dd>
+</dl>
+<p>At genesis this account held <span class="n">347,025,702.544547</span> of each token, which matches the plan’s Protocol Treasury line (<span class="n">284,025,703</span>) and Foundation DAO line (<span class="n">63,000,000</span>) taken together. The plan lists the Foundation line as <q>50% at 7 years</q>.</p>
+<p class="gd-src">Plan: <a href="https://github.com/terpnetwork/genesis-prelaunch" target="_blank" rel="noopener">terpnetwork/genesis-prelaunch</a>.</p>
+
+<h3>Other account</h3>
+<dl class="gd-facts">
+<dt>Account</dt><dd><a class="gd-addr" href="https://ping.pub/terp/account/terp1x8rxh2k68xawu5pep8rd2fzy2j0v47cfwp424q" target="_blank" rel="noopener">terp1x8rxh2k68xawu5pep8rd2fzy2j0v47cfwp424q</a></dd>
+<dt>Holds</dt><dd><span class="n" data-live="x-terp">1,000</span> TERP · <span class="n" data-live="x-thiol">999.98</span> THIOL</dd>
+</dl>
+</section>
 </main>
 <script type="module">
   import { applyNavGuard } from '/lib/nav-guard.js';
-  import { startGlowBg } from '/lib/glow-bg.js';
   applyNavGuard();
-  try { startGlowBg(); } catch { /* optional */ }
 </script>
 </body>
 </html>

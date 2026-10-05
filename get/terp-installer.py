@@ -28,8 +28,8 @@ PRUNING_CHOICES = ['default', 'nothing', 'everything']
 # Binary Versions
 # Keep in sync with terp-installer.sh TERPD_VERSION when cutting a release.
 # Keep in sync with get/terp-installer.sh TERPD_VERSION and s3 releases/terp-core/vX.Y.Z
-MAINNET_VERSION = "6.0.0"
-TESTNET_VERSION = "6.0.0"
+MAINNET_VERSION = "6.0.1"
+TESTNET_VERSION = "6.2.0"
 
 # GitHub Repository
 GITHUBURL = "https://github.com/terpnetwork/terp-core"
@@ -68,6 +68,44 @@ COSMOVISOR_BASE_URL = "https://snapshot-mainnet.terp.network/binaries/cosmovisor
 # ============================================================================
 # END CONFIGURATION CONSTANTS
 # ============================================================================
+
+def persist_terpd_path(binary_path):
+    """Put terpd on PATH for zsh (not only ~/.profile) and this process."""
+    bin_dir = os.path.dirname(os.path.abspath(binary_path))
+    os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
+    home = os.path.expanduser("~")
+    local_bin = os.path.join(home, ".local", "bin")
+    for d in ("/opt/homebrew/bin", "/usr/local/bin", local_bin):
+        try:
+            if d == local_bin:
+                os.makedirs(d, exist_ok=True)
+            if os.path.isdir(d) and os.access(d, os.W_OK):
+                dest = os.path.join(d, "terpd")
+                if os.path.islink(dest) or not os.path.exists(dest):
+                    if os.path.islink(dest) or os.path.exists(dest):
+                        os.remove(dest)
+                    os.symlink(os.path.abspath(binary_path), dest)
+                    print(f"  linked {dest} -> {binary_path}")
+                    break
+        except OSError:
+            continue
+    for rc in (".zprofile", ".zshrc", ".bash_profile", ".profile"):
+        path = os.path.join(home, rc)
+        mark = f"# terp-installer: PATH {bin_dir}"
+        line = f'export PATH="{bin_dir}:$PATH"\n'
+        try:
+            existing = ""
+            if os.path.isfile(path):
+                with open(path) as f:
+                    existing = f.read()
+            if mark not in existing:
+                with open(path, "a") as f:
+                    f.write(f"\n{mark}\n{line}")
+                print(f"  PATH += {bin_dir}  ({path})")
+        except OSError:
+            continue
+    print(f"  binary: {binary_path}")
+
 
 # CLI arguments
 parser = argparse.ArgumentParser(description="Terp Network Installer")
@@ -1155,6 +1193,7 @@ def download_binary(network):
                 os.chmod(binary_path, 0o755)
 
             subprocess.run([binary_path, "version"], check=True)
+            persist_terpd_path(binary_path)
             print("Binary downloaded successfully.")
             clear_screen()
             return
@@ -1170,21 +1209,33 @@ def download_binary(network):
             sys.exit(1)
 
         print("Building " + bcolors.PURPLE + "terpd" + bcolors.ENDC + f" v{version} from source (this may take a few minutes)...")
-        subprocess.run(
-            ["go", "install", f"github.com/terpnetwork/terp-core/v6/cmd/terpd@v{version}"],
-            check=True,
-        )
-
-        go_bin = os.path.join(
-            subprocess.run(["go", "env", "GOPATH"], capture_output=True, text=True, check=True).stdout.strip(),
-            "bin", "terpd"
-        )
-        if os.path.isfile(go_bin) and go_bin != binary_path:
+        clones = [
+            os.path.expanduser("~/abstract/terp-core"),
+            os.path.expanduser("~/terp-core"),
+        ]
+        src = next((p for p in clones if os.path.isdir(os.path.join(p, "cmd", "terpd"))), None)
+        if src and operating_system == "darwin":
+            subprocess.run(["make", "build-darwin-arm64"], cwd=src, check=True)
+            built = os.path.join(src, "build", "terpd-darwin-arm64")
             import shutil
-            shutil.copy2(go_bin, binary_path)
+            shutil.copy2(built, binary_path)
             os.chmod(binary_path, 0o755)
+        else:
+            subprocess.run(
+                ["go", "install", f"github.com/terpnetwork/terp-core/v6/cmd/terpd@v{version}"],
+                check=True,
+            )
+            go_bin = os.path.join(
+                subprocess.run(["go", "env", "GOPATH"], capture_output=True, text=True, check=True).stdout.strip(),
+                "bin", "terpd"
+            )
+            if os.path.isfile(go_bin) and go_bin != binary_path:
+                import shutil
+                shutil.copy2(go_bin, binary_path)
+                os.chmod(binary_path, 0o755)
 
         subprocess.run([binary_path, "version"], check=True)
+        persist_terpd_path(binary_path)
         print("Binary built and installed successfully.")
         clear_screen()
         return

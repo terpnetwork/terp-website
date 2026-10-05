@@ -18,10 +18,11 @@
 set -euo pipefail
 
 # ── Configuration (user‑overridable via env vars) ────────────────────────
-# Keep in sync with public/config + releases/terp-core/vX.Y.Z on s3.terp.network
-TERPD_VERSION="${TERPD_VERSION:-6.0.0}"
-# Versioned binaries: https://s3.terp.network/releases/terp-core/v6.0.0/terpd-6.0.0-linux-amd64.tar.gz
-# Upgrade info for cosmovisor: https://s3.terp.network/upgrades/<name>/cosmovisor.json
+# Keep in sync with get/terp-installer.py and s3.terp.network/releases/terp-core/vX.Y.Z
+# morocco-1 (mainnet) stays on the rolling patch until the v6.1 halt.
+# 120u-1 (testnet) is the dual-upgrade line (v6.2.0 includes v6.1).
+MAINNET_VERSION="${MAINNET_VERSION:-6.0.1}"
+TESTNET_VERSION="${TESTNET_VERSION:-6.2.0}"
 RELEASES_BASE="${RELEASES_BASE:-https://s3.terp.network/releases/terp-core}"
 S3_BASE="${S3_BASE:-https://s3.terp.network/snapshots}"
 BINARY_DEST="${TERPD_BIN:-$HOME/go/bin/terpd}"
@@ -168,35 +169,64 @@ case "$OS" in
         ;;
 esac
 
-# ── Detect network from flags or env, else default to mainnet ──────────
+# ── Detect network from flags or env. Interactive: ask before download. ──
+NETWORK_LOCKED=""
 if echo "$*" | grep -q -- "--network 120u-1\|--network=120u-1"; then
     NETWORK="120u-1"
-elif [ "${TERP_NETWORK:-}" = "120u-1" ]; then
-    NETWORK="120u-1"
-else
+    NETWORK_LOCKED=1
+elif echo "$*" | grep -q -- "--network morocco-1\|--network=morocco-1"; then
     NETWORK="morocco-1"
+    NETWORK_LOCKED=1
+elif [ "${TERP_NETWORK:-}" = "120u-1" ] || [ "${TERP_NETWORK:-}" = "morocco-1" ]; then
+    NETWORK="$TERP_NETWORK"
+    NETWORK_LOCKED=1
+else
+    NETWORK=""
 fi
-
-# Map network name to S3 snapshot folder (archives / chain json — not binaries)
-case "$NETWORK" in
-    120u-1)    S3_NET="testnet"  ;;
-    morocco-1) S3_NET="mainnet"  ;;
-    *)         S3_NET="mainnet"  ;;
-esac
-
-# Prefer versioned release objects: releases/<repo>/<tag>/
-# Fallback order: versioned tarball → plain binary → legacy snapshots/.../releases/latest/
-DOWNLOAD_URL_TGZ="${RELEASES_BASE}/v${TERPD_VERSION}/terpd-${TERPD_VERSION}-${OS}-${ARCH}.tar.gz"
-DOWNLOAD_URL="${RELEASES_BASE}/v${TERPD_VERSION}/${BINARY_NAME}"
-DOWNLOAD_URL_LEGACY="${S3_BASE}/${S3_NET}/releases/latest/${BINARY_NAME}"
 
 # ── Header ──────────────────────────────────────────────────────────────
 intro_terp
-echo "=== Terp Network Installer v${TERPD_VERSION} ==="
+echo "=== Terp Network Installer ==="
 echo ""
 echo "  Platform : ${OS}/${ARCH}"
-echo "  Network  : ${NETWORK}"
 echo "  Binary   : ${BINARY_DEST}"
+echo "  Mainnet  : morocco-1  terpd v${MAINNET_VERSION}"
+echo "  Testnet  : 120u-1     terpd v${TESTNET_VERSION}"
+echo ""
+
+# Ask network before downloading so testnet does not get the mainnet ELF.
+if [ -z "$NETWORK" ]; then
+    if stdin_available; then
+        echo "1) Network"
+        echo "   1) morocco-1   (mainnet, v${MAINNET_VERSION})"
+        echo "   2) 120u-1      (testnet, v${TESTNET_VERSION})"
+        prompt NET_CHOICE "Enter choice [1]:" "1"
+        case "$NET_CHOICE" in
+            2) NETWORK="120u-1" ;;
+            *) NETWORK="morocco-1" ;;
+        esac
+        NETWORK_LOCKED=1
+        echo "  -> ${NETWORK}"
+        echo ""
+    else
+        NETWORK="morocco-1"
+    fi
+fi
+
+case "$NETWORK" in
+    120u-1)    S3_NET="testnet";  _default_ver="$TESTNET_VERSION" ;;
+    morocco-1) S3_NET="mainnet";  _default_ver="$MAINNET_VERSION" ;;
+    *)         S3_NET="mainnet";  _default_ver="$MAINNET_VERSION" ;;
+esac
+TERPD_VERSION="${TERPD_VERSION:-$_default_ver}"
+
+DOWNLOAD_URL_TGZ="${RELEASES_BASE}/v${TERPD_VERSION}/terpd-${TERPD_VERSION}-${OS}-${ARCH}.tar.gz"
+DOWNLOAD_URL="${RELEASES_BASE}/v${TERPD_VERSION}/${BINARY_NAME}"
+DOWNLOAD_URL_LEGACY="${S3_BASE}/${S3_NET}/releases/latest/${BINARY_NAME}"
+SUMS_URL="${RELEASES_BASE}/v${TERPD_VERSION}/sha256sum.txt"
+
+echo "  Network  : ${NETWORK}"
+echo "  Version  : v${TERPD_VERSION}"
 echo "  Source   : ${DOWNLOAD_URL_TGZ}"
 echo ""
 
@@ -221,6 +251,91 @@ try_download() {
     return 1
 }
 
+sha256_file() {
+    if command -v shasum >/dev/null 2>&1; then
+        shasum -a 256 "$1" | awk '{print $1}'
+    else
+        sha256sum "$1" | awk '{print $1}'
+    fi
+}
+
+verify_tarball_sum() {
+    _tar="$1"
+    _name="$2"
+    _want=""
+    if command -v curl >/dev/null 2>&1; then
+        _want="$(curl -fsSL "$SUMS_URL" 2>/dev/null | awk -v n="$_name" '$2 == n {print $1; exit}')" || true
+    fi
+    if [ -z "$_want" ]; then
+        if [ "$OS" = "linux" ]; then
+            echo "Error: $SUMS_URL has no $_name (refusing unsigned linux ELF)" >&2
+            return 1
+        fi
+        echo "  (no sha256sum.txt entry for $_name — darwin pack may not be published yet)"
+        return 0
+    fi
+    _got="$(sha256_file "$_tar")"
+    if [ "$_got" != "$_want" ]; then
+        echo "Error: checksum mismatch for $_name" >&2
+        echo "  want $_want" >&2
+        echo "  got  $_got" >&2
+        return 1
+    fi
+    echo "  checksum ok $_name"
+}
+
+# Published darwin ELFs must not rpath this clone. If the tarball still
+# links libwasmvm.dylib, put the dylib next to terpd and add @loader_path.
+fix_darwin_wasmvm() {
+    [ "$OS" = "darwin" ] || return 0
+    command -v otool >/dev/null 2>&1 || return 0
+    if ! otool -L "$BINARY_DEST" | grep -q libwasmvm.dylib; then
+        return 0
+    fi
+    if [ -n "${WASMVM_DYLIB:-}" ] && [ -f "$WASMVM_DYLIB" ]; then
+        cp -f "$WASMVM_DYLIB" "$BIN_DIR/libwasmvm.dylib"
+        chmod 755 "$BIN_DIR/libwasmvm.dylib"
+    fi
+    if [ ! -f "$BIN_DIR/libwasmvm.dylib" ]; then
+        echo "Error: terpd links libwasmvm.dylib but it was not in the tarball." >&2
+        echo "This is the v6.0.0 darwin rpath bug. Rebuild with:" >&2
+        echo "  make build-darwin-arm64   # static_wasm, no dylib" >&2
+        return 1
+    fi
+    if command -v install_name_tool >/dev/null 2>&1; then
+        install_name_tool -add_rpath "@loader_path" "$BINARY_DEST" 2>/dev/null || true
+        install_name_tool -add_rpath "$BIN_DIR" "$BINARY_DEST" 2>/dev/null || true
+    fi
+    echo "  placed $BIN_DIR/libwasmvm.dylib (@loader_path)"
+}
+
+build_from_source() {
+    _src=""
+    for _cand in "$HOME/abstract/terp-core" "$HOME/terp-core"; do
+        if [ -d "$_cand/cmd/terpd" ]; then
+            _src="$_cand"
+            break
+        fi
+    done
+    if [ -z "$_src" ]; then
+        echo "Error: no published ${OS}/${ARCH} tarball for v${TERPD_VERSION} and no local terp-core clone." >&2
+        echo "Linux: wait for releases/terp-core/v${TERPD_VERSION}/" >&2
+        echo "Darwin: git clone https://github.com/terpnetwork/terp-core ~/terp-core" >&2
+        echo "  cd ~/terp-core && make build-darwin-arm64 && cp build/terpd-darwin-arm64 $BINARY_DEST" >&2
+        return 1
+    fi
+    echo "Found local clone at $_src. Building (static wasmvm on darwin)..."
+    (
+        cd "$_src"
+        if [ "$OS" = "darwin" ]; then
+            make build-darwin-arm64
+            cp -f build/terpd-darwin-arm64 "$BINARY_DEST"
+        else
+            GOWORK=off go build -mod=mod -tags "netgo ledger" -o "$BINARY_DEST" ./cmd/terpd
+        fi
+    )
+}
+
 if try_download "$DOWNLOAD_URL_TGZ"; then
     DOWNLOAD_OK=1
     EXTRACTED=1
@@ -232,12 +347,19 @@ elif try_download "$DOWNLOAD_URL_LEGACY"; then
 fi
 
 if [ "$DOWNLOAD_OK" = "1" ] && [ -s "$TMPFILE" ]; then
+    WASMVM_DYLIB=""
     if [ "$EXTRACTED" = "1" ]; then
+        verify_tarball_sum "$TMPFILE" "terpd-${TERPD_VERSION}-${OS}-${ARCH}.tar.gz" || { rm -f "$TMPFILE"; exit 1; }
         TMPDIR_EXT="$(mktemp -d /tmp/terpd-ext.XXXXXX)"
         tar -xzf "$TMPFILE" -C "$TMPDIR_EXT" 2>/dev/null || tar -xf "$TMPFILE" -C "$TMPDIR_EXT" 2>/dev/null || true
         FOUND="$(find "$TMPDIR_EXT" -type f \( -name 'terpd' -o -name 'terpd-linux-*' -o -name 'terpd-darwin-*' \) 2>/dev/null | head -1)"
+        DYLIB_FOUND="$(find "$TMPDIR_EXT" -type f -name 'libwasmvm.dylib' 2>/dev/null | head -1)"
         if [ -n "$FOUND" ] && [ -s "$FOUND" ]; then
             mv "$FOUND" "$TMPFILE"
+        fi
+        if [ -n "$DYLIB_FOUND" ] && [ -s "$DYLIB_FOUND" ]; then
+            WASMVM_DYLIB="$BIN_DIR/libwasmvm.dylib"
+            cp -f "$DYLIB_FOUND" "$WASMVM_DYLIB"
         fi
         rm -rf "$TMPDIR_EXT"
     fi
@@ -251,71 +373,78 @@ if [ "$DOWNLOAD_OK" = "1" ] && [ -s "$TMPFILE" ]; then
         sudo mv "$TMPFILE" "$BINARY_DEST"
         sudo chown "$(id -u):$(id -g)" "$BINARY_DEST" 2>/dev/null || true
         sudo chmod +x "$BINARY_DEST"
+        [ -n "$WASMVM_DYLIB" ] && [ -f "$WASMVM_DYLIB" ] && sudo chmod 755 "$WASMVM_DYLIB" || true
     fi
+    fix_darwin_wasmvm || { echo "Error: darwin wasmvm dylib missing" >&2; exit 1; }
 else
-    # ── Fallback: build from source (local checkout or go install) ────
     rm -f "$TMPFILE"
     echo ""
-    echo "Binary download failed. Attempting to build terpd from source..."
+    echo "Binary download failed (no object at ${DOWNLOAD_URL_TGZ})."
+    echo "Attempting to build terpd v${TERPD_VERSION} from source..."
     echo ""
-
-    if command -v go >/dev/null 2>&1; then
-        # Try local terp-core checkout first
-        if [ -d "$HOME/terp-core/cmd/terpd" ]; then
-            echo "Found local clone at $HOME/terp-core. Building..."
-            cd "$HOME/terp-core"
-            go build -o "$BINARY_DEST" ./cmd/terpd/
-            cd "$OLDPWD"
-        elif [ -d "$HOME/abstract/terp-core/cmd/terpd" ]; then
-            echo "Found local clone at $HOME/abstract/terp-core. Building..."
-            cd "$HOME/abstract/terp-core"
-            go build -o "$BINARY_DEST" ./cmd/terpd/
-            cd "$OLDPWD"
-        else
-            echo "Attempting go install (requires a tagged release on GitHub)..."
-            go install "github.com/terpnetwork/terp-core/v6/cmd/terpd@v${TERPD_VERSION}" 2>/dev/null && {
-                GO_BIN="$(go env GOPATH)/bin/terpd"
-                if [ "$GO_BIN" != "$BINARY_DEST" ] && [ -f "$GO_BIN" ]; then
-                    cp "$GO_BIN" "$BINARY_DEST"
-                fi
-            } || {
-                echo ""
-                echo "Error: Could not build terpd from source."
-                echo "Install Go from https://go.dev/dl/ then run:"
-                echo "  git clone https://github.com/terpnetwork/terp-core ~/terp-core"
-                echo "  cd ~/terp-core && go build -o $BINARY_DEST ./cmd/terpd/"
-                exit 1
-            }
-        fi
-        # Verify
-        if [ ! -f "$BINARY_DEST" ] || ! "$BINARY_DEST" version >/dev/null 2>&1; then
-            echo "Error: Built binary failed to run." >&2
-            exit 1
-        fi
-        echo "Build complete."
-    else
+    if ! command -v go >/dev/null 2>&1; then
         echo "Error: Go is required to build terpd from source." >&2
         echo "Install Go from https://go.dev/dl/ or: brew install go" >&2
         exit 1
     fi
+    build_from_source || exit 1
+    echo "Build complete."
 fi
 
-# ── PATH hint ────────────────────────────────────────────────────────────
-case ":${PATH}:" in
-    *":${BIN_DIR}:") ;;
-    *)
-        echo ""
-        echo "Note: ${BIN_DIR} is not on your PATH."
-        echo "Add it with:  export PATH=\"${BIN_DIR}:\$PATH\""
-        echo "Or add to ~/.profile for persistence."
-        ;;
-esac
+# Persist PATH in files the login shell actually reads (zsh ignores ~/.profile).
+ensure_path_file() {
+    _file="$1"
+    _dir="$2"
+    _mark="# terp-installer: PATH ${_dir}"
+    _line="export PATH=\"${_dir}:\$PATH\""
+    touch "$_file" 2>/dev/null || return 0
+    if grep -Fq "$_mark" "$_file" 2>/dev/null; then
+        return 0
+    fi
+    printf '\n%s\n%s\n' "$_mark" "$_line" >> "$_file"
+    echo "  PATH += ${_dir}  ($_file)"
+}
+
+link_terpd_on_path() {
+    _d=""
+    for _d in /opt/homebrew/bin /usr/local/bin "$HOME/.local/bin"; do
+        if [ "$_d" = "$HOME/.local/bin" ]; then
+            mkdir -p "$_d"
+        fi
+        if [ -d "$_d" ] && [ -w "$_d" ]; then
+            ln -sf "$BINARY_DEST" "$_d/terpd"
+            echo "  linked ${_d}/terpd -> ${BINARY_DEST}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+echo ""
+echo "Installing terpd on PATH..."
+export PATH="${BIN_DIR}:${PATH}"
+link_terpd_on_path || true
+ensure_path_file "$HOME/.zprofile" "$BIN_DIR"
+ensure_path_file "$HOME/.zshrc" "$BIN_DIR"
+ensure_path_file "$HOME/.bash_profile" "$BIN_DIR"
+ensure_path_file "$HOME/.profile" "$BIN_DIR"
+if [ -d "$HOME/.local/bin" ]; then
+    export PATH="${HOME}/.local/bin:${PATH}"
+    ensure_path_file "$HOME/.zprofile" "$HOME/.local/bin"
+    ensure_path_file "$HOME/.zshrc" "$HOME/.local/bin"
+fi
+hash -r 2>/dev/null || true
+command -v rehash >/dev/null 2>&1 && rehash || true
 
 # ── Verify binary ───────────────────────────────────────────────────────
 echo ""
 echo "Verifying installation..."
-export PATH="${BIN_DIR}:${PATH}"
-terpd version || { echo "Error: terpd binary failed to run" >&2; exit 1; }
+if ! "$BINARY_DEST" version; then
+    echo "Error: terpd binary failed to run ($BINARY_DEST)" >&2
+    exit 1
+fi
+echo "  binary: $BINARY_DEST"
+command -v terpd >/dev/null && echo "  command: $(command -v terpd)" || echo "  command: open a new terminal (or: source ~/.zprofile)"
 
 echo ""
 echo "terpd v${TERPD_VERSION} installed successfully."
@@ -326,7 +455,7 @@ echo ""
 # those verbatim.  If no flags and we have a terminal, run the wizard.
 if [ $# -gt 0 ]; then
     # Explicit flags from command line — pass them through
-    BOOTSTRAP_CMD="terpd bootstrap $*"
+    BOOTSTRAP_CMD="$BINARY_DEST bootstrap $*"
 elif stdin_available; then
     # ── Interactive Setup Wizard ──────────────────────────────────────
     echo "╔══════════════════════════════════════════════════════════╗"
@@ -335,18 +464,9 @@ elif stdin_available; then
     echo "╚══════════════════════════════════════════════════════════╝"
     echo ""
 
-    # 1. Network
-    echo "1) Network & Chain"
-    echo "   1) morocco-1   (mainnet)"
-    echo "   2) 120u-1     (testnet)"
-    prompt NET_CHOICE "Enter choice [1]:" "1"
-    case "$NET_CHOICE" in
-        2) BOOTSTRAP_FLAGS="--network 120u-1"
-           NETWORK="120u-1" ;;
-        *) BOOTSTRAP_FLAGS="--network morocco-1"
-           NETWORK="morocco-1" ;;
-    esac
-    echo "  -> ${NETWORK}"
+    # 1. Network (already chosen before download so the ELF matches the chain)
+    echo "1) Network & Chain: ${NETWORK} (terpd v${TERPD_VERSION})"
+    BOOTSTRAP_FLAGS="--network ${NETWORK}"
     echo ""
 
     # 2. Custom home directory
@@ -409,13 +529,38 @@ elif stdin_available; then
         echo "   2) pruned      — pruned pack from minio.terp.network"
         prompt SNAP_CLASS "Snapshot class [1=lightweight, 2=pruned, Enter=1]:" "1"
         case "$SNAP_CLASS" in
-            2) BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --snapshot-class pruned"
-               echo "  -> pruned" ;;
-            *) BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --snapshot-class light"
-               echo "  -> lightweight" ;;
+            2) SNAP_KIND="pruned" ;;
+            *) SNAP_KIND="light" ;;
         esac
+        echo "  -> ${SNAP_KIND}"
         prompt SNAP_URL "Override snapshot URL (empty = resolve from catalog):" ""
-        [ -n "$SNAP_URL" ] && BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --snapshot-url $SNAP_URL"
+        if [ -n "$SNAP_URL" ]; then
+            BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --snapshot-url $SNAP_URL"
+        elif "$BINARY_DEST" bootstrap -h 2>&1 | grep -q -- '--snapshot-class'; then
+            BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --snapshot-class $SNAP_KIND"
+        else
+            # v6.0.1 has --sync-mode snapshot but not --snapshot-class.
+            _netpath="mainnet/${NETWORK}"
+            [ "$NETWORK" = "120u-1" ] && _netpath="testnet/120u-1"
+            if [ "$SNAP_KIND" = "pruned" ]; then
+                _cat="https://minio.terp.network/snapshots/${_netpath}/pruned/snapshot.json"
+            else
+                _cat="https://minio.terp.network/snapshots/${_netpath}/snapshot_light.json"
+            fi
+            _resolved=""
+            if command -v python3 >/dev/null 2>&1; then
+                _resolved="$(curl -fsSL "$_cat" 2>/dev/null | python3 -c 'import json,sys
+d=json.load(sys.stdin)
+u=d.get("latest") or d.get("url") or ((d.get("snapshots") or [None])[0])
+print(u or "")' 2>/dev/null || true)"
+            fi
+            if [ -n "$_resolved" ]; then
+                BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --snapshot-url $_resolved"
+                echo "  catalog $_cat"
+            else
+                echo "  (no catalog URL; pass --snapshot-url or the node will sync from genesis)"
+            fi
+        fi
     fi
     echo ""
 
@@ -448,10 +593,10 @@ elif stdin_available; then
     fi
     echo ""
 
-    BOOTSTRAP_CMD="terpd bootstrap $BOOTSTRAP_FLAGS"
+    BOOTSTRAP_CMD="$BINARY_DEST bootstrap $BOOTSTRAP_FLAGS"
 else
     # Non-interactive with no flags — use defaults for mainnet
-    BOOTSTRAP_CMD="terpd bootstrap"
+    BOOTSTRAP_CMD="$BINARY_DEST bootstrap --network ${NETWORK}"
 fi
 
 # ── Run bootstrap ───────────────────────────────────────────────────────

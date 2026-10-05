@@ -1,0 +1,354 @@
+{
+  "chainId": "morocco-1",
+  "source": "local-state",
+  "updatedAt": "2026-07-17T02:15:58Z",
+  "generatedFrom": "terp-rs/public/state.json + s3 snapshot merge",
+  "note": "IBC inventory fallback. Sync: scripts/sync-ibc-state.sh --scrape",
+  "ibc_data": {
+    "akash": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "akashnet-2",
+        "chain_name": "akash",
+        "client_id": "07-tendermint-210",
+        "connection_id": "connection-207"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-32",
+        "connection_id": "connection-11"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-115",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-6",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        },
+        {
+          "chain_1": {
+            "channel_id": "channel-139",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-9",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": false,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "atomone": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "atomone-1",
+        "chain_name": "atomone",
+        "client_id": "07-tendermint-46",
+        "connection_id": "connection-42"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-34",
+        "connection_id": "connection-12"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-13",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-10",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "evmos": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "evmos_9001-2",
+        "chain_name": "evmos",
+        "client_id": "07-tendermint-124",
+        "connection_id": "connection-79"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-23",
+        "connection_id": "connection-7"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-101",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-5",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "gitopia": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "gitopia",
+        "chain_name": "gitopia",
+        "client_id": "07-tendermint-33",
+        "connection_id": "connection-38"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-16",
+        "connection_id": "connection-5"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-1",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-4",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "juno": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "juno-1",
+        "chain_name": "juno",
+        "client_id": "07-tendermint-486",
+        "connection_id": "connection-487"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-2",
+        "connection_id": "connection-1"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-393",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-0",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "omniflix": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "omniflixhub-1",
+        "chain_name": "omniflix",
+        "client_id": "07-tendermint-50",
+        "connection_id": "connection-44"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-15",
+        "connection_id": "connection-4"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-33",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-3",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "osmosis": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "osmosis-1",
+        "chain_name": "osmosis",
+        "client_id": "07-tendermint-3708",
+        "connection_id": "connection-11060"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-33",
+        "connection_id": "connection-13"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-6738",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-1",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        },
+        {
+          "chain_1": {
+            "channel_id": "channel-110258",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-11",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": false,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "secret": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "secret-4",
+        "chain_name": "secret",
+        "client_id": "07-tendermint-211",
+        "connection_id": "connection-202"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-31",
+        "connection_id": "connection-10"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-100",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-7",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        },
+        {
+          "chain_1": {
+            "channel_id": "channel-165",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-8",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": false,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    },
+    "stargaze": {
+      "$schema": "../ibc_data.schema.json",
+      "chain_1": {
+        "chain_id": "stargaze-1",
+        "chain_name": "stargaze",
+        "client_id": "07-tendermint-317",
+        "connection_id": "connection-255"
+      },
+      "chain_2": {
+        "chain_id": "morocco-1",
+        "chain_name": "terp",
+        "client_id": "07-tendermint-13",
+        "connection_id": "connection-3"
+      },
+      "channels": [
+        {
+          "chain_1": {
+            "channel_id": "channel-235",
+            "port_id": "transfer"
+          },
+          "chain_2": {
+            "channel_id": "channel-2",
+            "port_id": "transfer"
+          },
+          "ordering": "unordered",
+          "tags": {
+            "preferred": true,
+            "status": "ACTIVE"
+          },
+          "version": "ics20-1"
+        }
+      ]
+    }
+  }
+}

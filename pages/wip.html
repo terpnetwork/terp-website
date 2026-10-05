@@ -18,6 +18,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Terp Network — Work in progress</title>
     <meta name="description" content="Terp Network — open L1 for programmable access and sovereignty. Surfaces on this origin are being finished.">
@@ -74,7 +78,7 @@
         .title {
             font-size: clamp(2.35rem, 6.5vw, 3.15rem);
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
             margin: 0 auto 0.65rem;
             text-shadow: 0 0 30px rgba(183, 255, 183, 0.068);
             display: flex;
@@ -84,6 +88,7 @@
             line-height: 1.05;
             letter-spacing: -0.02em;
         }
+        html[data-theme="permissionless"] .title { text-shadow: 0 0 9.2px rgb(var(--tn-glow-rgb) / calc(0.068 * var(--tn-glow-tk))), 0 0 30px rgb(var(--tn-glow-rgb) / calc(0.082 * var(--tn-glow-tk))); }
         .title-static { white-space: nowrap; display: block; }
 
         .title-rotator {
@@ -104,7 +109,7 @@
             align-items: center;
             justify-content: center;
             white-space: nowrap;
-            color: #fe7d7d;
+            color: var(--tn-coral);
             font-weight: 500;
             font-size: 1em;
             line-height: 1;
@@ -119,10 +124,10 @@
 
         .subtitle {
             font-size: clamp(1rem, 2.4vw, 1.2rem);
-            color: rgba(255, 255, 218, 0.88);
+            color: rgb(var(--tn-kicker-rgb, 255 255 218) / 0.88);
             text-shadow: 0 0 3px rgba(71, 50, 102, 0.55);
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: var(--tn-track-label);
             margin: 0 auto 1.75rem;
             line-height: 1.5;
             max-width: 28rem;
@@ -132,7 +137,7 @@
         .lede {
             font-size: 1.125rem;
             line-height: 1.65;
-            color: #d2d3d8;
+            color: var(--tn-text);
             text-align: center;
             max-width: 36rem;
             margin: 0 auto 1.1rem;
@@ -158,29 +163,29 @@
             font-size: 0.95rem;
             font-weight: 500;
             letter-spacing: 0.03em;
-            color: #0a0a0f;
-            background: #98e8c1;
-            border: 1px solid #98e8c1;
-            border-radius: 999px;
+            color: var(--tn-on-accent);
+            background: var(--tn-teal);
+            border: 1px solid var(--tn-teal);
+            border-radius: var(--tn-radius-ctl);
             text-decoration: none;
             transition: background 0.15s, border-color 0.15s;
         }
         .enter:hover {
-            background: #b0f0d0;
-            border-color: #b0f0d0;
-            color: #0a0a0f;
+            background: var(--tn-teal-hover);
+            border-color: var(--tn-teal-hover);
+            color: var(--tn-on-accent);
             opacity: 1;
         }
         .enter:focus-visible {
-            outline: 2px solid #cfffcf;
+            outline: 2px solid var(--tn-mint);
             outline-offset: 3px;
         }
 
         .rooms-label {
             font-size: 0.75rem;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
             text-transform: uppercase;
-            color: rgba(152, 232, 193, 0.75);
+            color: rgb(var(--tn-teal-rgb) / max(0.75, var(--tn-alpha-floor)));
             margin-bottom: 0.65rem;
         }
 
@@ -196,22 +201,22 @@
         .rooms li {
             padding: 0.85rem 1rem;
             border-radius: 12px;
-            border: 1px solid rgba(152, 232, 193, 0.16);
-            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.16);
+            background: rgb(var(--tn-shade-rgb) / 0.4);
             opacity: 0.55;
         }
         .rooms .name {
             display: block;
             font-size: 1.02rem;
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
             letter-spacing: -0.01em;
         }
         .rooms .hint {
             display: block;
             margin-top: 0.15rem;
             font-size: 0.78rem;
-            color: rgba(210, 211, 216, 0.55);
+            color: rgb(var(--tn-text-rgb) / max(0.55, var(--tn-alpha-floor)));
         }
 
         .foot {
@@ -245,7 +250,7 @@
         <nav class="site-chrome" aria-label="Primary">
             <a class="primary" href="/" id="brand">Home</a>
             <span class="dot" aria-hidden="true"></span>
-            <span style="color:rgba(210,211,216,0.45);font-size:0.9rem;letter-spacing:0.03em;padding:0.4rem 0.75rem;">WIP</span>
+            <span style="color:rgb(var(--tn-text-rgb) / max(0.45, var(--tn-alpha-floor)));font-size:0.9rem;letter-spacing:0.03em;padding:0.4rem 0.75rem;">WIP</span>
         </nav>
 
         <h1 class="title">

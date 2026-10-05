@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/config.js">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <!-- WIP gate: default OFF. Flip WIP_GATE_ENABLED in /lib/wip-gate.js or use ?wip=1 -->
   <script src="/lib/wip-gate.js"></script>
@@ -11,6 +16,10 @@
   <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
   <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
   <link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script>
   <!--
     Static page: read-only LCD/RPC queries + optional wallet deposits.
     Client types register in /lib/ibc-clients.js (same-origin only).
@@ -39,21 +48,25 @@
       align-items: center;
     }
     .page-title {
-      font-size: var(--eco-title);
-      font-weight: 500;
-      color: #cfffcf;
+      font-size: var(--tn-size-display);
+      font-weight: var(--tn-weight-display);
+      color: var(--tn-mint);
       text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
       text-align: center;
       margin-bottom: 0.35rem;
+      letter-spacing: var(--tn-track-display);
+      font-family: var(--tn-font-display);
     }
+    html[data-theme="permissionless"] .page-title { text-shadow: 0 0 9.2px rgb(var(--tn-glow-rgb) / calc(0.070 * var(--tn-glow-tk))), 0 0 30px rgb(var(--tn-glow-rgb) / calc(0.084 * var(--tn-glow-tk))); }
     .page-subtitle {
-      font-size: var(--eco-text-sm);
-      color: #ffffda;
+      font-size: var(--tn-size-kicker);
+      color: var(--tn-kicker);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: var(--tn-track-label);
       text-align: center;
       margin-bottom: 1.5rem;
       line-height: 1.45;
+      font-weight: var(--tn-font-weight-medium);
     }
     .ibc-chrome {
       display: flex;
@@ -64,12 +77,12 @@
       font-size: var(--eco-text-sm);
     }
     .ibc-chrome a {
-      color: rgba(210, 211, 216, 0.8);
+      color: rgb(var(--tn-text-rgb) / max(0.8, var(--tn-alpha-floor)));
       text-decoration: none;
       padding: 0.35rem 0.65rem;
-      border-radius: 999px;
+      border-radius: var(--tn-radius-ctl);
     }
-    .ibc-chrome a:hover { color: #98e8c1; opacity: 1; }
+    .ibc-chrome a:hover { color: var(--tn-teal); opacity: 1; }
 
     /* Stats strip — real LCD numbers */
     .stat-strip {
@@ -84,15 +97,15 @@
     }
     .stat-card {
       border-radius: 10px;
-      border: 1px solid rgba(152, 232, 193, 0.14);
-      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgb(var(--tn-teal-rgb) / 0.14);
+      background: rgb(var(--tn-shade-rgb) / 0.4);
       padding: 0.75rem 0.85rem;
       text-align: left;
     }
     .stat-label {
       font-size: var(--eco-label);
-      color: rgba(152, 232, 193, 0.65);
-      letter-spacing: 0.06em;
+      color: rgb(var(--tn-teal-rgb) / max(0.65, var(--tn-alpha-floor)));
+      letter-spacing: var(--tn-track-label);
       text-transform: uppercase;
       margin-bottom: 0.25rem;
     }
@@ -100,11 +113,11 @@
       font-family: var(--tn-font-mono);
       font-size: 1.15rem;
       font-weight: 500;
-      color: #cfffcf;
+      color: var(--tn-mint);
     }
     .stat-meta {
       font-size: 0.75rem;
-      color: rgba(210, 211, 216, 0.5);
+      color: rgb(var(--tn-text-rgb) / max(0.5, var(--tn-alpha-floor)));
       margin-top: 0.2rem;
     }
 
@@ -123,29 +136,29 @@
       margin-bottom: 0.75rem;
     }
     .plane-tab {
-      background: rgba(152, 232, 193, 0.06);
-      border: 1px solid rgba(152, 232, 193, 0.18);
-      color: rgba(207, 255, 207, 0.85);
+      background: rgb(var(--tn-teal-rgb) / 0.06);
+      border: 1px solid rgb(var(--tn-teal-rgb) / 0.18);
+      color: rgb(var(--tn-mint-rgb) / max(0.85, var(--tn-alpha-floor)));
       padding: 0.5rem 0.95rem;
       font-family: var(--tn-font);
       font-size: var(--eco-label);
       font-weight: 500;
-      border-radius: 999px;
+      border-radius: var(--tn-radius-ctl);
       cursor: pointer;
       transition: all 0.2s ease;
     }
     .plane-tab:hover {
-      border-color: rgba(152, 232, 193, 0.4);
-      color: #98e8c1;
+      border-color: rgb(var(--tn-teal-rgb) / 0.4);
+      color: var(--tn-teal);
     }
     .plane-tab.active {
-      background: rgba(152, 232, 193, 0.14);
-      border-color: rgba(152, 232, 193, 0.45);
-      color: #cfffcf;
+      background: rgb(var(--tn-teal-rgb) / 0.14);
+      border-color: rgb(var(--tn-teal-rgb) / 0.45);
+      color: var(--tn-mint);
     }
     .type-badge {
-      font-size: 0.65rem;
-      opacity: 0.65;
+      font-size: var(--tn-size-label);
+      opacity: 0.8;
       margin-left: 0.25rem;
       text-transform: uppercase;
     }
@@ -166,20 +179,20 @@
     .type-panel-title {
       font-size: 1.1rem;
       font-weight: 500;
-      color: #98e8c1;
+      color: var(--tn-teal);
       margin: 0;
     }
     .type-status {
-      font-size: 0.7rem;
+      font-size: var(--tn-size-label);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: rgba(152, 232, 193, 0.55);
+      letter-spacing: var(--tn-track-label);
+      color: rgb(var(--tn-teal-rgb) / max(0.55, var(--tn-alpha-floor)));
     }
-    .type-status.status-planned { color: rgba(189, 147, 249, 0.8); }
-    .type-status.status-live { color: #98e8c1; }
+    .type-status.status-planned { color: rgb(var(--tn-purple-rgb) / max(0.8, var(--tn-alpha-floor))); }
+    .type-status.status-live { color: var(--tn-teal); }
     .type-panel-blurb {
       font-size: var(--eco-text-sm);
-      color: rgba(210, 211, 216, 0.72);
+      color: rgb(var(--tn-text-rgb) / max(0.72, var(--tn-alpha-floor)));
       line-height: 1.5;
       margin: 0 0 0.85rem;
     }
@@ -187,8 +200,8 @@
 
     .section-card {
       border-radius: 12px;
-      border: 1px solid rgba(152, 232, 193, 0.14);
-      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgb(var(--tn-teal-rgb) / 0.14);
+      background: rgb(var(--tn-shade-rgb) / 0.35);
       padding: 1rem 1.1rem;
       backdrop-filter: blur(12px);
     }
@@ -207,18 +220,18 @@
     }
     table.data-table th {
       text-align: left;
-      color: rgba(152, 232, 193, 0.7);
+      color: rgb(var(--tn-teal-rgb) / max(0.7, var(--tn-alpha-floor)));
       font-weight: 500;
       padding: 0.4rem 0.5rem;
-      border-bottom: 1px solid rgba(152, 232, 193, 0.12);
+      border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
       position: sticky;
       top: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgb(var(--tn-shade-rgb) / 0.85);
     }
     table.data-table td {
       padding: 0.4rem 0.5rem;
-      border-bottom: 1px solid rgba(152, 232, 193, 0.06);
-      color: #d2d3d8;
+      border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.06);
+      color: var(--tn-text);
       font-family: var(--tn-font-mono);
       font-size: 0.78rem;
       vertical-align: top;
@@ -227,7 +240,7 @@
       font-family: var(--tn-font);
       font-size: var(--eco-label);
     }
-    .muted { color: rgba(210, 211, 216, 0.5); }
+    .muted { color: rgb(var(--tn-text-rgb) / max(0.5, var(--tn-alpha-floor))); }
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -241,20 +254,20 @@
       font-size: var(--eco-label);
       padding: 0.35rem 0.7rem;
       border-radius: 6px;
-      border: 1px solid rgba(152, 232, 193, 0.25);
-      background: rgba(152, 232, 193, 0.08);
-      color: #98e8c1;
+      border: 1px solid rgb(var(--tn-teal-rgb) / 0.25);
+      background: rgb(var(--tn-teal-rgb) / 0.08);
+      color: var(--tn-teal);
       cursor: pointer;
     }
-    .btn-quiet:hover { border-color: rgba(152, 232, 193, 0.45); }
+    .btn-quiet:hover { border-color: rgb(var(--tn-teal-rgb) / 0.45); }
 
     .mesh-panel {
       position: relative;
       width: 100%;
       height: 120px;
       border-radius: 12px;
-      border: 1px solid rgba(152, 232, 193, 0.12);
-      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
+      background: rgb(var(--tn-shade-rgb) / 0.35);
       overflow: hidden;
       margin-top: 1.5rem;
     }
@@ -264,7 +277,7 @@
       left: 0.75rem;
       bottom: 0.45rem;
       font-size: 0.72rem;
-      color: rgba(152, 232, 193, 0.4);
+      color: rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));
       pointer-events: none;
     }
     #ibc-fund-mount { margin-top: 0.25rem; }
@@ -272,7 +285,7 @@
     /* Loading skeleton */
     .skeleton {
       display: inline-block;
-      background: linear-gradient(90deg, rgba(152,232,193,0.06) 25%, rgba(152,232,193,0.14) 50%, rgba(152,232,193,0.06) 75%);
+      background: linear-gradient(90deg, rgb(var(--tn-teal-rgb) / 0.06) 25%, rgb(var(--tn-teal-rgb) / 0.14) 50%, rgb(var(--tn-teal-rgb) / 0.06) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
@@ -286,8 +299,8 @@
     .stat-meta.skeleton { min-width: 3rem; height: 0.75rem; }
 
     /* Error state in stat cards */
-    .stat-card.err { border-color: rgba(254, 125, 125, 0.35); }
-    .stat-val.err { color: #fe7d7d; font-size: 0.85rem; font-family: var(--tn-font); }
+    .stat-card.err { border-color: rgb(var(--tn-coral-rgb) / 0.35); }
+    .stat-val.err { color: var(--tn-coral); font-size: 0.85rem; font-family: var(--tn-font); }
 
     /* Mobile improvements */
     @media (max-width: 480px) {
@@ -311,23 +324,24 @@
     }
     .ibc-cap-card {
       border-radius: 10px;
-      border: 1px solid rgba(152, 232, 193, 0.12);
-      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
+      background: rgb(var(--tn-shade-rgb) / 0.35);
       padding: 0.85rem 0.9rem;
       transition: border-color 0.2s, box-shadow 0.2s;
       display: flex;
       flex-direction: column;
     }
     .ibc-cap-card:hover {
-      border-color: rgba(152, 232, 193, 0.3);
-      box-shadow: 0 0 16px rgba(152, 232, 193, 0.04);
+      border-color: rgb(var(--tn-teal-rgb) / 0.3);
+      box-shadow: 0 0 16px rgb(var(--tn-halo-rgb) / calc(0.04 * var(--tn-halo-k)));
     }
+    html[data-theme="permissionless"] .ibc-cap-card:hover { box-shadow: 0 0 3.52px rgb(var(--tn-glow-rgb) / calc(0.05 * var(--tn-glow-k))), 0 0 8px rgb(var(--tn-glow-rgb) / calc(0.04 * var(--tn-glow-k))), 0 0 16px rgb(var(--tn-glow-2-rgb) / calc(0.03 * var(--tn-glow-k))); }
     .ibc-cap-card.planned {
-      border-color: rgba(189, 147, 249, 0.15);
-      background: rgba(0, 0, 0, 0.25);
+      border-color: rgb(var(--tn-purple-rgb) / 0.15);
+      background: rgb(var(--tn-shade-rgb) / 0.25);
     }
     .ibc-cap-card.planned:hover {
-      border-color: rgba(189, 147, 249, 0.35);
+      border-color: rgb(var(--tn-purple-rgb) / 0.35);
     }
     .ibc-cap-card-head {
       display: flex;
@@ -343,26 +357,26 @@
     .ibc-cap-title {
       font-size: 0.95rem;
       font-weight: 500;
-      color: #cfffcf;
+      color: var(--tn-mint);
     }
     .ibc-cap-status {
-      font-size: 0.6rem;
+      font-size: var(--tn-size-label);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: var(--tn-track-label);
       margin-left: auto;
       padding: 0.15rem 0.4rem;
       border-radius: 4px;
-      background: rgba(152, 232, 193, 0.1);
-      color: rgba(152, 232, 193, 0.6);
+      background: rgb(var(--tn-teal-rgb) / 0.1);
+      color: rgb(var(--tn-teal-rgb) / max(0.6, var(--tn-alpha-floor)));
       flex-shrink: 0;
     }
     .ibc-cap-status.planned {
-      background: rgba(189, 147, 249, 0.1);
-      color: rgba(189, 147, 249, 0.6);
+      background: rgb(var(--tn-purple-rgb) / 0.1);
+      color: rgb(var(--tn-purple-rgb) / max(0.6, var(--tn-alpha-floor)));
     }
     .ibc-cap-desc {
       font-size: 0.82rem;
-      color: rgba(210, 211, 216, 0.72);
+      color: rgb(var(--tn-text-rgb) / max(0.72, var(--tn-alpha-floor)));
       line-height: 1.5;
       margin: 0 0 0.5rem;
       flex: 1;
@@ -376,19 +390,19 @@
     .ibc-cap-tag {
       font-size: 0.65rem;
       padding: 0.15rem 0.45rem;
-      border-radius: 999px;
-      background: rgba(152, 232, 193, 0.06);
-      border: 1px solid rgba(152, 232, 193, 0.1);
-      color: rgba(152, 232, 193, 0.55);
+      border-radius: var(--tn-radius-ctl);
+      background: rgb(var(--tn-teal-rgb) / 0.06);
+      border: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
+      color: rgb(var(--tn-teal-rgb) / max(0.55, var(--tn-alpha-floor)));
       letter-spacing: 0.04em;
     }
     .ibc-cap-tag.live {
-      border-color: rgba(152, 232, 193, 0.2);
-      color: rgba(152, 232, 193, 0.7);
+      border-color: rgb(var(--tn-teal-rgb) / 0.2);
+      color: rgb(var(--tn-teal-rgb) / max(0.7, var(--tn-alpha-floor)));
     }
     .ibc-cap-tag.planned-tag {
-      border-color: rgba(189, 147, 249, 0.15);
-      color: rgba(189, 147, 249, 0.5);
+      border-color: rgb(var(--tn-purple-rgb) / 0.15);
+      color: rgb(var(--tn-purple-rgb) / max(0.5, var(--tn-alpha-floor)));
     }
     @media (max-width: 560px) {
       .ibc-cap-grid { grid-template-columns: 1fr; }
@@ -396,11 +410,10 @@
   </style>
 </head>
 <body>
-  <canvas id="glow-canvas"></canvas>
   <script src="/lib/fab.js"></script>
 
   <main class="main">
-    <h1 class="page-title">IBC</h1>
+    <h1 class="page-title" data-tn-head>IBC</h1>
     <p class="page-subtitle">Open channels · clients · relayer gas</p>
 
     <!-- Live inventory strip (wallet via FAB — no redundant Connect button) -->
@@ -434,10 +447,8 @@
   </main>
 
   <script type="module">
-    import { startGlowBg } from '/lib/glow-bg.js';
     import { bootIbcPage } from '/lib/ibc-page.js';
 
-    try { startGlowBg(); } catch { /* optional */ }
     bootIbcPage().catch((e) => console.error('[ibc] boot', e));
   </script>
 </body>

@@ -5,6 +5,12 @@
 
 <head>
     <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/config.js">
+<link rel="modulepreload" href="/lib/nav-guard.js">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="description"
         content="Register your Terp Account Billboard on-chain. Human-readable identities for Terp Network addresses.">
@@ -26,6 +32,10 @@
     <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
     <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
     <link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script>
 
     <style>
         /* Main */
@@ -65,44 +75,45 @@
         @media (min-width: 900px) { .eco-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media (max-width: 560px) { .eco-grid { grid-template-columns: 1fr; } }
         .eco-card {
-            border: 1px solid rgba(152, 232, 193, 0.14); border-radius: 12px;
-            padding: 0.95rem 1rem; background: rgba(0, 0, 0, 0.32);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.14); border-radius: 12px;
+            padding: 0.95rem 1rem; background: rgb(var(--tn-shade-rgb) / 0.32);
             text-align: left; min-width: 0;
         }
         .eco-card.is-open {
-            grid-column: 1 / -1; border-color: rgba(152, 232, 193, 0.35);
-            box-shadow: 0 0 32px rgba(152, 232, 193, 0.06); background: rgba(0, 0, 0, 0.45);
+            grid-column: 1 / -1; border-color: rgb(var(--tn-teal-rgb) / 0.35);
+            box-shadow: 0 0 32px rgb(var(--tn-halo-rgb) / calc(0.06 * var(--tn-halo-k))); background: rgb(var(--tn-shade-rgb) / 0.45);
         }
-        .eco-card h3 { font-size: 0.98rem; font-weight: 600; color: #cfffcf; margin: 0; line-height: 1.3; overflow-wrap: anywhere; }
-        .eco-summary { font-size: 0.88rem; color: #d2d3d8; line-height: 1.5; margin: 0.4rem 0 0.55rem; }
+        html[data-theme="permissionless"] .eco-card.is-open { box-shadow: 0 0 7.04px rgb(var(--tn-glow-rgb) / calc(0.08 * var(--tn-glow-k))), 0 0 16px rgb(var(--tn-glow-rgb) / calc(0.06 * var(--tn-glow-k))), 0 0 32px rgb(var(--tn-glow-2-rgb) / calc(0.04 * var(--tn-glow-k))); }
+        .eco-card h3 { font-size: 0.98rem; font-weight: 600; color: var(--tn-mint); margin: 0; line-height: 1.3; overflow-wrap: anywhere; }
+        .eco-summary { font-size: 0.88rem; color: var(--tn-text); line-height: 1.5; margin: 0.4rem 0 0.55rem; }
         .eco-card-top { display: flex; justify-content: space-between; gap: 0.5rem; align-items: flex-start; }
         .eco-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
         .eco-open, .eco-link {
-            font-size: 0.82rem; font-weight: 500; padding: 0.35rem 0.65rem; border-radius: 999px;
+            font-size: 0.82rem; font-weight: 500; padding: 0.35rem 0.65rem; border-radius: var(--tn-radius-ctl);
             cursor: pointer; font-family: inherit; text-decoration: none;
         }
         .eco-open {
-            border: 1px solid rgba(152, 232, 193, 0.4); background: rgba(152, 232, 193, 0.12); color: #98e8c1;
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.4); background: rgb(var(--tn-teal-rgb) / 0.12); color: var(--tn-teal);
         }
         .eco-card.is-open .eco-open {
-            border-color: rgba(254, 125, 125, 0.35); background: rgba(254, 125, 125, 0.08); color: #fe7d7d;
+            border-color: rgb(var(--tn-coral-rgb) / 0.35); background: rgb(var(--tn-coral-rgb) / 0.08); color: var(--tn-coral);
         }
-        .eco-link { border: 1px solid rgba(152, 232, 193, 0.22); color: #98e8c1; background: transparent; }
+        .eco-link { border: 1px solid rgb(var(--tn-teal-rgb) / 0.22); color: var(--tn-teal); background: transparent; }
         .eco-status {
-            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em;
-            padding: 0.15rem 0.4rem; border-radius: 999px; border: 1px solid; white-space: nowrap; flex-shrink: 0;
+            font-size: var(--tn-size-label); text-transform: uppercase; letter-spacing: var(--tn-track-label);
+            padding: 0.15rem 0.4rem; border-radius: var(--tn-radius-ctl); border: 1px solid; white-space: nowrap; flex-shrink: 0;
         }
-        .eco-status--live { color: #98e8c1; border-color: rgba(152, 232, 193, 0.35); background: rgba(152, 232, 193, 0.08); }
-        .eco-status--soon { color: #bd93f9; border-color: rgba(189, 147, 249, 0.35); background: rgba(189, 147, 249, 0.08); }
-        .eco-status--beta { color: #ffb86c; border-color: rgba(255, 184, 108, 0.35); background: rgba(255, 184, 108, 0.08); }
+        .eco-status--live { color: var(--tn-teal); border-color: rgb(var(--tn-teal-rgb) / 0.35); background: rgb(var(--tn-teal-rgb) / 0.08); }
+        .eco-status--soon { color: var(--tn-purple); border-color: rgb(var(--tn-purple-rgb) / 0.35); background: rgb(var(--tn-purple-rgb) / 0.08); }
+        .eco-status--beta { color: var(--tn-amber); border-color: rgb(var(--tn-amber-rgb) / 0.35); background: rgb(var(--tn-amber-rgb) / 0.08); }
         .eco-pills { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.65rem; }
         .eco-pill {
-            font-size: 0.72rem; color: rgba(152, 232, 193, 0.75);
-            border: 1px solid rgba(152, 232, 193, 0.15); border-radius: 999px; padding: 0.12rem 0.4rem;
+            font-size: 0.72rem; color: rgb(var(--tn-teal-rgb) / max(0.75, var(--tn-alpha-floor)));
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15); border-radius: var(--tn-radius-ctl); padding: 0.12rem 0.4rem;
         }
         .eco-card-detail {
             margin-top: 0.85rem; padding-top: 0.85rem;
-            border-top: 1px solid rgba(152, 232, 193, 0.12); min-width: 0;
+            border-top: 1px solid rgb(var(--tn-teal-rgb) / 0.12); min-width: 0;
         }
         .eco-card-detail[hidden] { display: none !important; }
         .eco-card-detail .plane { display: block !important; width: 100%; }
@@ -112,45 +123,27 @@
             padding: 0 !important; margin: -1px !important; overflow: hidden !important;
             clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important;
         }
-        .site-chrome {
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-            gap: 0.15rem 0.35rem; margin: 0 auto 1.25rem; max-width: 40rem; width: 100%;
-        }
-        .site-chrome a, .site-chrome-pill {
-            font-size: 0.9rem; font-weight: 500; letter-spacing: 0.03em;
-            padding: 0.4rem 0.75rem; border-radius: 999px; border: 1px solid transparent;
-            color: rgba(210, 211, 216, 0.85); text-decoration: none; background: transparent;
-            font-family: inherit; cursor: pointer; line-height: 1.25;
-        }
-        .site-chrome a:hover, .site-chrome-pill:hover {
-            color: #cfffcf; border-color: rgba(152, 232, 193, 0.28); background: rgba(152, 232, 193, 0.06);
-        }
-        .site-chrome a.active, .site-chrome-pill.connected {
-            color: #cfffcf; border-color: rgba(152, 232, 193, 0.35); background: rgba(152, 232, 193, 0.08);
-        }
-        .site-chrome .dot {
-            width: 3px; height: 3px; border-radius: 50%; background: rgba(152, 232, 193, 0.35); flex-shrink: 0;
-        }
-        .site-chrome-wallet { position: relative; display: inline-flex; }
+        /* header styles: public/global.css */
 
         .page-title {
             font-size: var(--eco-title);
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
             text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
             text-align: center;
             margin-bottom: 0.5rem;
             overflow-wrap: anywhere;
             max-width: 100%;
         }
+        html[data-theme="permissionless"] .page-title { text-shadow: 0 0 9.2px rgb(var(--tn-glow-rgb) / calc(0.070 * var(--tn-glow-tk))), 0 0 30px rgb(var(--tn-glow-rgb) / calc(0.084 * var(--tn-glow-tk))); }
 
         .btn-docs {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            border: 1px solid rgba(152, 232, 193, 0.2);
-            background: rgba(152, 232, 193, 0.06);
-            color: rgba(152, 232, 193, 0.75);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.2);
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+            color: rgb(var(--tn-teal-rgb) / max(0.75, var(--tn-alpha-floor)));
             font-family: var(--tn-font);
             font-size: 1rem;
             font-weight: 500;
@@ -163,21 +156,22 @@
         }
 
         .btn-docs:hover {
-            background: rgba(152, 232, 193, 0.12);
-            border-color: rgba(152, 232, 193, 0.4);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            border-color: rgb(var(--tn-teal-rgb) / 0.4);
+            color: var(--tn-teal);
         }
 
         .page-subtitle {
-            font-size: var(--eco-text-sm);
-            color: #ffffda;
+            font-size: var(--tn-size-kicker);
+            color: var(--tn-kicker);
             text-shadow: 0 0 3px rgba(71, 50, 102, 0.9);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
             text-align: center;
             margin-bottom: 1.25rem;
             max-width: 100%;
             line-height: 1.45;
+            font-weight: var(--tn-font-weight-medium);
         }
 
         /* Live contracts — elegant table at page footer */
@@ -186,8 +180,8 @@
             margin: 1.5rem 0 0.5rem;
             padding: 0;
             border-radius: 10px;
-            border: 1px solid rgba(152, 232, 193, 0.12);
-            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
+            background: rgb(var(--tn-shade-rgb) / 0.28);
             text-align: left;
             overflow: hidden;
         }
@@ -195,24 +189,24 @@
             list-style: none;
             cursor: pointer;
             padding: 0.75rem 1.1rem;
-            color: rgba(152, 232, 193, 0.8);
+            color: rgb(var(--tn-teal-rgb) / max(0.8, var(--tn-alpha-floor)));
             font-weight: 500;
             font-size: var(--eco-label);
-            letter-spacing: 0.06em;
+            letter-spacing: var(--tn-track-label);
             text-transform: uppercase;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 0.75rem;
             user-select: none;
-            background: rgba(152, 232, 193, 0.04);
+            background: rgb(var(--tn-teal-rgb) / 0.04);
             border-bottom: 1px solid transparent;
             transition: border-color 0.2s, background 0.2s;
         }
         .contract-strip summary::-webkit-details-marker { display: none; }
         .contract-strip summary::after {
             content: "▸";
-            color: rgba(152, 232, 193, 0.45);
+            color: rgb(var(--tn-teal-rgb) / max(0.45, var(--tn-alpha-floor)));
             font-size: 0.85rem;
             transition: transform 0.2s ease;
         }
@@ -221,11 +215,11 @@
             transform: rotate(0);
         }
         .contract-strip[open] summary {
-            border-bottom-color: rgba(152, 232, 193, 0.1);
+            border-bottom-color: rgb(var(--tn-teal-rgb) / 0.1);
         }
         .contract-strip summary:hover {
-            color: #98e8c1;
-            background: rgba(152, 232, 193, 0.07);
+            color: var(--tn-teal);
+            background: rgb(var(--tn-teal-rgb) / 0.07);
         }
         .contract-strip .summary-left {
             display: flex;
@@ -249,11 +243,11 @@
             font-weight: 400;
             text-transform: none;
             letter-spacing: 0;
-            color: rgba(152, 232, 193, 0.5);
+            color: rgb(var(--tn-teal-rgb) / max(0.5, var(--tn-alpha-floor)));
             padding: 0.15rem 0.5rem;
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 4px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgb(var(--tn-shade-rgb) / 0.2);
             white-space: nowrap;
             max-width: 220px;
             overflow: hidden;
@@ -262,27 +256,27 @@
             transition: all 0.2s ease;
         }
         .contract-strip .checksum-label:hover {
-            color: #98e8c1;
-            border-color: rgba(152, 232, 193, 0.35);
+            color: var(--tn-teal);
+            border-color: rgb(var(--tn-teal-rgb) / 0.35);
         }
         .contract-strip .checksum-label .checksum-icon {
             width: 12px;
             height: 12px;
-            fill: rgba(152, 232, 193, 0.5);
+            fill: rgb(var(--tn-teal-rgb) / 0.5);
             flex-shrink: 0;
         }
-        .contract-strip .checksum-label:hover .checksum-icon { fill: #98e8c1; }
+        .contract-strip .checksum-label:hover .checksum-icon { fill: var(--tn-teal); }
         .contract-strip .checksum-label .checksum-value {
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .contract-strip .checksum-label.computing {
-            color: rgba(210, 211, 216, 0.4);
-            border-color: rgba(210, 211, 216, 0.12);
+            color: rgb(var(--tn-text-rgb) / max(0.4, var(--tn-alpha-floor)));
+            border-color: rgb(var(--tn-text-rgb) / 0.12);
         }
         .contract-strip .checksum-label.error {
-            color: #fe7d7d;
-            border-color: rgba(254, 125, 125, 0.2);
+            color: var(--tn-coral);
+            border-color: rgb(var(--tn-coral-rgb) / 0.2);
         }
         .contract-strip .contract-body {
             padding: 0;
@@ -290,21 +284,21 @@
         .contract-strip .contract-meta {
             padding: 0.6rem 1.1rem;
             font-size: 0.8rem;
-            color: rgba(210, 211, 216, 0.45);
+            color: rgb(var(--tn-text-rgb) / max(0.45, var(--tn-alpha-floor)));
             display: flex;
             flex-wrap: wrap;
             gap: 0.4rem 1rem;
             align-items: center;
-            border-bottom: 1px solid rgba(152, 232, 193, 0.06);
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.06);
         }
         .contract-strip .contract-meta a {
-            color: #98e8c1;
+            color: var(--tn-teal);
             text-decoration: none;
         }
         .contract-strip .contract-meta a:hover { text-decoration: underline; }
         .contract-strip .contract-meta code {
             font-family: var(--tn-font-mono);
-            color: #cfffcf;
+            color: var(--tn-mint);
             font-size: 0.8rem;
         }
         .contract-table {
@@ -316,64 +310,65 @@
         .contract-table td {
             text-align: left;
             padding: 0.5rem 1.1rem;
-            border-bottom: 1px solid rgba(152, 232, 193, 0.06);
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.06);
             vertical-align: top;
         }
         .contract-table th {
             font-weight: 500;
-            color: rgba(152, 232, 193, 0.7);
+            color: rgb(var(--tn-teal-rgb) / max(0.7, var(--tn-alpha-floor)));
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
-            background: rgba(152, 232, 193, 0.03);
+            letter-spacing: var(--tn-track-label);
+            background: rgb(var(--tn-teal-rgb) / 0.03);
         }
         .contract-table td.module {
-            color: #cfffcf;
+            color: var(--tn-mint);
             font-weight: 500;
             white-space: nowrap;
         }
         .contract-table td.module .module-tag {
             display: inline-block;
-            font-size: 0.62rem;
+            font-size: var(--tn-size-label);
             font-weight: 400;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: var(--tn-track-label);
             padding: 0.1rem 0.35rem;
             border-radius: 3px;
             margin-left: 0.4rem;
             vertical-align: middle;
-            border: 1px solid rgba(152, 232, 193, 0.2);
-            color: rgba(152, 232, 193, 0.6);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.2);
+            color: rgb(var(--tn-teal-rgb) / max(0.6, var(--tn-alpha-floor)));
         }
         .contract-table td.module .module-tag.abstract {
-            border-color: rgba(189, 147, 249, 0.3);
-            color: rgba(189, 147, 249, 0.8);
+            border-color: rgb(var(--tn-purple-rgb) / 0.3);
+            color: rgb(var(--tn-purple-rgb) / max(0.8, var(--tn-alpha-floor)));
         }
         .contract-table td.addr code,
         .contract-table td.codeid code {
             font-family: var(--tn-font-mono);
             font-size: 0.82rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             word-break: break-all;
         }
-        .contract-table td.codeid code { color: #bd93f9; }
+        .contract-table td.codeid code { color: var(--tn-purple); }
         .contract-table tr:last-child td { border-bottom: none; }
-        .contract-table tr:hover td { background: rgba(152, 232, 193, 0.03); }
+        .contract-table tr:hover td { background: rgb(var(--tn-teal-rgb) / 0.03); }
         .contract-strip .contract-empty {
             padding: 1rem 1.1rem;
             font-size: 0.85rem;
-            color: rgba(210, 211, 216, 0.4);
+            color: rgb(var(--tn-text-rgb) / max(0.4, var(--tn-alpha-floor)));
         }
 
         /* Search / Mint Card */
         .name-card {
             width: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-shade-rgb) / 0.4);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 12px;
             padding: 2rem;
-            box-shadow: 0 0 40px rgba(152, 232, 193, 0.03);
+            box-shadow: 0 0 40px rgb(var(--tn-halo-rgb) / calc(0.03 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .name-card { box-shadow: 0 0 8.8px rgb(var(--tn-glow-rgb) / calc(0.04 * var(--tn-glow-k))), 0 0 20px rgb(var(--tn-glow-rgb) / calc(0.03 * var(--tn-glow-k))), 0 0 40px rgb(var(--tn-glow-2-rgb) / calc(0.02 * var(--tn-glow-k))); }
 
         .name-input-wrap {
             display: flex;
@@ -383,10 +378,10 @@
 
         .name-input {
             flex: 1;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(152, 232, 193, 0.2);
+            background: rgb(var(--tn-shade-rgb) / 0.3);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.2);
             border-radius: 6px;
-            color: #f8f8f2;
+            color: var(--tn-text-bright);
             padding: 0.8rem 1rem;
             font-family: var(--tn-font);
             font-size: 1rem;
@@ -395,18 +390,19 @@
         }
 
         .name-input::placeholder {
-            color: rgba(210, 211, 216, 0.4);
+            color: rgb(var(--tn-text-rgb) / max(0.4, var(--tn-alpha-floor)));
         }
 
         .name-input:focus {
-            border-color: rgba(152, 232, 193, 0.5);
-            box-shadow: 0 0 15px rgba(152, 232, 193, 0.08);
+            border-color: rgb(var(--tn-teal-rgb) / 0.5);
+            box-shadow: 0 0 15px rgb(var(--tn-halo-rgb) / calc(0.08 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .name-input:focus { box-shadow: 0 0 3.3px rgb(var(--tn-glow-rgb) / calc(0.1 * var(--tn-glow-k))), 0 0 7.5px rgb(var(--tn-glow-rgb) / calc(0.08 * var(--tn-glow-k))), 0 0 15px rgb(var(--tn-glow-2-rgb) / calc(0.06 * var(--tn-glow-k))); }
 
         .btn-check {
-            background: rgba(152, 232, 193, 0.1);
-            border: 1px solid rgba(152, 232, 193, 0.3);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.1);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.3);
+            color: var(--tn-teal);
             padding: 0.8rem 1.2rem;
             font-family: var(--tn-font);
             font-size: 0.85rem;
@@ -418,8 +414,8 @@
         }
 
         .btn-check:hover {
-            background: rgba(152, 232, 193, 0.2);
-            border-color: rgba(152, 232, 193, 0.5);
+            background: rgb(var(--tn-teal-rgb) / 0.2);
+            border-color: rgb(var(--tn-teal-rgb) / 0.5);
         }
 
         .btn-check:disabled {
@@ -438,23 +434,23 @@
 
         .name-status.available {
             display: block;
-            background: rgba(152, 232, 193, 0.08);
-            border: 1px solid rgba(152, 232, 193, 0.25);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.08);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.25);
+            color: var(--tn-teal);
         }
 
         .name-status.taken {
             display: block;
-            background: rgba(254, 125, 125, 0.08);
-            border: 1px solid rgba(254, 125, 125, 0.25);
-            color: #fe7d7d;
+            background: rgb(var(--tn-coral-rgb) / 0.08);
+            border: 1px solid rgb(var(--tn-coral-rgb) / 0.25);
+            color: var(--tn-coral);
         }
 
         .name-status.error {
             display: block;
-            background: rgba(189, 147, 249, 0.08);
-            border: 1px solid rgba(189, 147, 249, 0.25);
-            color: #bd93f9;
+            background: rgb(var(--tn-purple-rgb) / 0.08);
+            border: 1px solid rgb(var(--tn-purple-rgb) / 0.25);
+            color: var(--tn-purple);
         }
 
         /* Pricing info */
@@ -473,23 +469,23 @@
 
         .pricing-label {
             font-size: var(--eco-label);
-            color: rgba(207, 255, 207, 0.55);
+            color: rgb(var(--tn-mint-rgb) / max(0.55, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .pricing-value {
             font-size: 1rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-weight: 500;
         }
 
         /* Mint button */
         .btn-mint {
             width: 100%;
-            background: linear-gradient(135deg, rgba(152, 232, 193, 0.15), rgba(152, 232, 193, 0.08));
-            border: 1px solid rgba(152, 232, 193, 0.4);
-            color: #cfffcf;
+            background: linear-gradient(135deg, rgb(var(--tn-teal-rgb) / 0.15), rgb(var(--tn-teal-rgb) / 0.08));
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.4);
+            color: var(--tn-mint);
             padding: 0.9rem 1.5rem;
             font-family: var(--tn-font);
             font-size: 1rem;
@@ -498,15 +494,16 @@
             border-radius: 6px;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .btn-mint:hover {
-            background: linear-gradient(135deg, rgba(152, 232, 193, 0.25), rgba(152, 232, 193, 0.15));
-            border-color: rgba(152, 232, 193, 0.6);
-            box-shadow: 0 0 25px rgba(152, 232, 193, 0.15);
+            background: linear-gradient(135deg, rgb(var(--tn-teal-rgb) / 0.25), rgb(var(--tn-teal-rgb) / 0.15));
+            border-color: rgb(var(--tn-teal-rgb) / 0.6);
+            box-shadow: 0 0 25px rgb(var(--tn-halo-rgb) / calc(0.15 * var(--tn-halo-k)));
             transform: translateY(-1px);
         }
+        html[data-theme="permissionless"] .btn-mint:hover { box-shadow: 0 0 5.5px rgb(var(--tn-glow-rgb) / calc(0.2 * var(--tn-glow-k))), 0 0 12.5px rgb(var(--tn-glow-rgb) / calc(0.15 * var(--tn-glow-k))), 0 0 25px rgb(var(--tn-glow-2-rgb) / calc(0.1 * var(--tn-glow-k))); }
 
         .btn-mint:active {
             transform: translateY(0);
@@ -542,21 +539,21 @@
         }
 
         .toast.success {
-            background: rgba(152, 232, 193, 0.1);
-            border-color: rgba(152, 232, 193, 0.3);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.1);
+            border-color: rgb(var(--tn-teal-rgb) / 0.3);
+            color: var(--tn-teal);
         }
 
         .toast.error {
-            background: rgba(254, 125, 125, 0.1);
-            border-color: rgba(254, 125, 125, 0.3);
-            color: #fe7d7d;
+            background: rgb(var(--tn-coral-rgb) / 0.1);
+            border-color: rgb(var(--tn-coral-rgb) / 0.3);
+            color: var(--tn-coral);
         }
 
         .toast.info {
-            background: rgba(189, 147, 249, 0.1);
-            border-color: rgba(189, 147, 249, 0.3);
-            color: #bd93f9;
+            background: rgb(var(--tn-purple-rgb) / 0.1);
+            border-color: rgb(var(--tn-purple-rgb) / 0.3);
+            color: var(--tn-purple);
         }
 
         .toast.removing {
@@ -594,14 +591,14 @@
             align-items: center;
             gap: 1rem;
             padding: 2rem 0;
-            color: #d2d3d8;
+            color: var(--tn-text);
         }
 
         .spinner {
             width: 36px;
             height: 36px;
-            border: 2px solid rgba(152, 232, 193, 0.2);
-            border-top-color: #98e8c1;
+            border: 2px solid rgb(var(--tn-teal-rgb) / 0.2);
+            border-top-color: var(--tn-teal);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -615,7 +612,9 @@
         /* Responsive */
         @media (max-width: 768px) {
             .page-title {
-                font-size: 1.6rem;
+                font-size: var(--tn-size-display);
+                letter-spacing: var(--tn-track-display);
+                font-family: var(--tn-font-display);
             }
 
             .page-subtitle {
@@ -663,7 +662,7 @@
         .modal-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgb(var(--tn-shade-rgb) / 0.75);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
@@ -671,15 +670,15 @@
         .modal-content {
             position: relative;
             z-index: 1;
-            background: rgba(10, 10, 15, 0.95);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-shade-rgb) / 0.95);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 12px;
             width: 90vw;
             max-width: 580px;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 60px rgb(var(--tn-shadow-rgb) / calc(0.5 * var(--tn-shadow-k)));
         }
 
         .modal-header {
@@ -687,19 +686,19 @@
             align-items: center;
             justify-content: space-between;
             padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid rgba(152, 232, 193, 0.1);
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
         }
 
         .modal-header h2 {
             font-size: 1.25rem;
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
         }
 
         .modal-close {
             background: none;
-            border: 1px solid rgba(152, 232, 193, 0.12);
-            color: #d2d3d8;
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
+            color: var(--tn-text);
             width: 32px;
             height: 32px;
             border-radius: 4px;
@@ -712,8 +711,8 @@
         }
 
         .modal-close:hover {
-            color: #fe7d7d;
-            border-color: rgba(254, 125, 125, 0.3);
+            color: var(--tn-coral);
+            border-color: rgb(var(--tn-coral-rgb) / 0.3);
         }
 
         .modal-body {
@@ -733,15 +732,15 @@
         .doc-heading {
             font-size: var(--eco-text-sm, 0.95rem);
             font-weight: 500;
-            color: #98e8c1;
+            color: var(--tn-teal);
             margin-bottom: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .doc-text {
             font-size: var(--eco-text, 1rem);
-            color: #d2d3d8;
+            color: var(--tn-text);
             line-height: 1.65;
         }
 
@@ -752,7 +751,7 @@
 
         .doc-list li {
             font-size: var(--eco-text, 1rem);
-            color: #d2d3d8;
+            color: var(--tn-text);
             line-height: 1.6;
             padding: 0.25rem 0 0.25rem 1.2rem;
             position: relative;
@@ -762,23 +761,23 @@
             content: "→";
             position: absolute;
             left: 0;
-            color: rgba(152, 232, 193, 0.4);
+            color: rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));
             font-size: 0.75rem;
         }
 
         .doc-code {
             font-family: var(--tn-font-mono);
             font-size: 0.8rem;
-            background: rgba(152, 232, 193, 0.06);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 3px;
             padding: 0.1rem 0.4rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .doc-pricing-table {
             margin-top: 0.75rem;
-            border: 1px solid rgba(152, 232, 193, 0.1);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
             border-radius: 6px;
             overflow: hidden;
         }
@@ -788,8 +787,8 @@
             justify-content: space-between;
             padding: 0.55rem 0.9rem;
             font-size: 0.8rem;
-            border-bottom: 1px solid rgba(152, 232, 193, 0.06);
-            color: #d2d3d8;
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.06);
+            color: var(--tn-text);
         }
 
         .doc-pricing-row:last-child {
@@ -797,20 +796,20 @@
         }
 
         .doc-pricing-row span:last-child {
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-weight: 500;
         }
 
         .doc-pricing-header {
-            background: rgba(152, 232, 193, 0.04);
-            font-size: 0.7rem;
+            background: rgb(var(--tn-teal-rgb) / 0.04);
+            font-size: var(--tn-size-label);
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: rgba(207, 255, 207, 0.5);
+            letter-spacing: var(--tn-track-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
         }
 
         .doc-pricing-header span:last-child {
-            color: rgba(207, 255, 207, 0.5);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
             font-weight: 400;
         }
 
@@ -830,29 +829,29 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.6rem 1rem;
-            background: rgba(10, 10, 15, 0.9);
-            border: 1px solid rgba(152, 232, 193, 0.25);
-            border-radius: 999px;
-            color: #98e8c1;
+            background: rgb(var(--tn-shade-rgb) / 0.9);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.25);
+            border-radius: var(--tn-radius-ctl);
+            color: var(--tn-teal);
             font-family: var(--tn-font);
             font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgb(var(--tn-shadow-rgb) / calc(0.5 * var(--tn-shadow-k)));
         }
 
         .wallet-dock-btn:hover {
-            border-color: rgba(152, 232, 193, 0.5);
-            background: rgba(152, 232, 193, 0.08);
+            border-color: rgb(var(--tn-teal-rgb) / 0.5);
+            background: rgb(var(--tn-teal-rgb) / 0.08);
         }
 
         .wallet-dock-icon {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: rgba(152, 232, 193, 0.12);
+            background: rgb(var(--tn-teal-rgb) / 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -869,20 +868,20 @@
         }
 
         .wallet-dock-btn.connected {
-            border-color: rgba(152, 232, 193, 0.35);
+            border-color: rgb(var(--tn-teal-rgb) / 0.35);
         }
 
         .wallet-dock-btn.connected .wallet-dock-icon {
-            background: rgba(152, 232, 193, 0.2);
+            background: rgb(var(--tn-teal-rgb) / 0.2);
         }
 
         .wallet-dock-fab {
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            border: 1px solid rgba(254, 125, 125, 0.25);
-            background: rgba(254, 125, 125, 0.08);
-            color: #fe7d7d;
+            border: 1px solid rgb(var(--tn-coral-rgb) / 0.25);
+            background: rgb(var(--tn-coral-rgb) / 0.08);
+            color: var(--tn-coral);
             font-size: 0.9rem;
             cursor: pointer;
             display: flex;
@@ -894,8 +893,8 @@
         }
 
         .wallet-dock-fab:hover {
-            background: rgba(254, 125, 125, 0.15);
-            border-color: rgba(254, 125, 125, 0.4);
+            background: rgb(var(--tn-coral-rgb) / 0.15);
+            border-color: rgb(var(--tn-coral-rgb) / 0.4);
         }
 
         @media (max-width: 480px) {
@@ -942,14 +941,14 @@
         .plane-card h3 {
             font-size: 1rem;
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
             margin: 0 0 0.55rem;
             overflow-wrap: anywhere;
         }
 
         .plane-card p {
             font-size: var(--eco-text);
-            color: #d2d3d8;
+            color: var(--tn-text);
             line-height: 1.55;
             margin: 0 0 0.75rem;
         }
@@ -962,7 +961,7 @@
 
         .plane-card li {
             font-size: var(--eco-text);
-            color: #d2d3d8;
+            color: var(--tn-text);
             line-height: 1.5;
             padding: 0.15rem 0 0.15rem 1rem;
             position: relative;
@@ -972,9 +971,19 @@
             content: "→";
             position: absolute;
             left: 0;
-            color: rgba(152, 232, 193, 0.45);
+            color: rgb(var(--tn-teal-rgb) / max(0.45, var(--tn-alpha-floor)));
             font-size: 0.9rem;
         }
+
+        .eco-svg-live { margin: 0 0 0.75rem; overflow-x: auto; }
+        .eco-svg-state { font-size: var(--tn-size-caption, 0.78rem); color: var(--tn-text-3, rgb(var(--tn-text-rgb) / 0.6)); }
+        .eco-svg-table { width: 100%; border-collapse: collapse; font-size: var(--eco-text); font-variant-numeric: tabular-nums; }
+        .eco-svg-table th { text-align: left; font-size: var(--tn-size-label, 0.66rem); font-weight: 500; letter-spacing: var(--tn-track-label, 0.08em); text-transform: uppercase; color: var(--tn-text-3, rgb(var(--tn-text-rgb) / 0.6)); padding: 0.3rem 0.6rem 0.3rem 0; border-bottom: 1px solid var(--tn-line, rgb(var(--tn-teal-rgb) / 0.14)); }
+        .eco-svg-table td { padding: 0.4rem 0.6rem 0.4rem 0; color: var(--tn-text-2, var(--tn-text)); border-bottom: 1px solid var(--tn-line-soft, rgb(var(--tn-teal-rgb) / 0.07)); white-space: nowrap; }
+        .eco-svg-name { color: var(--tn-text-1, var(--tn-text-bright)); text-decoration: none; }
+        .eco-svg-name:hover, .eco-svg-name:focus-visible { color: var(--tn-accent, var(--tn-teal)); text-decoration: underline; text-underline-offset: 3px; }
+        .eco-svg-sym { margin-left: 0.45rem; font-size: var(--tn-size-caption, 0.72rem); color: var(--tn-text-3, rgb(var(--tn-text-rgb) / 0.6)); }
+        .eco-svg-retry { background: none; border: 1px solid currentColor; border-radius: 2px; color: inherit; font: inherit; padding: 0.1rem 0.5rem; cursor: pointer; }
 
         .plane-links {
             display: flex;
@@ -986,67 +995,87 @@
         .plane-link {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.35rem;
-            padding: 0.55rem 1rem;
-            border-radius: 6px;
-            border: 1px solid rgba(152, 232, 193, 0.3);
-            background: rgba(152, 232, 193, 0.08);
-            color: #98e8c1;
-            font-size: 0.95rem;
+            min-height: 2.25rem;
+            padding: 0.36rem 0.7rem;
+            border-radius: var(--tn-radius-ctl, 2px);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.45);
+            background: transparent;
+            color: var(--tn-text-bright, var(--tn-text));
+            font-family: var(--tn-font, inherit);
+            font-size: 0.88rem;
+            font-weight: var(--tn-font-weight-medium, 500);
+            letter-spacing: var(--tn-track-nav, 0.01em);
+            line-height: 1.25;
             text-decoration: none;
-            transition: all 0.2s ease;
+            white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
         }
 
         .plane-link:hover {
-            background: rgba(152, 232, 193, 0.16);
-            border-color: rgba(152, 232, 193, 0.5);
+            color: var(--tn-mint);
+            border-color: var(--tn-teal);
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+        }
+
+        .plane-link:focus-visible {
+            outline: 2px solid var(--tn-teal);
+            outline-offset: 2px;
         }
 
         .plane-link.secondary {
-            border-color: rgba(189, 147, 249, 0.35);
-            background: rgba(189, 147, 249, 0.08);
-            color: #bd93f9;
+            /* same Connect control; secondary is not a second colour box */
+            color: var(--tn-text-bright, var(--tn-text));
+            border-color: rgb(var(--tn-teal-rgb) / 0.45);
+            background: transparent;
         }
 
         .plane-link.secondary:hover {
-            background: rgba(189, 147, 249, 0.16);
+            color: var(--tn-mint);
+            border-color: var(--tn-teal);
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+        }
+
+        html[data-theme="permissionless"] .plane-link:hover {
+            box-shadow: var(--tn-glow-ring);
         }
 
         /* Abstract plane: subhead + state table */
         .abstract-subhead {
             font-size: 1.0625rem;
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
             margin: 1.1rem 0 0.5rem;
         }
         .abstract-state {
             margin: 1rem 0 1.1rem;
-            border: 1px solid rgba(152, 232, 193, 0.14);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.14);
             border-radius: 8px;
             overflow: hidden;
-            background: rgba(0, 0, 0, 0.28);
+            background: rgb(var(--tn-shade-rgb) / 0.28);
         }
         .abstract-state-loading {
             padding: 0.85rem 1rem;
             font-size: 0.9rem;
-            color: rgba(210, 211, 216, 0.6);
+            color: rgb(var(--tn-text-rgb) / max(0.6, var(--tn-alpha-floor)));
         }
         .abstract-state-error {
             padding: 0.85rem 1rem;
             font-size: 0.9rem;
-            color: #fe7d7d;
+            color: var(--tn-coral);
         }
         .abstract-state-meta {
             padding: 0.6rem 1rem;
             font-size: 0.8rem;
-            color: rgba(210, 211, 216, 0.5);
-            border-bottom: 1px solid rgba(152, 232, 193, 0.08);
+            color: rgb(var(--tn-text-rgb) / max(0.5, var(--tn-alpha-floor)));
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.08);
             display: flex;
             flex-wrap: wrap;
             gap: 0.4rem 1rem;
             align-items: center;
         }
-        .abstract-state-meta a { color: #98e8c1; text-decoration: none; }
+        .abstract-state-meta a { color: var(--tn-teal); text-decoration: none; }
         .abstract-state-meta a:hover { text-decoration: underline; }
         .abstract-table {
             width: 100%;
@@ -1057,19 +1086,19 @@
         .abstract-table td {
             text-align: left;
             padding: 0.55rem 1rem;
-            border-bottom: 1px solid rgba(152, 232, 193, 0.07);
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.07);
             vertical-align: top;
         }
         .abstract-table th {
             font-weight: 500;
-            color: rgba(152, 232, 193, 0.8);
+            color: rgb(var(--tn-teal-rgb) / max(0.8, var(--tn-alpha-floor)));
             font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
-            background: rgba(152, 232, 193, 0.04);
+            letter-spacing: var(--tn-track-label);
+            background: rgb(var(--tn-teal-rgb) / 0.04);
         }
         .abstract-table td.module {
-            color: #cfffcf;
+            color: var(--tn-mint);
             font-weight: 500;
             white-space: nowrap;
         }
@@ -1077,23 +1106,23 @@
         .abstract-table td.codeid code {
             font-family: var(--tn-font-mono);
             font-size: 0.82rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             word-break: break-all;
         }
-        .abstract-table td.codeid code { color: #bd93f9; }
+        .abstract-table td.codeid code { color: var(--tn-purple); }
         .abstract-table tr:last-child td { border-bottom: none; }
 
         .badge-soon {
             display: inline-block;
             margin-left: 0.4rem;
-            font-size: 0.62rem;
-            letter-spacing: 0.08em;
+            font-size: var(--tn-size-label);
+            letter-spacing: var(--tn-track-label);
             text-transform: uppercase;
             padding: 0.15rem 0.45rem;
             border-radius: 3px;
-            border: 1px solid rgba(255, 184, 108, 0.4);
-            color: #ffb86c;
-            background: rgba(255, 184, 108, 0.08);
+            border: 1px solid rgb(var(--tn-amber-rgb) / 0.4);
+            color: var(--tn-amber);
+            background: rgb(var(--tn-amber-rgb) / 0.08);
             vertical-align: middle;
         }
 
@@ -1111,54 +1140,94 @@
         }
 
         .lifecycle-item {
-            border: 1px solid rgba(152, 232, 193, 0.12);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
             border-radius: 8px;
             padding: 0.75rem 0.85rem;
-            background: rgba(152, 232, 193, 0.03);
+            background: rgb(var(--tn-teal-rgb) / 0.03);
         }
 
         .lifecycle-item strong {
             display: block;
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-size: 0.78rem;
             margin-bottom: 0.25rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .lifecycle-item span {
             font-size: 0.78rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             line-height: 1.5;
         }
 
         .code-inline {
             font-family: var(--tn-font-mono);
             font-size: 0.75rem;
-            background: rgba(152, 232, 193, 0.06);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 3px;
             padding: 0.1rem 0.35rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
+        }
+        .eco-list-foot {
+            margin: 1.25rem 0 0.25rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.55rem 0.85rem;
+        }
+        .eco-list-foot .muted {
+            font-size: 0.88rem;
+            color: var(--tn-text-dim);
+            margin: 0;
+        }
+        .doc-section:focus {
+            outline: none;
+        }
+        .doc-section:focus-visible {
+            outline: 2px solid var(--tn-teal);
+            outline-offset: 4px;
+        }
+        .doc-text a {
+            color: var(--tn-teal);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .doc-text a:hover { color: var(--tn-mint); }
+        .doc-steps {
+            margin: 0.55rem 0 0;
+            padding-left: 1.15rem;
+            color: var(--tn-text);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+        .doc-steps li { margin: 0.35rem 0; }
+        .doc-steps code {
+            font-family: var(--tn-font-mono);
+            font-size: 0.82em;
+            color: var(--tn-teal);
         }
     </style>
 </head>
 
 <body>
     <script src="/lib/fab.js"></script>
-    <canvas id="main-canvas"
-        style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
     <main class="main">
 
-        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+        <div data-tn-head style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
             <h1 class="page-title" style="margin-bottom:0;">Ecosystem</h1>
             <button class="btn-docs" onclick="document.getElementById('modal-docs').style.display='flex'"
                 aria-label="Documentation" title="Documentation">?</button>
         </div>
         <!-- Expandable: catalog from public/ecosystem.json — filter by tag / status / search -->
-        <div class="page-subtitle">On-chain surfaces · filterable catalog</div>
+        <div class="page-subtitle">Apps and projects on Terp</div>
 
         <div id="eco-catalog-host" style="width:100%;"></div>
+        <div class="eco-list-foot">
+            <button type="button" class="plane-link" id="eco-list-app" aria-haspopup="dialog" aria-controls="modal-docs">List your app</button>
+            <p class="muted">Open a PR to add it to the Eco catalog.</p>
+        </div>
 
         <!-- Planes parked here; opened cards host them via ecosystem.js -->
         <div id="plane-storage" aria-hidden="true">
@@ -1169,16 +1238,16 @@
                 <h3>Abstract Accounts</h3>
                 <p>
                     Smart accounts on mainnet: a registry, names, IBC, and a module factory.
-                    Addresses are below. To create and run an account, use Abstract JS.
+                    Addresses are below. To create and run an account, use the Abstract TypeScript SDK.
                 </p>
                 <div class="abstract-state" id="abstract-state" aria-live="polite">
                     <div class="abstract-state-loading">Loading addresses…</div>
                 </div>
                 <div class="plane-links">
-                    <a class="plane-link" href="https://js.abstract.money/" target="_blank" rel="noopener">Abstract JS</a>
+                    <a class="plane-link" href="https://github.com/AbstractSDK/abstract.js" target="_blank" rel="noopener">abstract.js on GitHub</a>
                     <a class="plane-link" href="https://docs.terp.network" target="_blank" rel="noopener">Docs · abstract &amp; modules</a>
                     <a class="plane-link secondary" href="/" title="Install terpd">Installer (terp-core)</a>
-                    <a class="plane-link secondary" href="https://github.com/terpnetwork" target="_blank" rel="noopener">GitHub</a>
+                    <a class="plane-link secondary" href="https://github.com/terpnetwork" target="_blank" rel="noopener">terpnetwork on GitHub</a>
                 </div>
             </div>
         </section>
@@ -1208,7 +1277,7 @@
                         <span>During cooldown you cannot transfer the name. The seller can cancel for a fee.</span>
                     </div>
                 </div>
-                <p style="margin-bottom:0;font-size:0.78rem;color:rgba(210,211,216,0.75);">
+                <p style="margin-bottom:0;font-size:0.78rem;color:rgb(var(--tn-text-rgb) / max(0.75, var(--tn-alpha-floor)));">
                     Contract sources: <span class="code-inline">terp-account-billboards</span>
                     (terp721-account + manifold). Prefer pure JS clients / ts-codegen bindings over a full React rewrite.
                 </p>
@@ -1253,10 +1322,11 @@
             <div class="plane-card">
                 <h3>SVG mint</h3>
                 <p>
-                    Collections from the live SVG minter. Open the SVG UI to mint.
+                    Generative collections on Terp mainnet. Prices and supply are read live from the minter.
                 </p>
+                <div id="eco-svg-live" class="eco-svg-live" aria-live="polite"></div>
                 <div class="plane-links">
-                    <a class="plane-link" href="/svg">Open SVG UI</a>
+                    <a class="plane-link" href="/svg">Open SVG mint</a>
                     <a class="plane-link secondary" href="https://docs.terp.network" target="_blank" rel="noopener">Docs</a>
                 </div>
             </div>
@@ -1305,7 +1375,7 @@
                     Cross-chain coordination for open work: fund tasks in native or IBC assets,
                     attract builders across Cosmos, and settle when acceptance criteria land on-chain.
                     The dedicated surface will live at
-                    <a href="https://bounties.terp.network" style="color:#bd93f9;text-decoration:none;">bounties.terp.network</a>.
+                    <a href="https://bounties.terp.network" style="color:var(--tn-purple);text-decoration:none;">bounties.terp.network</a>.
                 </p>
                 <ul>
                     <li>Intent: multi-chain payouts without single-chain lock-in</li>
@@ -1326,8 +1396,8 @@
             <p id="loading-text">Loading...</p>
         </div>
 
-        <p class="muted" style="margin-top:1.25rem;font-size:0.88rem;color:#6272a4;">
-            Live contract table lives under <a href="/resources#contracts" style="color:#98e8c1;">Resources → Contracts</a>.
+        <p class="muted" style="margin-top:1.25rem;font-size:0.88rem;color:var(--tn-text-dim);">
+            Live contract table lives under <a href="/resources#contracts" style="color:var(--tn-teal);">Resources → Contracts</a>.
         </p>
     </main>
 
@@ -1400,6 +1470,9 @@
                     detailEl.hidden = false;
                     if (componentId === 'upgrades' || componentId === 'releases') {
                         import('/lib/ops-modal.js').then((m) => m.openOpsModal(componentId));
+                    }
+                    if (componentId === 'svg') {
+                        import('/lib/eco-svg-plane.js').then((m) => m.mountSvgPlane());
                     }
                     if (componentId === 'ibc') {
                         import('/lib/ibc-core.js').then(async ({ loadIbcContext, loadIbcSnapshot }) => {
@@ -1563,7 +1636,7 @@
             const tagHtml = (tag) => tag ? `<span class="module-tag ${tag}">${tag}</span>` : '';
             const cellHtml = (val, cls) => val
                 ? `<td class="${cls}"><code>${esc(val)}</code></td>`
-                : `<td class="${cls}"><span style="color:rgba(210,211,216,0.3)">—</span></td>`;
+                : `<td class="${cls}"><span style="color:rgb(var(--tn-text-rgb) / max(0.3, var(--tn-alpha-floor)))">—</span></td>`;
 
             body.innerHTML =
                 `<div class="contract-meta">
@@ -1610,8 +1683,8 @@
                         if (!addr && !codeId) return null;
                         return `<tr>
                             <td class="module">${label}</td>
-                            <td class="addr">${addr ? `<code>${esc(addr)}</code>` : '<span style="color:rgba(210,211,216,0.4)">—</span>'}</td>
-                            <td class="codeid">${codeId ? `<code>${esc(codeId)}</code>` : '<span style="color:rgba(210,211,216,0.4)">—</span>'}</td>
+                            <td class="addr">${addr ? `<code>${esc(addr)}</code>` : '<span style="color:rgb(var(--tn-text-rgb) / max(0.4, var(--tn-alpha-floor)))">—</span>'}</td>
+                            <td class="codeid">${codeId ? `<code>${esc(codeId)}</code>` : '<span style="color:rgb(var(--tn-text-rgb) / max(0.4, var(--tn-alpha-floor)))">—</span>'}</td>
                         </tr>`;
                     })
                     .filter(Boolean);
@@ -1621,7 +1694,7 @@
                 }
                 host.innerHTML =
                     `<div class="abstract-state-meta">
-                        <span>chain: <code style="font-family:var(--tn-font-mono);color:#cfffcf">${esc(CONFIG.chainId || 'morocco-1')}</code></span>
+                        <span>chain: <code style="font-family:var(--tn-font-mono);color:var(--tn-mint)">${esc(CONFIG.chainId || 'morocco-1')}</code></span>
                         <span><a href="${esc(url)}" target="_blank" rel="noopener">Raw list</a></span>
                     </div>
                     <table class="abstract-table">
@@ -1655,7 +1728,8 @@
                 const ok = await TerpWallet.ensureLibs(CONFIG, { pageId: "tabs" });
                 if (!ok) throw new Error("cosmes load failed");
 
-                MsgExecuteContract = TerpWallet.getState().MsgExecuteContract;
+                // cosmes loads on connect intent; the wallet.js wrapper builds the msg once it has.
+                MsgExecuteContract = TerpWallet.getState().MsgExecuteContract || TerpWallet.MsgExecuteContract;
 
                 const minterMod = await import("/lib/account-minter.js");
                 AccountMinterQueryClient = minterMod.AccountMinterQueryClient;
@@ -1957,6 +2031,7 @@
 
         (function initBackground() {
             const canvas = document.getElementById("main-canvas");
+            if (!canvas) return;
             const ctx = canvas.getContext("2d");
             let width, height, centerX, centerY, time = 0;
 
@@ -2104,77 +2179,73 @@
     </script>
 
     <script>
-        window.openDocModal = function () {
-            document.getElementById('modal-docs').style.display = 'flex';
+        window.openDocModal = function (sectionId) {
+            const modal = document.getElementById('modal-docs');
+            if (!modal) return;
+            modal.style.display = 'flex';
+            const go = () => {
+                if (!sectionId) return;
+                const el = document.getElementById(sectionId);
+                if (!el) return;
+                el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                try { el.focus({ preventScroll: true }); } catch (_) { el.focus(); }
+            };
+            requestAnimationFrame(() => requestAnimationFrame(go));
         };
         window.closeDocModal = function () {
-            document.getElementById('modal-docs').style.display = 'none';
+            const modal = document.getElementById('modal-docs');
+            if (modal) modal.style.display = 'none';
         };
+        document.getElementById('eco-list-app')?.addEventListener('click', () => {
+            openDocModal('eco-list-guide');
+        });
     </script>
 
     <!-- ─── Documentation Modal ─── -->
-    <div class="modal" id="modal-docs" style="display:none">
+    <div class="modal" id="modal-docs" style="display:none" role="dialog" aria-labelledby="modal-docs-title">
         <div class="modal-backdrop" onclick="closeDocModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Documentation</h2>
-                <button class="modal-close" onclick="closeDocModal()">&times;</button>
+                <h2 id="modal-docs-title">Ecosystem</h2>
+                <button class="modal-close" onclick="closeDocModal()" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="doc-section">
-                    <h3 class="doc-heading">Ecosystem</h3>
-                    <p class="doc-text">This page is the apps on Terp: names, accounts, art, DAOs. More will land here.</p>
+                    <h3 class="doc-heading">What’s here</h3>
+                    <p class="doc-text">A community catalog of the apps and projects on Terp: names and accounts, art, DeFi, DAOs, tools and infrastructure. Each light is one project.</p>
                 </div>
 
                 <div class="doc-section">
-                    <h3 class="doc-heading">What are TABS?</h3>
-                    <p class="doc-text">A name you buy on-chain that points at your wallet, like a username.
-                        After you accept a bid, there is a cooldown before the name settles.</p>
+                    <h3 class="doc-heading">Browse</h3>
+                    <p class="doc-text">Nine projects show at a time. Previous and Next turn the page, and the line under the lights tells you which page you are on.</p>
                 </div>
 
                 <div class="doc-section">
-                    <h3 class="doc-heading">Pricing</h3>
-                    <p class="doc-text">Cost is calculated from the length of the name you register. Shorter names
-                        require a higher premium. The price components are derived from the contract's configured
-                        tier rates.</p>
-                    <div class="doc-pricing-table">
-                        <div class="doc-pricing-row doc-pricing-header">
-                            <span>Name Length</span>
-                            <span>Base Cost</span>
-                        </div>
-                        <div class="doc-pricing-row">
-                            <span>1 – 3 chars</span>
-                            <span id="doc-tier-1">--</span>
-                        </div>
-                        <div class="doc-pricing-row">
-                            <span>4 – 6 chars</span>
-                            <span id="doc-tier-2">--</span>
-                        </div>
-                        <div class="doc-pricing-row">
-                            <span>7 – 9 chars</span>
-                            <span id="doc-tier-3">--</span>
-                        </div>
-                        <div class="doc-pricing-row">
-                            <span>10+ chars</span>
-                            <span id="doc-tier-4">--</span>
-                        </div>
-                    </div>
+                    <h3 class="doc-heading">Filter</h3>
+                    <p class="doc-text">Pick a category to see only those projects, or choose All to see everything again.</p>
                 </div>
 
                 <div class="doc-section">
-                    <h3 class="doc-heading">Rules</h3>
-                    <ul class="doc-list">
-                        <li>Only lowercase alphanumeric characters and hyphens</li>
-                        <li>Must start with a letter</li>
-                        <li>Cannot end with a hyphen</li>
-                        <li>Minimum 1 character, maximum 64 characters</li>
-                        <li>You can sell a name through the marketplace</li>
-                    </ul>
+                    <h3 class="doc-heading">Open</h3>
+                    <p class="doc-text">Select a project to read what it does. Apps built into this site open right here. Projects hosted elsewhere open in a new tab, after you confirm you are leaving.</p>
                 </div>
 
                 <div class="doc-section">
-                    <h3 class="doc-heading">Resolution</h3>
-                    <p class="doc-text">Apps can look up <code class="doc-code">your-name</code> and find the wallet that owns it.</p>
+                    <h3 class="doc-heading">Terp Account Billboards</h3>
+                    <p class="doc-text">Despite the name, TABS is not a message board. It is the on-chain name registry: a username that points at your wallet, which other apps can look up.</p>
+                </div>
+
+                <div class="doc-section" id="eco-list-guide" tabindex="-1">
+                    <h3 class="doc-heading">List your app</h3>
+                    <p class="doc-text">Eco reads its catalog from <code>public/ecosystem.json</code> in the <a href="https://github.com/terpnetwork/terp-website" target="_blank" rel="noopener">terp-website</a> repository. A merged pull request on that file is what puts a project on this page.</p>
+                    <ol class="doc-steps">
+                        <li>Fork <a href="https://github.com/terpnetwork/terp-website" target="_blank" rel="noopener">github.com/terpnetwork/terp-website</a> and open <a href="https://github.com/terpnetwork/terp-website/blob/main/public/ecosystem.json" target="_blank" rel="noopener">public/ecosystem.json</a>.</li>
+                        <li>Add one object to the <code>projects</code> array with at least <code>id</code>, <code>title</code>, <code>summary</code>, <code>tags</code>, <code>status</code> (<code>live</code>, <code>beta</code>, or <code>soon</code>), and a <code>links</code> entry pointing at your app or repo.</li>
+                        <li>Use an existing tag from <code>filters.tags</code> when it fits (accounts, nft, governance, zk, ibc, infra, agentic, defi). Set <code>relevance</code> as a number if you care about sort order; higher appears first.</li>
+                        <li>Open a pull request against <code>main</code>. Keep the description short: what the app does and the live URL.</li>
+                    </ol>
+                    <p class="doc-text">Deployed CosmWasm contracts show under Resources → App state from the published chain address file after they are live on mainnet — that list is not edited in this JSON.</p>
+                    <p class="doc-text">Edit file: <a href="https://github.com/terpnetwork/terp-website/edit/main/public/ecosystem.json" target="_blank" rel="noopener">github.com/terpnetwork/terp-website/edit/main/public/ecosystem.json</a>. Wider contribution notes: <a href="https://docs.terp.network/resources/contribution" target="_blank" rel="noopener">docs.terp.network/resources/contribution</a>.</p>
                 </div>
             </div>
         </div>

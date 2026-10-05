@@ -53,6 +53,8 @@ just serve          # local :3000
 curl -fsSL https://terp.network/get/terp-installer.sh | bash
 ```
 
+Ask **network first**, then download the matching ELF: morocco-1 → **v6.0.1**, 120u-1 → **v6.2.0**. Darwin builds must link `libwasmvmstatic_darwin.a` (`make build-darwin-arm64`); a dylib rpath into this clone will abort on anyone else's Mac.
+
 The installer will automatically:
 
 1. Check/install Python 3.6+
@@ -72,7 +74,7 @@ curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --install nod
 **Available flags:**
 
 - `--install <node|client|localterp>` - Installation type
-- `--network <morocco-1|90u-4>` - Network to join
+- `--network <morocco-1|120u-1>` - morocco-1 installs terpd v6.0.1; 120u-1 installs terpd v6.2.0
 - `--home <path>` - Installation directory (default: ~/.terp)
 - `--moniker <name>` - Node moniker (default: terp)
 - `--pruning <default|nothing|everything>` - Pruning settings

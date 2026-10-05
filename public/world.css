@@ -1,0 +1,304 @@
+/* Home navigation layout (lib/fractal/world.js).
+ * Loaded by pages that show the navigation. world.js sets
+ * html[data-tn-world] to "home" or "panel" once it mounts; without it (no JS,
+ * ?fractal=0) only the pinned banner below applies.
+ *
+ * One background: the navigation canvas paints the only background, behind every
+ * page. Pages, cards, dialogs and the banner are transparent and sit directly on
+ * it; text stays readable through weight, colour and a soft text shadow. Where
+ * text scrolls under the banner or a pinned title it fades out into an exact
+ * copy of the canvas background (--tnw-g*, kept in step by world.js), so no
+ * layer ever shows an edge of its own. */
+
+:root {
+  --tnw-bg: var(--tn-canvas);           /* ink, amber, focus: per theme in global.css */
+  --tnw-ink-dim: var(--tn-text-muted);
+  --tnw-line: rgb(var(--tn-mint-rgb) / 0.14);
+  --tnw-left: clamp(300px, 38vw, 560px); /* keep in sync with leftW() in world.js */
+  --tnw-ease: cubic-bezier(.2, .7, .2, 1);
+  --tnw-tint: 152, 232, 193;            /* rgb triplet, current section colour */
+  --tn-chrome-h: 56px;                  /* measured by lib/fab.js */
+  --tnw-halo: 0 0 10px rgb(var(--tn-canvas-rgb) / .9), 0 0 2px rgb(var(--tn-canvas-rgb) / .85); /* soft text shadow, no box */
+  /* the canvas background (a radial wash; world.js keeps these in step) */
+  --tnw-wash: radial-gradient(circle var(--tnw-gr, 1000px) at var(--tnw-gx, 50%) var(--tnw-gy, 50%), var(--tnw-g0, var(--tn-canvas)) 0, var(--tn-canvas) 100%);
+  --tnw-fade: linear-gradient(180deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+  --tnw-fade-bar: linear-gradient(180deg, #000 0, #000 60%, transparent 100%);
+}
+
+/* ── banner: one element, pinned to the top of every page ─────────────── */
+.site-chrome-wrap[data-tn-chrome] {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+  padding: 10px 12px 18px; pointer-events: none; background: none;
+}
+.site-chrome-wrap[data-tn-chrome] .site-chrome { text-shadow: var(--tnw-halo); }
+/* Text scrolled under the banner fades into the canvas background (only once the page is scrolled). */
+.site-chrome-wrap[data-tn-chrome]::before { content: ""; position: absolute; z-index: -1; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; opacity: 0; transition: opacity 160ms linear;
+  background: var(--tnw-wash); -webkit-mask-image: var(--tnw-fade-bar); mask-image: var(--tnw-fade-bar); }
+html[data-tn-world="panel"][data-tn-scrolled] .site-chrome-wrap[data-tn-chrome]::before { opacity: 1; }
+.site-chrome-wrap[data-tn-chrome] .site-chrome { pointer-events: auto; margin: 0 auto; width: auto; flex-wrap: nowrap; }
+body.has-site-chrome { padding-top: calc(var(--tn-chrome-h) + 12px); }
+@media (max-width: 480px) {
+  .site-chrome-wrap[data-tn-chrome] { padding: 8px 4px 14px; }
+  .site-chrome-wrap[data-tn-chrome] .site-chrome { gap: 0 .1rem; }
+  .site-chrome-wrap[data-tn-chrome] .site-chrome a,
+  .site-chrome-wrap[data-tn-chrome] .site-chrome-pill { padding: .4rem .5rem; font-size: .85rem; letter-spacing: .01em; }
+  .site-chrome-wrap[data-tn-chrome] .site-chrome .dot { display: none; }
+}
+@media (max-width: 359px) {
+  .site-chrome-wrap[data-tn-chrome] .site-chrome { flex-wrap: wrap; }
+}
+
+/* ── stage ─────────────────────────────────────────────────────────────── */
+#tn-world { position: fixed; inset: 0; z-index: 0; }
+#tn-world[hidden], #tn-world-preview[hidden] { display: none !important; }
+#tn-world .tnw-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: opacity 150ms linear; }
+#tn-world.is-fading .tnw-canvas { opacity: 0; }
+.tnw-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.tnw-portals { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.tnw-portals.is-hidden { visibility: hidden; }
+.tnw-portal { position: absolute; pointer-events: auto; border-radius: 50%; transform: translate(-50%, -50%); text-decoration: none; min-width: 44px; min-height: 44px; color: var(--tnw-ink); -webkit-tap-highlight-color: transparent; background: none; border: 0; padding: 0; margin: 0; font: inherit; cursor: pointer; touch-action: manipulation; }
+.tnw-portal:focus { outline: none; }
+.tnw-portal:focus-visible { outline: 1px solid var(--tnw-focus); outline-offset: 6px; }
+.tnw-portal[aria-disabled="true"] { cursor: default; }
+.tnw-label { position: absolute; white-space: nowrap; font: 500 14px/1.4 var(--tn-font, system-ui, sans-serif); color: var(--tnw-ink); padding: 2px 6px; text-shadow: var(--tnw-halo); pointer-events: none; transition: opacity 140ms linear, color 140ms linear; }
+.tnw-portal[data-dir="N"] .tnw-label { bottom: 100%; left: 50%; transform: translate(-50%, -6px); }
+.tnw-portal[data-dir="S"] .tnw-label { top: 100%; left: 50%; transform: translate(-50%, 6px); }
+.tnw-portal[data-dir="E"] .tnw-label { left: 100%; top: 50%; transform: translate(8px, -50%); }
+.tnw-portal[data-dir="W"] .tnw-label { right: 100%; top: 50%; transform: translate(-8px, -50%); }
+.tnw-portal[data-dir="NW"] .tnw-label { right: 80%; bottom: 80%; }
+.tnw-portal[data-dir="NE"] .tnw-label { left: 80%; bottom: 80%; }
+.tnw-portal[data-dir="SE"] .tnw-label { left: 80%; top: 80%; }
+.tnw-portal[data-dir="SW"] .tnw-label { right: 80%; top: 80%; }
+.tnw-portal.is-external .tnw-label::after { content: " ↗"; color: var(--tnw-amber); }
+/* Controls drawn as the centre of their own light (install, category, previous/next): label inside. */
+.tnw-portal.is-inset .tnw-label { left: 50% !important; top: 50% !important; right: auto !important; bottom: auto !important; transform: translate(-50%, -50%) !important; background: none; padding: 0; color: var(--tn-canvas); font-weight: 600; text-shadow: 0 0 6px rgb(var(--tn-tint-rgb) / .55); }
+html:is([data-theme="light"], [data-theme="sandman"]) .tnw-portal.is-inset .tnw-label { color: var(--tn-text-bright); text-shadow: 0 0 3px var(--tn-canvas), 0 0 8px var(--tn-canvas), 0 0 14px var(--tn-canvas); }
+.tnw-portal.is-filter .tnw-label { font-size: 13px; }
+.tnw-portal.is-action .tnw-label { font-size: 15px; }
+.tnw-portal.is-inset.is-small .tnw-label { font-size: 12px; }
+.tnw-portal[aria-disabled="true"] .tnw-label { opacity: .4; }
+/* Projects, sections, previous and next: the name shows when lit (pointed at, focused or selected). */
+.tnw-portal:is(.is-entry, .is-section, .is-prev, .is-next) .tnw-label { opacity: 0; }
+.tnw-portal:is(.is-entry, .is-section, .is-prev, .is-next):is(.is-lit, :focus-visible) .tnw-label { opacity: 1; z-index: 2; }
+.tnw-portal.is-entry[aria-pressed="true"] .tnw-label, .tnw-portal.is-section[aria-current] .tnw-label { color: var(--tnw-strong); font-weight: 600; }
+.tnw-portal.is-arrow .tnw-label { color: var(--tnw-ink-dim); }
+.tnw-portal.is-arrow:is(.is-lit, :focus-visible, :hover) .tnw-label { color: var(--tnw-strong); }
+
+.tnw-caption { position: absolute; z-index: 3; margin: 0; transform: translateX(-50%); max-width: min(92vw, 420px); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 13px/1.4 var(--tn-font, system-ui, sans-serif); color: var(--tnw-ink-dim); text-shadow: var(--tnw-halo); pointer-events: none; }
+.tnw-caption[hidden] { display: none; }
+
+.tnw-crumbs { position: absolute; z-index: 3; top: calc(var(--tn-chrome-h) + 4px); left: 24px; max-width: calc(var(--tnw-left) - 48px); }
+.tnw-crumbs ol { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; color: var(--tnw-ink-dim); font: 14px/1.5 var(--tn-font, system-ui, sans-serif); }
+.tnw-crumbs li + li::before { content: "›"; margin-right: 8px; opacity: .6; }
+.tnw-crumbs a { color: inherit; text-decoration: none; }
+.tnw-crumbs a:hover, .tnw-crumbs a:focus-visible { color: var(--tnw-ink); text-decoration: underline; text-underline-offset: 3px; }
+.tnw-crumbs [aria-current] { color: var(--tnw-ink); }
+
+/* Cards: type on the background, a thin rule in the colour of the light they belong to.
+   world.js places them in free space: under the mark (wide pages), in the page flow
+   under the navigation (narrow pages), or in the landing column (start page). */
+#tn-world-preview { position: fixed; z-index: 30; max-width: 520px; padding: 10px 2px 4px; border: 0; border-top: 1px solid rgba(var(--tnw-tint), .45); border-radius: 0; background: none; box-shadow: none; color: var(--tnw-ink); font: 14px/1.45 var(--tn-font, system-ui, sans-serif); text-shadow: var(--tnw-halo); opacity: 0; transition: opacity 160ms linear; pointer-events: none; left: -9999px; top: 0; box-sizing: border-box; }
+#tn-world-preview.is-inline { position: absolute; }
+#tn-world-preview.is-on { opacity: 1; }
+#tn-world-preview.is-sticky, #tn-world-preview.is-pinned { pointer-events: auto; }
+#tn-world-preview h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: rgb(var(--tnw-tint)); }
+#tn-world-preview p { margin: 0 0 8px; color: var(--tnw-ink-dim); }
+#tn-world-preview .tnw-meta { font-size: 12px; letter-spacing: .02em; margin-bottom: 6px; }
+#tn-world-preview .tnw-dest { font: 12px/1.4 var(--tn-font-mono, ui-monospace, monospace); color: var(--tnw-ink-dim); }
+#tn-world-preview .tnw-dest.ext, #tn-world-preview .tnw-leave { color: var(--tnw-amber); }
+#tn-world-preview .tnw-leave { font-size: 13px; }
+#tn-world-preview .tnw-actions { display: flex; gap: 16px; align-items: baseline; }
+#tn-world-preview .tnw-actions a { color: var(--tnw-amber); font-weight: 500; }
+#tn-world-preview button { font: inherit; color: var(--tnw-ink-dim); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+#tn-world-preview #tnw-open { color: rgb(var(--tnw-tint)); background: none; box-shadow: inset 0 0 0 1px rgba(var(--tnw-tint), .5); text-decoration: none; font-weight: 600; padding: 6px 14px; border-radius: var(--tn-radius-ctl); min-height: 32px; text-shadow: none; }
+#tn-world-preview #tnw-open:hover { box-shadow: inset 0 0 0 1px rgb(var(--tnw-tint)); color: var(--tnw-strong); }
+#tn-world-preview.is-pinned h3 { padding-right: 28px; }
+#tn-world-preview #tnw-clear { position: absolute; top: 4px; right: 0; width: 32px; height: 32px; border-radius: 50%; text-decoration: none; font-size: 20px; line-height: 1; color: var(--tnw-ink-dim); }
+#tn-world-preview #tnw-clear:hover { color: var(--tnw-ink); background: rgba(var(--tnw-tint), .1); }
+#tn-world-preview .tnw-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+#tn-world-preview .tnw-chips button { text-decoration: none; color: var(--tnw-ink); padding: 6px 12px; min-height: 36px; border-radius: var(--tn-radius-ctl); background: none; box-shadow: inset 0 0 0 1px rgba(var(--tnw-tint), .28); text-shadow: none; }
+#tn-world-preview .tnw-chips button span { color: var(--tnw-ink-dim); font-size: 12px; margin-left: 2px; }
+#tn-world-preview .tnw-chips button[aria-pressed="true"] { color: var(--tnw-strong); box-shadow: inset 0 0 0 1px rgb(var(--tnw-tint)); }
+#tn-world-preview .tnw-chips button:focus-visible { outline: 1px solid var(--tnw-focus); outline-offset: 2px; }
+
+/* ── page layout while the navigation is on ───────────────────────────── */
+html[data-tn-world="home"], html[data-tn-world="panel"] { background: var(--tnw-bg); }
+html[data-tn-world="home"] body, html[data-tn-world="panel"] body { background: var(--tnw-bg); overflow-x: clip; }
+html[data-tn-world="panel"] body > main, html[data-tn-world="panel"] body > .container,
+html[data-tn-world="home"] body > main, html[data-tn-world="home"] body > .container { position: relative; z-index: 2; background: none; }
+html[data-tn-world="panel"] body > main { overflow-x: clip; }
+
+/* Content fades (opacity only, titles included) while the navigation moves between pages. */
+html[data-tn-xfade] body > main > *, html[data-tn-xfade] body > .container { transition: opacity 180ms linear; }
+html[data-tn-xfade="out"] body > main > *, html[data-tn-xfade="out"] body > .container { opacity: 0; pointer-events: none; }
+html[data-tn-xfade="in"] body > main > *, html[data-tn-xfade="in"] body > .container { transition-duration: 280ms; }
+
+/* Page titles and their details buttons hold their place under the banner; text
+   scrolled beneath them fades into the canvas background. */
+html[data-tn-world="panel"] [data-tn-head] { position: sticky; top: var(--tn-chrome-h); z-index: 6; isolation: isolate; animation: none !important; transform: none !important; text-shadow: var(--tnw-halo); }
+html[data-tn-world="panel"] [data-tn-head]::before { content: ""; position: fixed; z-index: -1; top: 0; left: 0; right: 0; height: calc(var(--tn-chrome-h) + var(--tnw-head-h, 48px) + 28px); pointer-events: none; opacity: 0; transition: opacity 160ms linear;
+  background: var(--tnw-wash); -webkit-mask-image: var(--tnw-fade); mask-image: var(--tnw-fade); }
+html[data-tn-world="panel"][data-tn-stuck] [data-tn-head]::before { opacity: 1; }
+
+/* ── dialogs: one language with the page ──────────────────────────────── */
+/* Details, guides, documentation and collection dialogs open in the page's own
+   column (never over the navigation), as type on the background with a thin
+   rule in the section colour. The page underneath steps back while one is open. */
+html[data-tn-world="panel"] :is(.res-info-overlay, #modal-docs, .modal, dialog.info-modal) { animation: none !important; transition: none !important; }
+html[data-tn-world="panel"] :is(.res-info-overlay, #modal-docs, .modal) { position: fixed !important; inset: auto !important; top: calc(var(--tn-chrome-h) + 4px) !important; left: var(--tnw-left) !important; right: 0 !important; bottom: 0 !important;
+  align-items: flex-start !important; justify-content: flex-start !important; padding: 8px 40px 40px 32px !important; overflow-y: auto; overscroll-behavior: contain; background: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-sizing: border-box; z-index: 200; }
+html[data-tn-world="panel"] [data-tn-behind] { visibility: hidden !important; }
+html[data-tn-world="panel"] :is(.modal-backdrop, .res-info-overlay > .tnw-none) { background: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html[data-tn-world="panel"] :is(.modal-content, .res-info-modal),
+html[data-tn-world="panel"] dialog.info-modal { background: none !important; border: 0 !important; border-top: 1px solid rgba(var(--tnw-tint), .45) !important; border-radius: 0 !important; box-shadow: none !important; width: 100% !important; max-width: 720px !important; max-height: none !important; padding: 14px 0 0 !important; overflow: visible !important; color: var(--tnw-ink); text-shadow: var(--tnw-halo); }
+html[data-tn-world="panel"] .modal-content { display: block !important; }
+html[data-tn-world="panel"] .modal-header { padding: 0 0 6px !important; border: 0 !important; background: none !important; }
+html[data-tn-world="panel"] .modal-body { padding: 8px 0 0 !important; overflow: visible !important; }
+html[data-tn-world="panel"] :is(.modal-header h2, .res-info-modal h3, dialog.info-modal h3) { color: rgb(var(--tnw-tint)) !important; }
+html[data-tn-world="panel"] :is(.modal-close, .res-info-modal .close-info, dialog.info-modal .close-info) { background: none !important; border: 0 !important; box-shadow: inset 0 0 0 1px rgba(var(--tnw-tint), .4) !important; border-radius: var(--tn-radius-ctl) !important; color: var(--tnw-ink) !important; width: auto !important; min-width: 36px; min-height: 36px; padding: .35rem .9rem !important; cursor: pointer; font-family: inherit; }
+html[data-tn-world="panel"] :is(.modal-close, .res-info-modal .close-info, dialog.info-modal .close-info):hover { box-shadow: inset 0 0 0 1px rgb(var(--tnw-tint)) !important; color: var(--tnw-strong) !important; }
+html[data-tn-world="panel"] .res-info-modal > .close-info { margin-top: .5rem; }
+html[data-tn-world="panel"] dialog.info-modal { position: fixed; margin: 0; inset: auto; top: calc(var(--tn-chrome-h) + 12px); left: calc(var(--tnw-left) + 32px); right: 40px; width: auto !important; max-height: calc(100svh - var(--tn-chrome-h) - 24px) !important; overflow-y: auto !important; }
+html[data-tn-world="panel"] dialog.info-modal::backdrop { background: none; }
+html[data-tn-world="panel"] .md-guide .snap-code { margin-left: 0; }
+/* the page steps back while a dialog is open */
+html[data-tn-world="panel"] body > main > *, html[data-tn-world="panel"] body > .container { transition: opacity 160ms linear; }
+html[data-tn-world="panel"][data-tn-sheet] body > main > :not(.modal):not(#modal-docs):not(.res-info-overlay):not(dialog) { opacity: 0 !important; pointer-events: none; }
+
+/* Home: the mark fills the view, the landing copy sits bottom-left. */
+html[data-tn-world="home"] body { display: block; padding: 0; min-height: 100svh; }
+html[data-tn-world="home"] body > .container { position: fixed; left: 0; bottom: 0; top: auto; width: min(560px, 100%); max-width: none; margin: 0; max-height: calc(100svh - var(--tn-chrome-h) - 8px); overflow-y: auto; overscroll-behavior: contain; text-align: left; padding: 24px 24px 32px; pointer-events: none; text-shadow: var(--tnw-halo); }
+html[data-tn-world="home"] body > .container > * { pointer-events: auto; transition: opacity 160ms linear; }
+/* A card for a light takes the landing copy's place. */
+html[data-tn-world="home"][data-tn-card] body > .container > :not(.install-section) { opacity: 0; pointer-events: none; }
+/* Installer: opened from the centre light, inline in the landing column in place of the copy. */
+html[data-tn-world="home"] body > .container > .install-section { display: none; }
+html[data-tn-world="home"] body > .container > .install-section.is-open { display: block; position: relative; margin: 0; padding: 12px 0 0; width: auto; max-width: 520px; box-sizing: border-box; text-align: left; background: none; border: 0; border-top: 1px solid rgb(var(--tnw-ink-rgb) / .4); border-radius: 0; box-shadow: none; animation: tnw-in 220ms linear both; }
+html[data-tn-world="home"][data-tn-install] body > .container > :not(.install-section) { display: none; }
+@keyframes tnw-in { from { opacity: 0; } to { opacity: 1; } }
+html[data-tn-world="home"] .install-section > .install-header { display: none; }
+html[data-tn-world="home"] .install-section .install-content { max-height: none; overflow: visible; transition: none; padding-top: 0; background: none; border: 0; }
+html[data-tn-world="home"] .install-section .install-content.expanded { padding-top: 0; }
+html[data-tn-world="home"] .install-section .mobile-overlay { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; border-radius: 0; }
+/* Phones: the "desktop only" note reads in place of the command instead of lying over it. */
+html[data-tn-world="home"] .install-section .mobile-overlay.active { position: static; width: auto; height: auto; padding: 10px 0 4px; align-items: flex-start; text-align: left; }
+html[data-tn-world="home"] .install-section .mobile-overlay-icon { width: 28px; height: 28px; margin-bottom: 8px; }
+html[data-tn-world="home"] .install-content:has(> .mobile-overlay.active) > :not(.install-lede):not(.mobile-overlay) { display: none; }
+/* Inside the installer: type and thin rules only, no boxes. */
+html[data-tn-world="home"] .install-section :is(.install-tab, .install-tab.active, .install-box-container, .install-input-wrapper, .inline-verify) { background: none; box-shadow: none; border-radius: 0; }
+html[data-tn-world="home"] .install-section :is(.install-box-container, .inline-verify) { border: 0; padding-left: 0; padding-right: 0; }
+html[data-tn-world="home"] .install-section .install-tab { border: 0; border-bottom: 1px solid transparent; padding-left: 0; padding-right: 0; text-align: left; }
+html[data-tn-world="home"] .install-section .install-tab.active { border-bottom-color: rgb(var(--tn-teal-rgb) / .55); }
+html[data-tn-world="home"] .install-section .install-tabs { background: none; border: 0; justify-content: flex-start; }
+html[data-tn-world="home"] .install-section .install-input-wrapper { border: 0; border-left: 2px solid rgb(var(--tn-teal-rgb) / .5); }
+html[data-tn-world="home"] .install-section :is(.install-box, .inline-checksum-value) { background: none; box-shadow: none; }
+html[data-tn-world="home"] .install-section :is(.copy-button, .inline-verify-button) { background: none; box-shadow: none; border: 1px solid rgb(var(--tnw-ink-rgb) / .28); border-radius: var(--tn-radius-ctl); }
+html[data-tn-world="home"] .install-section :is(.copy-button, .inline-verify-button):is(:hover, :focus-visible) { border-color: rgb(var(--tnw-ink-rgb) / .6); }
+html[data-tn-world="home"] .install-section .copy-button { display: grid; place-items: center; padding: 0; min-width: 40px; }
+html[data-tn-world="home"] .install-section .copy-button svg { flex: none; width: 18px; min-width: 18px; }
+html[data-tn-world="home"] .install-section .code-inline { background: none; border: 0; padding: 0; }
+/* The explanation opens below the button, in the column, rather than as a floating box. */
+html[data-tn-world="home"] .install-section .tooltip { position: static; display: none; width: auto; max-width: none; margin-top: 8px; padding: 0; background: none; border: 0; box-shadow: none; opacity: 1; visibility: visible; text-align: left; }
+html[data-tn-world="home"] .install-section .tooltip::before, html[data-tn-world="home"] .install-section .tooltip::after { content: none; }
+html[data-tn-world="home"] .install-section .tooltip-trigger:is(:hover, :focus-visible) .tooltip { display: block; }
+html[data-tn-world="home"] .install-section .tooltip-footer { border: 0; }
+
+.install-close { display: none; }
+html[data-tn-world="home"] .install-section.is-open > .install-close { display: block; position: absolute; z-index: 2; top: 4px; right: 0; width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: var(--tnw-ink-dim); font: 22px/1 var(--tn-font, system-ui, sans-serif); cursor: pointer; }
+html[data-tn-world="home"] .install-section > .install-close:hover { color: var(--tnw-ink); box-shadow: inset 0 0 0 1px rgb(var(--tnw-ink-rgb) / .35); }
+html[data-tn-world="home"] .install-section > .install-close:focus-visible { outline: 1px solid var(--tnw-focus); }
+
+/* Catalog and resources: selection is made from the navigation; the page mirrors it. */
+html[data-tn-world] .eco-card.is-selected { box-shadow: none !important; }
+html[data-tn-world] .eco-card.is-selected :is(h3, .eco-card-title, .eco-title) { color: rgb(var(--tnw-tint)); }
+html[data-tn-world] .eco-card.is-selected { border-left: 1px solid rgba(var(--tnw-tint), .6) !important; }
+html[data-tn-world="panel"] #res-subtabs { display: none; }
+html[data-tn-world="panel"] .res-layout { grid-template-columns: minmax(0, 1fr); }
+
+/* No surfaces inside pages: cards, notes, code and tables sit on the background. */
+html[data-tn-world="panel"] :is(.eco-card, .snap-card, .section-card, .stat-card, .nr-card, .about-card, .collection-card, .lifecycle-item, .name-card, .reward-card, .result-area, .forbidden-display, .demo-notice, details.res-release, .graph-stage, .col-card-preview, .doc-pricing-table, .doc-pricing-header) {
+  background: none !important; border-color: transparent !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html[data-tn-world="panel"] :is(.eco-card, .snap-card, .section-card, .stat-card, .nr-card, .about-card, .collection-card, .lifecycle-item, .reward-card, .result-area) { padding-left: 0 !important; padding-right: 0 !important; }
+html[data-tn-world="panel"] details.res-release { border-bottom-color: rgba(var(--tnw-tint), .14) !important; border-radius: 0 !important; }
+html[data-tn-world="panel"] :is(pre, .snap-code, .code-inline, code) { background: none !important; border-color: transparent !important; box-shadow: none !important; }
+html[data-tn-world="panel"] :is(pre, .snap-code) { border-left: 2px solid rgba(var(--tnw-tint), .3) !important; border-radius: 0 !important; }
+html[data-tn-world="panel"] :is(th, thead, tr, td) { background: none !important; }
+html[data-tn-world="panel"] :is(.data-table-wrap) { max-height: none !important; overflow-y: visible !important; }
+html[data-tn-world="panel"] table.data-table th { position: static !important; }
+html[data-tn-world="panel"] main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) { background-color: transparent !important; }
+html[data-tn-world="panel"] main :is(h1, h2, h3, h4, p, li, dt, dd, td, th, label, summary, figcaption) { text-shadow: var(--tnw-halo); }
+
+/* Panel: navigation on the left, the page on the right, on the one background. */
+@media (min-width: 900px) {
+  html[data-tn-world="panel"] body { padding-left: var(--tnw-left); box-sizing: border-box; }
+  /* only the page column scrolls under the banner */
+  .site-chrome-wrap[data-tn-chrome]::before, html[data-tn-world="panel"] [data-tn-head]::before { left: var(--tnw-left);
+    background: radial-gradient(circle var(--tnw-gr, 1000px) at calc(var(--tnw-gx, 50%) - var(--tnw-left)) var(--tnw-gy, 50%), var(--tnw-g0, var(--tn-canvas)) 0, var(--tn-canvas) 100%); }
+  /* long names beside the outer lights would run off the pane: put them underneath */
+  html[data-tn-world="panel"] .tnw-portal[data-dir="W"]:not(.is-inset) .tnw-label, html[data-tn-world="panel"] .tnw-portal[data-dir="E"]:not(.is-inset) .tnw-label { top: 100%; left: 50%; right: auto; bottom: auto; transform: translate(-50%, 6px); }
+}
+@media (max-width: 899px) {
+  /* The navigation scrolls away with the page, so text never passes over it
+     (world.js holds it in view while it moves: data-tn-moving). */
+  html[data-tn-world="panel"]:not([data-tn-moving]) #tn-world { position: absolute; top: 0; left: 0; right: auto; bottom: auto; width: 100%; height: var(--tnw-h, 100vh); }
+  html[data-tn-world="panel"] body { padding-top: calc(var(--tnw-scene, calc(var(--tn-chrome-h) + 34vh + 30px)) + var(--tnw-push, 0px)); transition: padding-top 200ms var(--tnw-ease); }
+  html[data-tn-world="panel"] body > main { padding-top: 16px; min-height: calc(66vh - 16px); background: none; }
+  .tnw-crumbs { display: none; }
+  /* dialogs sit in the page flow under the navigation (world.js sets their top) */
+  html[data-tn-world="panel"] :is(.res-info-overlay, #modal-docs, .modal) { position: absolute !important; left: 0 !important; right: 0 !important; bottom: auto !important; padding: 0 16px 40px !important; overflow: visible; }
+  html[data-tn-world="panel"] dialog.info-modal { position: absolute; left: 16px; right: 16px; max-height: none !important; overflow: visible !important; }
+}
+@media (max-width: 599px) {
+  .tnw-portal[data-dir="E"]:not(.is-inset) .tnw-label, .tnw-portal[data-dir="W"]:not(.is-inset) .tnw-label { top: 100%; left: 50%; right: auto; bottom: auto; transform: translate(-50%, 6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #tn-world-preview { transition-duration: 1ms; }
+  html[data-tn-world="home"] body > .container > .install-section.is-open { animation: none; }
+  html[data-tn-world="panel"] body { transition: none; }
+}
+
+/* ── section picker in page text (lib/section-shield.js) ──────────────────
+ * Discs follow the navigation's orb model: one solid fill each, a short soft
+ * edge and a small halo that ends inside the disc's own grid cell, so two
+ * discs never overlap (the open one scales up within its cell, never past
+ * it). Hover brightens. Without JS every panel shows, one after the other. */
+.shield-orbs {
+  --shield-d: 34px;                                   /* disc diameter */
+  display: grid; grid-template-columns: repeat(var(--shield-cols, 6), minmax(0, 1fr));
+  gap: .75rem 0; margin: 1.5rem 0 1.25rem; padding: 0;
+}
+@media (max-width: 599px) { .shield-orbs { grid-template-columns: repeat(var(--shield-cols-n, 3), minmax(0, 1fr)); --shield-d: 30px; } }
+.shield-orb {
+  display: flex; flex-direction: column; align-items: center; gap: .3rem; min-width: 0; min-height: 44px;
+  margin: 0; padding: .2rem .25rem .35rem; background: none; border: 0; border-radius: var(--tn-radius-ctl, 2px);
+  font: inherit; color: var(--tnw-ink-dim, var(--tn-text-muted)); cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.shield-disc {
+  /* the box is the halo's extent (1.4 disc radii): disc to 69%, soft edge to 74%, halo to the box edge */
+  flex: none; width: calc(var(--shield-d) * 1.4); height: calc(var(--shield-d) * 1.4); border-radius: 50%;
+  --c: rgb(var(--tnw-tint, 152, 232, 193));
+  --body: color-mix(in oklab, var(--c) 52%, var(--tn-canvas, #0b0f0d));
+  --core: color-mix(in oklab, var(--body) 86%, var(--tnw-strong, #fff));
+  background: radial-gradient(circle closest-side, var(--core) 0, var(--body) 36%, var(--body) 69%,
+    color-mix(in oklab, var(--c) 30%, transparent) 74%, color-mix(in oklab, var(--c) 9%, transparent) 86%, transparent 100%);
+  transform: scale(.8); transition: transform 200ms var(--tnw-ease, ease), filter 140ms linear;
+}
+.shield-orb[aria-selected="true"] .shield-disc { --body: var(--c); transform: scale(1); }
+.shield-orb:hover .shield-disc { filter: brightness(1.18); }
+html:is([data-theme="light"], [data-theme="sandman"]) .shield-orb:hover .shield-disc { filter: brightness(1.1) saturate(1.15); }
+.shield-label { max-width: 100%; font-size: .8rem; line-height: 1.3; text-align: center; overflow-wrap: anywhere; text-shadow: var(--tnw-halo); }
+.shield-orb:hover .shield-label { color: var(--tnw-ink, var(--tn-text)); }
+.shield-orb[aria-selected="true"] .shield-label { color: var(--tnw-strong, var(--tn-text-bright)); font-weight: 600; }
+.shield-orb:focus { outline: none; }
+.shield-orb:focus-visible { outline: 1px solid var(--tnw-focus, var(--tn-teal)); outline-offset: 2px; }
+.shield-panel[hidden] { display: none; }
+.shield-panel.is-entering { animation: shield-in 220ms var(--tnw-ease, ease) both; }
+@keyframes shield-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* before the script mounts (soft navigation), show only the first panel */
+html[data-tn-world] [data-shield]:not([data-shield-on]) > [data-shield-panel] ~ [data-shield-panel] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .shield-disc { transition: none; }
+  .shield-panel.is-entering { animation: none; }
+}

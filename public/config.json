@@ -49,10 +49,12 @@
       "grpc": "https://testnet-grpc.terp.network",
       "rest": "https://testnet-api.terp.network",
       "rpc": "https://testnet-rpc.terp.network",
+      "restLab": "http://192.168.10.101:1617",
+      "rpcLab": "http://192.168.10.101:36657",
       "services": {
         "headstashServer": "",
         "indexer": "",
-        "merkleServer": "",
+        "merkleServer": "http://127.0.0.1:29090",
         "whitelistTreeId": ""
       }
     },
@@ -76,7 +78,10 @@
         "abstractAnsHost": "terp133wf9rysrrwkgga3jxzadnpaky6e8tq0x70gwemzvlvz2k36mq5qy4kur5",
         "abstractIbcClient": "terp13ct8hfvuxwfulygcjx9xtvhsxd5kjt7qgqhlkqvt5d0khfxnwefsrphmeu",
         "abstractIbcHost": "terp13rzt9anw8qmf5kqu3ucccuz6ryrg0ca73r3wp0yespr90wmhe4ms86j4qn",
-        "abstractModuleFactory": "terp1lujfwru7t0vuzugqr4s6kt7syyvf4q8d7njym7a2le64p0z4h00s7rxtez"
+        "abstractModuleFactory": "terp1lujfwru7t0vuzugqr4s6kt7syyvf4q8d7njym7a2le64p0z4h00s7rxtez",
+        "passkeyAuthenticator": "",
+        "ethAuthenticatorCode": 87,
+        "passkeyAuthenticatorCode": 84
       },
       "defaultApps": [
         {
@@ -126,7 +131,8 @@
         "snapshotMeta": "https://s3.terp.network/snapshots/mainnet/morocco-1/snapshot_full.json",
         "addrbookUrl": "https://s3.terp.network/snapshots/mainnet/morocco-1/addrbook.json",
         "s3Base": "https://s3.terp.network/snapshots/mainnet/morocco-1",
-        "snapshotsManifest": "/public/snapshots.json"
+        "snapshotsManifest": "/public/snapshots.json",
+        "onboard": "https://hash.terp.network"
       }
     }
   },
@@ -144,8 +150,8 @@
       "lib/whitelist-merkletree.js": "d78a1780b424b847840373be308477e94184c2caa1a11388c0a26b49d21fc036"
     },
     "installers": {
-      "get/terp-installer.py": "bf5af3f7a4db0a3695f027254b6e1713aaeff347c85e9669a3c0534819961bf7",
-      "get/terp-installer.sh": "03269a9a63f2bb1d2160b40b4c24521dcaa936be56e4aca372eb4dd2e5a224b1"
+      "get/terp-installer.py": "566613f4cf8282b8a01c14e30e657b1ac254f41bfa1c03fffe56efb1ea5f7684",
+      "get/terp-installer.sh": "567a9c9c0c64ae9f6daa9c17c99310d69f19829f8c352883c92d3cc00824851e"
     }
   },
   "version": "1.0.0",
@@ -208,7 +214,7 @@
             "denom": "upenumbra",
             "minSuggested": "1000000",
             "recommendedDisplay": "1 PEN",
-            "note": "Shielded chain \u2014 fund via Penumbra-compatible wallet / deposit path"
+            "note": "Shielded chain — fund via Penumbra-compatible wallet / deposit path"
           },
           "atomone-1": {
             "chainKey": "atomone",

@@ -1,0 +1,14 @@
+{
+  "updated": "2026-10-05",
+  "source": "https://s3.terp.network/releases/terp-core/",
+  "entries": [
+    {
+      "version": "v6.2.1",
+      "tags": ["rolling-coordination"],
+      "title": "terpd 6.2.1",
+      "summary": "Same-home binary replacement for nodes already on 6.2.0. Not a governance software-upgrade plan; Cosmovisor will not download it. Every signing node switches in the same step so the set stays consistent when a contract transaction runs.",
+      "operator": "https://s3.terp.network/releases/terp-core/v6.2.1/OPERATOR.html",
+      "completed": true
+    }
+  ]
+}

@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resource map</title>
+<meta name="description" content="Community paths and team coordination — same graph, two audiences."/>
+<style>
+:root {
+  --bg: #08090d;
+  --panel: #12141c;
+  --panel2: #1a1b24;
+  --border: #2e3142;
+  --text: #f8f8f2;
+  --muted: #8b96b8;
+  --accent: #bd93f9;
+  --teal: #b1ebeb;
+  --link: #8be9fd;
+  --side-w: min(430px, 40vw);
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.84em; }
+.muted { color: var(--muted); }
+.badge {
+  display: inline-block; padding: 0.08rem 0.4rem; border-radius: 999px;
+  font-size: 0.66rem; font-weight: 650; letter-spacing: 0.02em;
+}
+.badge.ok { background: rgba(80,250,123,0.15); color: #7dcea0; }
+.badge.warn { background: rgba(255,184,108,0.18); color: #ffd19a; }
+.badge.bad { background: rgba(255,85,85,0.18); color: #ffaaaa; }
+.badge.lab { background: rgba(189,147,249,0.18); color: #d4b8ff; }
+.badge.phase { background: rgba(139,233,253,0.12); color: #8be9fd; font-weight: 600; }
+.badge.kind {
+  background: rgba(255,255,255,0.06); color: var(--muted); font-weight: 600;
+}
+
+/* Top bar */
+.topbar {
+  flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(189,147,249,0.14);
+  background: linear-gradient(180deg, #12141c, var(--bg)); z-index: 20;
+}
+.brand { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
+.brand h1 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--teal); letter-spacing: -0.02em; }
+.brand .sub { font-size: 0.72rem; color: var(--muted); line-height: 1.3; max-width: 28rem; }
+.top-grow { flex: 1; min-width: 0.5rem; }
+.stats { display: flex; flex-wrap: wrap; gap: 0.28rem; }
+.stat {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.18rem 0.42rem; font-size: 0.7rem;
+}
+.stat b { margin-right: 0.15rem; }
+.stat span { color: var(--muted); }
+.chip, .icon-btn {
+  background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 0.28rem 0.55rem; cursor: pointer; font-size: 0.76rem;
+}
+.chip:hover, .icon-btn:hover { border-color: var(--accent); }
+.links { display: flex; flex-wrap: wrap; gap: 0.28rem; align-items: center; }
+
+/* Segmented control */
+.seg {
+  display: inline-flex; padding: 0.15rem; gap: 0.12rem;
+  background: #0a0b10; border: 1px solid var(--border); border-radius: 999px;
+}
+.seg button {
+  border: 0; background: transparent; color: var(--muted);
+  border-radius: 999px; padding: 0.28rem 0.7rem; font-size: 0.74rem;
+  cursor: pointer; font-weight: 600;
+}
+.seg button.active {
+  background: var(--accent); color: #12081a; box-shadow: 0 0 0 1px rgba(189,147,249,0.35);
+}
+.seg.compact button { padding: 0.22rem 0.55rem; font-size: 0.7rem; }
+.seg.block { display: flex; width: 100%; }
+.seg.block button { flex: 1; text-align: center; }
+
+.variant-bar {
+  flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: 0.28rem; align-items: center;
+  padding: 0.35rem 0.7rem; border-bottom: 1px solid var(--border); background: rgba(26,27,36,0.96);
+}
+.variant-bar .lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.variant-bar button {
+  background: #0f1118; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 999px; padding: 0.24rem 0.6rem; font-size: 0.72rem; cursor: pointer; font-weight: 600;
+}
+.variant-bar button:hover { color: var(--text); border-color: var(--teal); }
+.variant-bar button.active { color: #12081a; background: var(--teal); border-color: var(--teal); }
+.variant-blurb { width: 100%; font-size: 0.72rem; color: var(--muted); }
+
+.app { flex: 1 1 auto; display: flex; min-height: 0; height: 100%; }
+.stage { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.side {
+  flex: 0 0 var(--side-w); width: var(--side-w);
+  border-left: 1px solid var(--border); background: #0c0e14;
+  display: flex; flex-direction: column; min-height: 0; gap: 0;
+  transition: margin-right 0.2s ease, transform 0.2s ease;
+}
+.side.collapsed { margin-right: calc(-1 * var(--side-w)); }
+@media (max-width: 960px) {
+  :root { --side-w: min(100vw, 400px); }
+  .side {
+    position: absolute; right: 0; top: 0; bottom: 0; z-index: 30;
+    box-shadow: -12px 0 40px rgba(0,0,0,0.5);
+  }
+  .side.collapsed { transform: translateX(100%); margin-right: 0; }
+}
+
+/* Toolbar — panels use position:fixed so they paint above the canvas */
+.graph-shell { position: relative; overflow: visible; }
+.graph-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  padding: 0.4rem 0.55rem 0.42rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel2);
+  position: relative;
+  z-index: 200;
+  overflow: visible;
+  max-height: none;
+}
+.graph-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.32rem 0.4rem;
+  align-items: center;
+  min-height: 1.95rem;
+}
+.graph-toolbar button,
+.graph-toolbar .tb-select,
+.graph-toolbar .dd-trigger {
+  background: #0f1118; border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 0.26rem 0.5rem; font-size: 0.72rem; cursor: pointer;
+  height: 1.95rem; display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: inherit;
+}
+.graph-toolbar button:hover, .dd-trigger:hover, .tb-select:hover { border-color: var(--teal); }
+.dd-trigger[aria-expanded="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(189,147,249,0.28);
+  color: var(--text);
+}
+.tb-select {
+  appearance: none; -webkit-appearance: none; padding-right: 1.4rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 11px) 55%, calc(100% - 6px) 55%;
+  background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+  max-width: 11rem;
+}
+.field-lbl { font-size: 0.66rem; color: var(--muted); margin-right: 0.1rem; white-space: nowrap; }
+.sep { width: 1px; height: 1.15rem; background: var(--border); flex: 0 0 auto; }
+.tb-spacer { flex: 1 1 auto; min-width: 0.35rem; }
+.dd { position: relative; display: inline-flex; flex: 0 0 auto; }
+.dd-panel {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10050;
+  min-width: min(340px, calc(100vw - 1.5rem));
+  max-width: min(420px, calc(100vw - 1rem));
+  max-height: min(68vh, 480px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #12141c;
+  border: 1px solid rgba(189,147,249,0.22);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+  padding: 0.65rem 0.75rem;
+}
+.dd-panel.open { display: block; }
+.dd-panel h3 {
+  margin: 0 0 0.4rem; font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted);
+}
+.row-actions { display: flex; flex-wrap: wrap; gap: 0.28rem; margin-bottom: 0.45rem; }
+.row-actions button {
+  background: #0f1118; border: 1px solid var(--border); color: var(--text);
+  border-radius: 999px; padding: 0.2rem 0.5rem; font-size: 0.7rem; cursor: pointer;
+}
+.row-actions button:hover { border-color: var(--accent); }
+.force-grid { display: grid; gap: 0.4rem; }
+.force-row {
+  display: grid; grid-template-columns: 4.4rem 1fr 2.1rem; gap: 0.35rem; align-items: center;
+  font-size: 0.7rem; color: var(--muted);
+}
+.force-row .val { text-align: right; color: var(--accent); font-family: ui-monospace, Menlo, monospace; }
+input[type=range].slider {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px;
+  background: linear-gradient(90deg, rgba(189,147,249,0.35), rgba(177,235,235,0.2));
+  border: 1px solid var(--border); outline: none;
+}
+input[type=range].slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f0e6ff, var(--accent));
+  border: 2px solid #1a1b24; cursor: grab;
+}
+.force-toggles { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.72rem; color: var(--muted); }
+.force-toggles label { display: inline-flex; gap: 0.25rem; align-items: center; cursor: pointer; }
+.hint-inline { font-size: 0.68rem; color: var(--muted); margin-top: 0.4rem; line-height: 1.35; }
+/* Full-screen / iframe host: keep chrome readable, never hide force tools */
+html.is-embed .graph-toolbar,
+body.is-embed .graph-toolbar {
+  max-height: none;
+  overflow: visible;
+  padding: 0.35rem 0.5rem;
+}
+html.is-embed .graph-toolbar-row { gap: 0.28rem; }
+
+.canvas-wrap {
+  flex: 1 1 auto; min-height: 200px; position: relative; width: 100%; overflow: hidden;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 18% 10%, rgba(189,147,249,0.09), transparent 46%),
+    radial-gradient(ellipse at 82% 88%, rgba(177,235,235,0.05), transparent 42%),
+    #0a0b10;
+}
+#graphCanvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 40% 30%, rgba(94,176,229,0.07), transparent 52%),
+    #0c1118;
+}
+#graphCanvas:active { cursor: grabbing; }
+.mode-pill {
+  position: absolute; left: 0.55rem; top: 0.5rem; z-index: 5;
+  background: rgba(18,20,28,0.9); border: 1px solid var(--border); border-radius: 999px;
+  padding: 0.18rem 0.5rem; font-size: 0.68rem; color: var(--teal); pointer-events: none;
+}
+.graph-hint {
+  flex: 0 0 auto; padding: 0.28rem 0.55rem; color: var(--muted); font-size: 0.7rem;
+  border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center;
+}
+.legend { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.18rem; }
+#bootError {
+  display: none; position: absolute; left: 1rem; top: 1rem; z-index: 40; max-width: 28rem;
+  padding: 0.7rem 0.9rem; border-radius: 10px; background: rgba(40,12,18,0.95);
+  border: 1px solid #ff5555; color: #ffcccc; font-size: 0.84rem; white-space: pre-wrap;
+}
+
+/* Two unified sidebar cards */
+.side-stack {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 0.55rem;
+  padding: 0.55rem; overflow: hidden;
+}
+.card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+}
+.card.context { flex: 1.15 1 0; }
+.card.inventory { flex: 1 1 0; }
+.card-head {
+  flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between;
+  gap: 0.4rem; padding: 0.5rem 0.65rem; border-bottom: 1px solid var(--border);
+  background: #0e1016;
+}
+.card-head h2 {
+  margin: 0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.01em; color: var(--text);
+}
+.card-head .hint { font-size: 0.66rem; color: var(--muted); }
+.card-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0.55rem 0.65rem; }
+.section { margin-bottom: 0.85rem; }
+.section:last-child { margin-bottom: 0; }
+.section-title {
+  display: flex; align-items: center; gap: 0.35rem; margin: 0 0 0.4rem;
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700;
+}
+.section-title .line { flex: 1; height: 1px; background: var(--border); }
+
+.side-search, .side select.full {
+  width: 100%; margin-bottom: 0.35rem;
+  background: #0f1118; border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 0.38rem 0.5rem; font-size: 0.78rem;
+}
+.side select.full {
+  appearance: none; -webkit-appearance: none; padding-right: 1.5rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%;
+  background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+}
+.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; }
+.side-count { color: var(--muted); font-size: 0.7rem; margin: 0.1rem 0 0.35rem; }
+.list { display: flex; flex-direction: column; gap: 0.28rem; }
+.item {
+  border: 1px solid var(--border); border-radius: 9px; padding: 0.42rem 0.5rem;
+  background: #0e1016; cursor: pointer;
+}
+.item:hover { border-color: rgba(189,147,249,0.4); background: rgba(189,147,249,0.06); }
+.item.selected { border-color: var(--accent); background: rgba(189,147,249,0.12); }
+.item .row { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+.item .title { font-size: 0.8rem; font-weight: 650; }
+.item .tagline {
+  font-size: 0.7rem; color: var(--muted); margin-top: 0.18rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.kind-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.focus-block h3 { margin: 0 0 0.3rem; font-size: 1rem; color: var(--teal); font-weight: 700; }
+.focus-block p { margin: 0.4rem 0; font-size: 0.82rem; line-height: 1.5; color: var(--muted); }
+.focus-block dl {
+  display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.25rem 0.4rem;
+  font-size: 0.76rem; margin: 0.5rem 0;
+}
+.focus-block dt { color: var(--muted); }
+.focus-block dd { margin: 0; word-break: break-word; }
+.focus-block ul { margin: 0.2rem 0 0.5rem; padding-left: 1rem; font-size: 0.76rem; color: var(--muted); }
+.focus-block h4 { margin: 0.55rem 0 0.2rem; font-size: 0.78rem; color: var(--text); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.4rem 0; }
+.btn-row button {
+  background: #0f1118; border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 0.26rem 0.5rem; font-size: 0.72rem; cursor: pointer;
+}
+.btn-row button:hover { border-color: var(--accent); }
+
+.seq-phase {
+  border: 1px solid var(--border); border-radius: 9px; padding: 0.4rem 0.48rem;
+  background: #0e1016; margin-bottom: 0.3rem;
+}
+.seq-phase h4 {
+  margin: 0 0 0.28rem; font-size: 0.76rem; color: var(--teal);
+  display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;
+}
+.seq-step {
+  display: flex; gap: 0.35rem; padding: 0.26rem 0.3rem; border-radius: 6px; cursor: pointer;
+  border: 1px solid transparent;
+}
+.seq-step:hover { background: rgba(189,147,249,0.08); border-color: var(--border); }
+.seq-step .ord {
+  flex: 0 0 auto; min-width: 1.3rem; font-size: 0.66rem; color: var(--accent);
+  font-family: ui-monospace, Menlo, monospace; padding-top: 0.08rem;
+}
+.seq-step .name { font-size: 0.76rem; font-weight: 600; }
+.seq-step .meta { font-size: 0.68rem; color: var(--muted); }
+
+.md-guide { font-size: 0.8rem; line-height: 1.5; }
+.md-guide h1 { font-size: 0.98rem; margin: 0 0 0.4rem; color: var(--teal); }
+.md-guide h2 { font-size: 0.84rem; margin: 0.75rem 0 0.3rem; color: var(--accent); }
+.md-guide h3 { font-size: 0.8rem; margin: 0.6rem 0 0.25rem; }
+.md-guide p { margin: 0.3rem 0; color: var(--muted); }
+.md-guide strong { color: var(--text); }
+.md-guide ul, .md-guide ol { margin: 0.25rem 0 0.45rem; padding-left: 1.1rem; color: var(--muted); }
+.md-guide li { margin: 0.15rem 0; }
+.md-guide code {
+  background: #0f1118; border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.02rem 0.25rem; font-size: 0.8em;
+}
+.md-guide pre {
+  background: #0a0b10; border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.45rem 0.55rem; overflow: auto; font-size: 0.72rem; color: var(--teal);
+}
+.md-guide table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin: 0.35rem 0 0.5rem; }
+.md-guide th, .md-guide td { border: 1px solid var(--border); padding: 0.28rem 0.35rem; text-align: left; vertical-align: top; }
+.md-guide th { background: #0f1118; color: var(--muted); font-size: 0.66rem; text-transform: uppercase; }
+.md-guide td { color: var(--muted); }
+.notes-list { margin: 0; padding-left: 1rem; font-size: 0.76rem; color: var(--muted); line-height: 1.45; }
+.notes-list li { margin: 0.25rem 0; }
+.empty { color: var(--muted); font-size: 0.8rem; padding: 0.5rem 0.15rem; }
+.inv-pane { display: none; }
+.inv-pane.active { display: block; }
+.kind-card {
+  border: 1px solid var(--border); border-radius: 9px; padding: 0.4rem 0.5rem; background: #0e1016;
+}
+.related-mini { font-size: 0.72rem; color: var(--muted); }
+.related-mini li { margin: 0.18rem 0; }
+
+/* Journey / flow elegance */
+.mode-pill.journey { color: #b1ebeb; border-color: rgba(177,235,235,0.35); }
+.flow-legend {
+  display: inline-flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;
+  font-size: 0.68rem; color: var(--muted);
+}
+.flow-legend .spine::before {
+  content: ""; display: inline-block; width: 18px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, #b1ebeb, #bd93f9); margin-right: 0.3rem; vertical-align: middle;
+}
+.flow-legend .support::before {
+  content: ""; display: inline-block; width: 18px; height: 2px; border-radius: 2px;
+  background: rgba(139,150,184,0.45); margin-right: 0.3rem; vertical-align: middle;
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <h1 id="pageTitle">Resource map</h1>
+    <div class="sub" id="pageSub">Community paths and team coordination</div>
+  </div>
+  <div class="seg" id="audienceSeg" title="Who is this view for?">
+    <button type="button" data-aud="public">Participants</button>
+    <button type="button" data-aud="internal" class="active">Operators</button>
+  </div>
+  <div class="top-grow"></div>
+  <div class="stats" id="topStats"></div>
+  <div class="links">
+    <a class="chip" id="linkCompanion" href="./ops-resource-map.operators.md">Guide</a>
+    <a class="chip" href="./dependency-map.html">Crates</a>
+    <a class="chip" href="https://permissionless.money/zk">Grant</a>
+    <button type="button" class="icon-btn active" id="btnToggleSide">Panel</button>
+  </div>
+</div>
+
+<div class="variant-bar" id="variantBar"><span class="lbl">View</span></div>
+
+<div class="app">
+  <section class="stage">
+    <div class="graph-shell" style="flex:1;min-height:0;display:flex;flex-direction:column">
+      <div class="graph-toolbar" role="toolbar" aria-label="Graph layout controls">
+        <div class="graph-toolbar-row">
+          <button type="button" id="btnRelayout">Relayout</button>
+          <button type="button" id="btnFit">Fit</button>
+          <button type="button" id="btnPause">Pause</button>
+          <button type="button" id="btnJitter">Jitter</button>
+          <span class="sep" aria-hidden="true"></span>
+          <span class="field-lbl">Layout</span>
+          <select class="tb-select" id="layoutMode" aria-label="Layout mode">
+            <option value="flow">Journey</option>
+            <option value="sequence">By path</option>
+            <option value="hierarchy">By type</option>
+            <option value="force">Organic</option>
+          </select>
+          <span class="field-lbl">Path</span>
+          <select class="tb-select" id="seqLane" aria-label="Path lane"></select>
+        </div>
+        <div class="graph-toolbar-row" id="forceToolbarRow">
+          <div class="dd" id="ddPresets">
+            <button type="button" class="dd-trigger" id="btnPresets" aria-expanded="false" aria-haspopup="true">Presets ▾</button>
+            <div class="dd-panel" id="panelPresets" role="menu">
+              <h3>Layout presets</h3>
+              <div class="row-actions">
+                <button type="button" data-preset="default">Default</button>
+                <button type="button" data-preset="cluster">Cluster</button>
+                <button type="button" data-preset="explode">Explode</button>
+                <button type="button" data-preset="orbit">Orbit</button>
+                <button type="button" data-preset="hierarchy">Hierarchy force</button>
+              </div>
+              <p class="hint-inline">Presets retune spacing for the current layout.</p>
+            </div>
+          </div>
+          <div class="dd" id="ddForces">
+            <button type="button" class="dd-trigger" id="btnForces" aria-expanded="false" aria-haspopup="true">Forces ▾</button>
+            <div class="dd-panel right" id="panelForces" role="dialog" aria-label="Simulation forces">
+              <h3>Simulation</h3>
+              <div class="force-grid">
+                <div class="force-row"><label for="fCharge">Repel</label><input class="slider" type="range" id="fCharge" min="40" max="700" value="240"/><span class="val" data-for="fCharge">240</span></div>
+                <div class="force-row"><label for="fLinkLen">Link</label><input class="slider" type="range" id="fLinkLen" min="30" max="220" value="100"/><span class="val" data-for="fLinkLen">100</span></div>
+                <div class="force-row"><label for="fLinkStiff">Stiff</label><input class="slider" type="range" id="fLinkStiff" min="1" max="120" value="48"/><span class="val" data-for="fLinkStiff">48</span></div>
+                <div class="force-row"><label for="fGravity">Gravity</label><input class="slider" type="range" id="fGravity" min="0" max="80" value="18"/><span class="val" data-for="fGravity">18</span></div>
+                <div class="force-row"><label for="fRadial">Radial</label><input class="slider" type="range" id="fRadial" min="0" max="80" value="0"/><span class="val" data-for="fRadial">0</span></div>
+                <div class="force-row"><label for="fCollide">Collide</label><input class="slider" type="range" id="fCollide" min="0" max="36" value="10"/><span class="val" data-for="fCollide">10</span></div>
+                <div class="force-row"><label for="fDamp">Damp</label><input class="slider" type="range" id="fDamp" min="50" max="98" value="84"/><span class="val" data-for="fDamp">84</span></div>
+                <div class="force-row"><label for="fHub">Hub</label><input class="slider" type="range" id="fHub" min="0" max="100" value="30"/><span class="val" data-for="fHub">30</span></div>
+                <div class="force-row"><label for="fHier">Y hier</label><input class="slider" type="range" id="fHier" min="0" max="60" value="0"/><span class="val" data-for="fHier">0</span></div>
+              </div>
+              <div class="force-toggles">
+                <label><input type="checkbox" id="fArrows" checked/> Arrows</label>
+                <label><input type="checkbox" id="fLabels" checked/> Labels</label>
+                <label><input type="checkbox" id="fPhaseBands" checked/> Phase bands</label>
+              </div>
+              <p class="hint-inline">Journey / path layouts soft-pin nodes; sliders still reshape spacing.</p>
+            </div>
+          </div>
+          <span class="tb-spacer" aria-hidden="true"></span>
+          <span id="graphStats" class="muted" style="font-size:0.7rem"></span>
+        </div>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="mode-pill" id="modePill">Organic</div>
+        <canvas id="graphCanvas"></canvas>
+        <div id="bootError"></div>
+      </div>
+      <div class="graph-hint">
+        <span id="hintText">Drag · zoom · click a node. Use <b>By path</b> for setup sequences.</span>
+        <span class="flow-legend" id="flowLegend"><span class="spine">path</span><span class="support">related</span></span>
+        <span class="legend" id="legend"></span>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side" id="sidePanel">
+    <div class="side-stack">
+      <!-- COMPONENT 1: Context = guide + focus + notes -->
+      <section class="card context" aria-label="Context">
+        <div class="card-head">
+          <div>
+            <h2>Context</h2>
+            <div class="hint" id="contextHint">Guide · selection · notes</div>
+          </div>
+        </div>
+        <div class="card-body" id="contextBody">
+          <div class="section" id="secFocus" style="display:none">
+            <div class="section-title"><span>Selected</span><span class="line"></span></div>
+            <div class="focus-block" id="focusBody"></div>
+          </div>
+          <div class="section" id="secGuide">
+            <div class="section-title"><span>Guide</span><span class="line"></span></div>
+            <div class="md-guide" id="guideMd"></div>
+          </div>
+          <div class="section" id="secNotes">
+            <div class="section-title"><span>Notes</span><span class="line"></span></div>
+            <ul class="notes-list" id="notesList"></ul>
+            <div class="section-title" style="margin-top:0.7rem"><span>Related</span><span class="line"></span></div>
+            <ul class="related-mini" id="relatedList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPONENT 2: Inventory = items + links + types (+ path steps) -->
+      <section class="card inventory" aria-label="Inventory">
+        <div class="card-head">
+          <div>
+            <h2>Inventory</h2>
+            <div class="hint">Items · links · types · path</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="seg block compact" id="invSeg" style="margin-bottom:0.45rem">
+            <button type="button" class="active" data-inv="items">Items</button>
+            <button type="button" data-inv="links">Links</button>
+            <button type="button" data-inv="types">Types</button>
+            <button type="button" data-inv="path">Path</button>
+          </div>
+
+          <div class="inv-pane active" id="inv-items">
+            <input type="search" class="side-search" id="qNode" placeholder="Search items…"/>
+            <div class="filter-row">
+              <select class="full" id="kindFilter"><option value="">All types</option></select>
+              <select class="full" id="statusFilter">
+                <option value="">All states</option>
+                <option value="ready">ready</option>
+                <option value="partial">partial</option>
+                <option value="lab">lab</option>
+                <option value="residual">residual</option>
+              </select>
+            </div>
+            <div class="side-count" id="countNodes"></div>
+            <div class="list" id="nodeList"></div>
+          </div>
+
+          <div class="inv-pane" id="inv-links">
+            <input type="search" class="side-search" id="qEdge" placeholder="Search links…"/>
+            <div class="side-count" id="countEdges"></div>
+            <div class="list" id="edgeList"></div>
+          </div>
+
+          <div class="inv-pane" id="inv-types">
+            <div class="side-count">Type colors & counts in this view</div>
+            <div class="list" id="kindList"></div>
+          </div>
+
+          <div class="inv-pane" id="inv-path">
+            <select class="full" id="seqLaneSide"></select>
+            <div class="side-count" id="seqMeta"></div>
+            <div class="btn-row">
+              <button type="button" id="btnApplySeqLayout">Show as journey</button>
+              <button type="button" id="btnShowSeqOnly">Lane only</button>
+            </div>
+            <div class="md-guide" id="seqIntro" style="margin-bottom:0.4rem"></div>
+            <div id="seqList"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </aside>
+</div>
+
+<script id="DATA" type="application/json">{"generated_at":"2026-08-07","title":"Resource map","subtitle":"Participant paths — how to take part","related":{"dependency_map":"dependency-map.html","dependency_json":"dependency-map.json","matrix":"dependency-matrix.toml","grant_zk_page":"../../../../../websites/permissionless.money/pages/zk.html","grant_zk_url":"https://permissionless.money/zk","event_task_pulse":"../../../../event-task/COMPUTE-INFRA-PULSE.md","event_task_hub":"../../../../event-task/README.md","stable":"STABLE.md","ops_map_json":"ops-resource-map.json"},"variants":[{"id":"overview","label":"Event path","blurb":"Everything we coordinate for community events.","guide_md":"# Overview graph\n\nThis is the **full ops resource map**: every curated node (workflows, tools, infra, teams, agents, planes, boards, docs) and the edges between them.\n\n## How to read it\n- **Node color** = kind (workflow, tool, infra, team, agent, …)\n- **Node size** ≈ degree (how connected)\n- **Amber/red ring** = partial / lab / residual status\n- **Edges** point *source → target* (uses, owns, gates, tracks, …)\n\n## Related graphs\n| Map | What it is |\n|-----|------------|\n| **This page** | Hand-curated *ops* graph |\n| [Crate dependency map](./dependency-map.html) | Auto *Cargo/repo* SoT |\n| [Grant /zk desk](https://permissionless.money/zk) | Public residual narrative |\n\n## Tips\n1. Start here, then filter with **Variant** chips.\n2. Click a hub (`event-task`, `compute pulse`, `Buzz`) to fan out neighbors.\n3. Use **Hierarchy** preset to stack kinds by layer.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_internal":"# Overview graph\n\nThis is the **full ops resource map**: every curated node (workflows, tools, infra, teams, agents, planes, boards, docs) and the edges between them.\n\n## How to read it\n- **Node color** = kind (workflow, tool, infra, team, agent, …)\n- **Node size** ≈ degree (how connected)\n- **Amber/red ring** = partial / lab / residual status\n- **Edges** point *source → target* (uses, owns, gates, tracks, …)\n\n## Related graphs\n| Map | What it is |\n|-----|------------|\n| **This page** | Hand-curated *ops* graph |\n| [Crate dependency map](./dependency-map.html) | Auto *Cargo/repo* SoT |\n| [Grant /zk desk](https://permissionless.money/zk) | Public residual narrative |\n\n## Tips\n1. Start here, then filter with **Variant** chips.\n2. Click a hub (`event-task`, `compute pulse`, `Buzz`) to fan out neighbors.\n3. Use **Hierarchy** preset to stack kinds by layer.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_public":"# How to take part\n\nThis map is for **community participants** — not lab operators.\n\n## Roles you might be\n- **Auditor** — review, then submit findings  \n- **Builder** — ship a hackathon project  \n- **Coinholder voter** — rank top demos (including top 10 for rewards) and audit work  \n- **Anyone** — register, join rooms, discover work, ask for guidance  \n\n## Stages (left → right)\nOrient → Register → Connect → Discover → Compute & help → Audit and/or Build → Vote  \n\n## Soft curves\nThey mean **what often comes next**. Click a stop for a short plain-language note.\n","label_public":"How to take part","blurb_public":"Register, discover work, submit audit or hackathon work, and holders vote on top projects."},{"id":"workflows","label":"Paths","blurb":"Bring-up and process ladders — how work moves.","guide_md":"# Workflows graph\n\nShows **bring-up and process ladders** — ordered work, not just crates.\n\n## Included\n- Event bring-up (WORKFLOW A–H)\n- Pack Buzz spawn · cw-orch / dao-testing · state.json ↔ S3\n- **Compute pulse** (wake ≠ spend ≠ Evidence)\n- AUTH-LEVELS · marketing media · FV synergy · dep matrix heal\n\n## How edges read\n`workflow → tool/infra` means **uses / targets / includes**.  \n`workflow → board/team` means **tracked or owned by**.\n\n## Operator start\n```bash\nopen crates/event-task/WORKFLOW.md\nopen crates/event-task/COMPUTE-INFRA-PULSE.md\n```\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_internal":"# Workflows graph\n\nShows **bring-up and process ladders** — ordered work, not just crates.\n\n## Included\n- Event bring-up (WORKFLOW A–H)\n- Pack Buzz spawn · cw-orch / dao-testing · state.json ↔ S3\n- **Compute pulse** (wake ≠ spend ≠ Evidence)\n- AUTH-LEVELS · marketing media · FV synergy · dep matrix heal\n\n## How edges read\n`workflow → tool/infra` means **uses / targets / includes**.  \n`workflow → board/team` means **tracked or owned by**.\n\n## Operator start\n```bash\nopen crates/event-task/WORKFLOW.md\nopen crates/event-task/COMPUTE-INFRA-PULSE.md\n```\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_public":"# Paths\n\nBring-up and process ladders — how work moves.\n\n## How to read this map\nEach column is a stage of the journey. Soft curves mean **what comes next**.\nClick a stop for a short plain-language note.\n\n## What you do not need\nYou do not need internal tools, file paths, or team jargon to participate.\n","label_public":"What happens when","blurb_public":"The main stages of joining and taking part."},{"id":"tools","label":"Tools","blurb":"What implementers run day to day.","guide_md":"# Tools graph\n\n**Implementer surface**: CLIs, crates, FE, scripts — what you run day-to-day.\n\n## Clusters\n| Cluster | Examples |\n|---------|----------|\n| Deploy | cw-orchestrator · dao-testing |\n| Collab | Buzz · o-line |\n| Dep plane | gen-tools · dep.py · crate dep map |\n| Event | event-task scripts · pack |\n| Observe | Playwright · SDA |\n\n## vs crate map\nThis variant is **product tools for ops**.  \nFor package dependency edges, open the [crate dependency map](./dependency-map.html).\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_internal":"# Tools graph\n\n**Implementer surface**: CLIs, crates, FE, scripts — what you run day-to-day.\n\n## Clusters\n| Cluster | Examples |\n|---------|----------|\n| Deploy | cw-orchestrator · dao-testing |\n| Collab | Buzz · o-line |\n| Dep plane | gen-tools · dep.py · crate dep map |\n| Event | event-task scripts · pack |\n| Observe | Playwright · SDA |\n\n## vs crate map\nThis variant is **product tools for ops**.  \nFor package dependency edges, open the [crate dependency map](./dependency-map.html).\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_public":"# Tools\n\nWhat implementers run day to day.\n\n## How to read this map\nEach column is a stage of the journey. Soft curves mean **what comes next**.\nClick a stop for a short plain-language note.\n\n## What you do not need\nYou do not need internal tools, file paths, or team jargon to participate.\n","label_public":"Tools you might use","blurb_public":"Apps and helpers you may open along the way."},{"id":"infra","label":"Infrastructure","blurb":"Hosts, relays, chain, storage, edge.","guide_md":"# Infra graph\n\n**Hosts, services, and fabric** the event stack needs.\n\n## Surfaces\n- Buzz relay (lab + public corridor)\n- Hermes (groot SoR boards)\n- MinIO / s3.terp.network\n- Zot OCI · lab chain 120u-1 · SDA\n- Edge/CF · Headscale mesh\n- **inference-edge** credit service\n\n## Plane law (do not merge)\nWake quota ≠ credit Bearer ≠ Headscale ≠ Nostr ≠ Hermes login.\n\nSee `COMPUTE-INFRA-PULSE.md` + INFRA-CHECKLIST §8b.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_internal":"# Infra graph\n\n**Hosts, services, and fabric** the event stack needs.\n\n## Surfaces\n- Buzz relay (lab + public corridor)\n- Hermes (groot SoR boards)\n- MinIO / s3.terp.network\n- Zot OCI · lab chain 120u-1 · SDA\n- Edge/CF · Headscale mesh\n- **inference-edge** credit service\n\n## Plane law (do not merge)\nWake quota ≠ credit Bearer ≠ Headscale ≠ Nostr ≠ Hermes login.\n\nSee `COMPUTE-INFRA-PULSE.md` + INFRA-CHECKLIST §8b.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_public":"# Infrastructure\n\nHosts, relays, chain, storage, edge.\n\n## How to read this map\nEach column is a stage of the journey. Soft curves mean **what comes next**.\nClick a stop for a short plain-language note.\n\n## What you do not need\nYou do not need internal tools, file paths, or team jargon to participate.\n","label_public":"Places & services","blurb_public":"Where chat, the app, and help live."},{"id":"teams","label":"Rooms","blurb":"Buzz rooms and Hermes boards for people.","guide_md":"# Teams & rooms graph\n\nBuzz **open vs private** channels and Hermes **boards**.\n\n## Public rooms\nWelcome · Community Audit · Design Hackathon — may host **read/guide** agents.\n\n## Private (Team -)\nInfra ops · Marketing ops · Grant DAO Coord · Resource Manifold\n\n## Boards (groot only)\n`community-gateway` · `event-ops` · `marketing-ops`  \nNo dual-mint secrets from laptop.\n\n## Access\nPack `ACCESS-HIERARCHY.md` + `channels.toml`.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_internal":"# Teams & rooms graph\n\nBuzz **open vs private** channels and Hermes **boards**.\n\n## Public rooms\nWelcome · Community Audit · Design Hackathon — may host **read/guide** agents.\n\n## Private (Team -)\nInfra ops · Marketing ops · Grant DAO Coord · Resource Manifold\n\n## Boards (groot only)\n`community-gateway` · `event-ops` · `marketing-ops`  \nNo dual-mint secrets from laptop.\n\n## Access\nPack `ACCESS-HIERARCHY.md` + `channels.toml`.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_public":"# Rooms\n\nBuzz rooms and Hermes boards for people.\n\n## How to read this map\nEach column is a stage of the journey. Soft curves mean **what comes next**.\nClick a stop for a short plain-language note.\n\n## What you do not need\nYou do not need internal tools, file paths, or team jargon to participate.\n","label_public":"Rooms","blurb_public":"Open rooms for welcome, audit, and build tracks."},{"id":"agents","label":"Agents","blurb":"Personas, public helpers, and runtimes.","guide_md":"# Agents graph\n\nLab **personas**, public agents, and runtimes.\n\n## Lab personas\n| Agent | Owns |\n|-------|------|\n| Grok Dev | dep matrix / monorepo implement |\n| Comms Orchestrator | multi-workspace routing |\n| Infra DevOps | chain / docker / edge |\n| Oline Implementor | SDL + auth_plane |\n| DaoDao UI | SDA / FE |\n| Channel Steward | soft-deny copy / public agent policy |\n| Hermes Coord | kanban runtime |\n\n## Public agents\nAlways-on **read/guide** · gated by **WakeAdmit** · spend via **inference-edge**.\n\nRuntime: Grok Build (ACP) ≠ Hermes dashboard.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_internal":"# Agents graph\n\nLab **personas**, public agents, and runtimes.\n\n## Lab personas\n| Agent | Owns |\n|-------|------|\n| Grok Dev | dep matrix / monorepo implement |\n| Comms Orchestrator | multi-workspace routing |\n| Infra DevOps | chain / docker / edge |\n| Oline Implementor | SDL + auth_plane |\n| DaoDao UI | SDA / FE |\n| Channel Steward | soft-deny copy / public agent policy |\n| Hermes Coord | kanban runtime |\n\n## Public agents\nAlways-on **read/guide** · gated by **WakeAdmit** · spend via **inference-edge**.\n\nRuntime: Grok Build (ACP) ≠ Hermes dashboard.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_public":"# Agents\n\nPersonas, public helpers, and runtimes.\n\n## How to read this map\nEach column is a stage of the journey. Soft curves mean **what comes next**.\nClick a stop for a short plain-language note.\n\n## What you do not need\nYou do not need internal tools, file paths, or team jargon to participate.\n","label_public":"Getting help","blurb_public":"When and how to ask for guidance."},{"id":"descriptions","label":"Rules & catalogs","blurb":"Plane law, policies, and claim language.","guide_md":"# Descriptions & planes graph\n\n**Claim language and dual-layer law** — the graph for facilitators and docs.\n\n## Planes\n1. **Wake / admission** — may a public agent turn *start*?\n2. **Spend / credits** — may model use *burn*?\n3. **Auth Evidence / auth-vm** — cold membership (not hot completion)\n\n## Catalogs\nPROVIDES · INFRA-CHECKLIST · ROUTES · POLICY-FREEZE · brand bible\n\n## Honesty residuals\nLive-room soft-deny · B3 with real keys · full auth-vm e2e — **not green**.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_internal":"# Descriptions & planes graph\n\n**Claim language and dual-layer law** — the graph for facilitators and docs.\n\n## Planes\n1. **Wake / admission** — may a public agent turn *start*?\n2. **Spend / credits** — may model use *burn*?\n3. **Auth Evidence / auth-vm** — cold membership (not hot completion)\n\n## Catalogs\nPROVIDES · INFRA-CHECKLIST · ROUTES · POLICY-FREEZE · brand bible\n\n## Honesty residuals\nLive-room soft-deny · B3 with real keys · full auth-vm e2e — **not green**.\n\n## Hierarchy & sequence\nUse layout mode **Hierarchy** or **Sequence** (toolbar) to walk ordered workflow paths left→right. Sidebar **Sequence** tab lists phases for the active lane.\n","guide_public":"# Rules & catalogs\n\nPlane law, policies, and claim language.\n\n## How to read this map\nEach column is a stage of the journey. Soft curves mean **what comes next**.\nClick a stop for a short plain-language note.\n\n## What you do not need\nYou do not need internal tools, file paths, or team jargon to participate.\n","label_public":"Simple rules","blurb_public":"A few rules in everyday language."}],"kinds":{"workflow":{"color":"#bd93f9","label":"Workflow","short":"Flow"},"tool":{"color":"#5eb0e5","label":"Tool","short":"Tool"},"infra":{"color":"#50fa7b","label":"Infrastructure","short":"Infra"},"team":{"color":"#ffb86c","label":"Room","short":"Room"},"agent":{"color":"#ff79c6","label":"Agent","short":"Agent"},"plane":{"color":"#f1fa8c","label":"Access gate","short":"Gate"},"board":{"color":"#8be9fd","label":"Ops board","short":"Board"},"surface":{"color":"#b1ebeb","label":"Hub","short":"Hub"},"description":{"color":"#cfc9e0","label":"Reference","short":"Doc"}},"status":{"ready":{"badge":"ok","color":"#3d9a6a"},"partial":{"badge":"warn","color":"#c9a227"},"lab":{"badge":"warn","color":"#bd93f9"},"residual":{"badge":"bad","color":"#c45c5c"}},"stats":{"nodes":58,"edges":85,"by_kind":{"surface":3,"tool":9,"workflow":9,"plane":3,"description":6,"infra":9,"board":3,"team":7,"agent":9},"by_status":{"ready":47,"partial":8,"lab":3}},"nodes":[{"id":"event-task","label":"Event hub","kind":"surface","status":"ready","description":"Unified operator index for community events: routes, workflow, provides, packs, scripts. Does not re-own Zot/SDL content.","path":"crates/event-task/","variants":["overview","workflows","tools","infra","descriptions"],"degree":11,"seq":[{"lane":"event-bringup","order":5,"phase":"0","phase_label":"Hub index"}],"seq_order":5,"seq_phase":"0","seq_lane":"event-bringup","seq_phase_label":"Hub index","kind_rank":0,"label_internal":"event-task hub","label_public":"Event hub","audience":["public","internal"],"tagline":"Unified operator index for community events: routes, workflow, provides, packs, scripts. D…","public_journey":false,"journey_depth":null},{"id":"grant-zk","label":"Grant desk","kind":"surface","status":"ready","description":"Public residual ZCG narrative on permissionless.money — desk panels (essence, stack, events, sources). Ops graphs extend this story for internal communication.","path":"websites/permissionless.money/pages/zk.html","variants":["overview","workflows","descriptions"],"degree":4,"seq":[{"lane":"marketing","order":5,"phase":"M0","phase_label":"Public desk"},{"lane":"auth","order":5,"phase":"L0","phase_label":"Public desk"},{"lane":"event-bringup","order":5,"phase":"0","phase_label":"Context"}],"seq_order":5,"seq_phase":"M0","seq_lane":"marketing","seq_phase_label":"Public desk","kind_rank":0,"label_internal":"Grant desk /zk","label_public":"Read the grant story","audience":["public","internal"],"tagline":"Why this work exists and what the residual covers.","public_journey":false,"journey_depth":null,"description_public":"The public grant page explains the selective-disclosure VM residual, community audit, and design-space hackathon in plain language.","product_once":null},{"id":"dep-map","label":"Code dependency graph","kind":"tool","status":"ready","description":"Force-graph of monorepo crate/repo deps from dependency-matrix (product line v3.1.0-zk.0). Inspiration for this ops resource map.","path":"crates/terp-rs/tools/gen-tools/_devops/dependency-map.html","variants":["overview","tools","workflows"],"degree":2,"seq":[{"lane":"deps","order":30,"phase":"D2","phase_label":"Visualize"}],"seq_order":30,"seq_phase":"D2","seq_lane":"deps","seq_phase_label":"Visualize","kind_rank":2,"label_internal":"Crate dependency map","label_public":"Code dependency graph","audience":["internal"],"tagline":"Force-graph of monorepo crate/repo deps from dependency-matrix (product line v3.1.0-zk.0).…","public_journey":false,"journey_depth":null},{"id":"gen-tools","label":"Dependency control plane","kind":"tool","status":"ready","description":"dep.py + dependency-matrix.toml control plane for path/git/stable/zk modes across workspaces.","path":"crates/terp-rs/tools/gen-tools/_devops/","variants":["overview","tools","workflows"],"degree":4,"seq":[{"lane":"deps","order":20,"phase":"D1","phase_label":"Heal"}],"seq_order":20,"seq_phase":"D1","seq_lane":"deps","seq_phase_label":"Heal","kind_rank":2,"label_internal":"gen-tools dep plane","label_public":"Dependency control plane","audience":["internal"],"tagline":"dep.py + dependency-matrix.toml control plane for path/git/stable/zk modes across workspac…","public_journey":false,"journey_depth":null},{"id":"wf-event-bringup","label":"Event setup path","kind":"workflow","status":"ready","description":"WORKFLOW.md phases: network → Buzz pack spawn → oline → FE → cw-orch stack → pack → compute pulse Phase H.","path":"crates/event-task/WORKFLOW.md","variants":["overview","workflows","infra"],"degree":6,"seq":[{"lane":"event-bringup","order":8,"phase":"0","phase_label":"Hub index"}],"seq_order":8,"seq_phase":"0","seq_lane":"event-bringup","seq_phase_label":"Hub index","kind_rank":1,"label_internal":"Event bring-up (A–H)","label_public":"Event setup path","audience":["public","internal"],"tagline":"WORKFLOW.md phases: network → Buzz pack spawn → oline → FE → cw-orch stack → pack → comput…","public_journey":false,"journey_depth":null},{"id":"wf-cw-orch","label":"Deploy contracts","kind":"workflow","status":"partial","description":"upload→bind→apps→export; state.json SoT; can hit dual cosmwasm_std until matrix heal. Offline provides-from-appstate fallback.","path":"crates/dao-contracts/packages/dao-testing/","variants":["overview","workflows","tools","infra"],"degree":4,"seq":[{"lane":"event-bringup","order":50,"phase":"E","phase_label":"cw-orch stack"}],"seq_order":50,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"cw-orch stack","kind_rank":1,"label_internal":"cw-orch / dao-testing stack","label_public":"Deploy contracts","audience":["public","internal"],"tagline":"upload→bind→apps→export; state.json SoT; can hit dual cosmwasm_std until matrix heal. Offl…","public_journey":false,"journey_depth":null},{"id":"wf-s3-state","label":"Publish live state","kind":"workflow","status":"ready","description":"Publish lab/mainnet cw-orch snapshots for FE peers; sync-event-from-chain + sync-cw-orch-state-s3.","path":"crates/event-task/scripts/sync-cw-orch-state-s3.sh","variants":["overview","workflows","infra"],"degree":2,"seq":[{"lane":"event-bringup","order":60,"phase":"E","phase_label":"State / S3"}],"seq_order":60,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"State / S3","kind_rank":1,"label_internal":"state.json ↔ S3 publish","label_public":"Publish live state","audience":["public","internal"],"tagline":"Publish lab/mainnet cw-orch snapshots for FE peers; sync-event-from-chain + sync-cw-orch-s…","public_journey":false,"journey_depth":null},{"id":"wf-spawn-buzz","label":"Start collab rooms","kind":"workflow","status":"ready","description":"spawn-buzz-relayer.sh + seed-channels-from-pack — pack overlay, not re-own compose.","path":"crates/event-task/scripts/spawn-buzz-relayer.sh","variants":["overview","workflows","infra","teams"],"degree":3,"seq":[{"lane":"event-bringup","order":20,"phase":"B","phase_label":"Buzz pack spawn"}],"seq_order":20,"seq_phase":"B","seq_lane":"event-bringup","seq_phase_label":"Buzz pack spawn","kind_rank":1,"label_internal":"Pack Buzz spawn","label_public":"Start collab rooms","audience":["public","internal"],"tagline":"spawn-buzz-relayer.sh + seed-channels-from-pack — pack overlay, not re-own compose.","public_journey":false,"journey_depth":null},{"id":"wf-compute-pulse","label":"Agent limits & credits","kind":"workflow","status":"ready","description":"Three planes shipped Phase A: wake ≠ spend ≠ cold Evidence. Residuals soft (live soft-deny, B3 keys, auth-vm e2e).","path":"crates/event-task/COMPUTE-INFRA-PULSE.md","variants":["overview","workflows","infra","agents","descriptions"],"degree":10,"seq":[{"lane":"event-bringup","order":90,"phase":"H","phase_label":"Compute pulse"},{"lane":"compute-pulse","order":5,"phase":"H","phase_label":"Pulse index"}],"seq_order":90,"seq_phase":"H","seq_lane":"event-bringup","seq_phase_label":"Compute pulse","kind_rank":1,"label_internal":"Compute pulse (Phase H)","label_public":"Agent limits & credits","audience":["public","internal"],"tagline":"Three planes shipped Phase A: wake ≠ spend ≠ cold Evidence. Residuals soft (live soft-deny…","public_journey":false,"journey_depth":null},{"id":"wf-marketing","label":"Media & voice pipeline","kind":"workflow","status":"partial","description":"Transcript-first multi-pass → short VO (20–30s / ≤2–3m), audience variants, capture/align. marketing-ops board on groot.","path":"docs/grant/zcash/participant-resources/WORKFLOW-MARKETING-MEDIA-PIPELINE.md","variants":["overview","workflows","teams","descriptions"],"degree":5,"seq":[{"lane":"marketing","order":10,"phase":"M1","phase_label":"Pipeline"}],"seq_order":10,"seq_phase":"M1","seq_lane":"marketing","seq_phase_label":"Pipeline","kind_rank":1,"label_internal":"Marketing media pipeline","label_public":"Media & voice pipeline","audience":["public","internal"],"tagline":"Transcript-first multi-pass → short VO (20–30s / ≤2–3m), audience variants, capture/align.…","public_journey":false,"journey_depth":null},{"id":"wf-auth-levels","label":"Join & membership","kind":"workflow","status":"partial","description":"Registration → DAO membership (ephemeral OIDC-flavored planes). Product identity — not wake/spend. Optional Zcash adapters deferred.","path":"docs/grant/zcash/AUTH-LEVELS-REGISTRATION-TO-DAO.md","variants":["overview","workflows","descriptions"],"degree":2,"seq":[{"lane":"auth","order":10,"phase":"L0","phase_label":"Product ladder"},{"lane":"event-bringup","order":50,"phase":"4","phase_label":"Access"}],"seq_order":10,"seq_phase":"L0","seq_lane":"auth","seq_phase_label":"Product ladder","kind_rank":1,"label_internal":"AUTH-LEVELS ladder","label_public":"Sign in & membership","audience":["public","internal"],"tagline":"Register and connect identity when you need more access.","public_journey":false,"journey_depth":null,"description_public":"When you need membership or stronger access, follow the sign-in steps. You do not need every system name to start.","product_once":null},{"id":"wf-fv-synergy","label":"Audit toolkits review","kind":"workflow","status":"lab","description":"Ironwood ↔ dregg ↔ ragu participant resource review + benchmark plans; event-ops epic skeleton.","path":"crates/event-task/resources/formal-verification-stacks/","variants":["overview","workflows","tools","descriptions"],"degree":2,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":1,"label_internal":"FV stacks synergy","label_public":"Audit toolkits review","audience":["internal"],"tagline":"Ironwood ↔ dregg ↔ ragu participant resource review + benchmark plans; event-ops epic skel…","public_journey":false,"journey_depth":null},{"id":"wf-dep-heal","label":"Align code dependencies","kind":"workflow","status":"partial","description":"just deps-status / heal / switch local|git — Grok Dev owns dual-std class bugs.","path":"crates/terp-rs/tools/gen-tools/_devops/STABLE.md","variants":["overview","workflows","tools"],"degree":3,"seq":[{"lane":"deps","order":10,"phase":"D1","phase_label":"Heal"}],"seq_order":10,"seq_phase":"D1","seq_lane":"deps","seq_phase_label":"Heal","kind_rank":1,"label_internal":"Dep matrix heal","label_public":"Align code dependencies","audience":["internal"],"tagline":"just deps-status / heal / switch local|git — Grok Dev owns dual-std class bugs.","public_journey":false,"journey_depth":null},{"id":"plane-wake","label":"Agent turn limits","kind":"plane","status":"ready","description":"How often a public agent turn may start. Soft-deny try-again. buzz-acp admission.rs · IMPL-01.","path":"crates/buzz/crates/buzz-acp/src/admission.rs","variants":["overview","infra","agents","descriptions"],"degree":5,"seq":[{"lane":"event-bringup","order":92,"phase":"H","phase_label":"Compute pulse"},{"lane":"compute-pulse","order":20,"phase":"H1","phase_label":"Wake"}],"seq_order":92,"seq_phase":"H","seq_lane":"event-bringup","seq_phase_label":"Compute pulse","kind_rank":7,"label_internal":"Wake / admission","label_public":"When help can start","audience":["public","internal"],"tagline":"Helpers may ask you to try again if many people are asking at once.","public_journey":false,"journey_depth":null,"description_public":"Open rooms stay on. If a helper cannot start a reply right away, wait and try again — that is normal.","product_once":null},{"id":"plane-spend","label":"Compute credits","kind":"plane","status":"ready","description":"How much model use may burn: hold→proxy→settle. crates/inference-edge · IMPL-02.","path":"crates/inference-edge/","variants":["overview","infra","agents","descriptions"],"degree":4,"seq":[{"lane":"event-bringup","order":94,"phase":"H","phase_label":"Compute pulse"},{"lane":"compute-pulse","order":30,"phase":"H2","phase_label":"Spend"}],"seq_order":94,"seq_phase":"H","seq_lane":"event-bringup","seq_phase_label":"Compute pulse","kind_rank":7,"label_internal":"Spend / credits","label_public":"When model help may pause","audience":["public","internal"],"tagline":"Sponsored compute can run out for a while.","public_journey":false,"journey_depth":null,"description_public":"Some answers use sponsored compute. If help pauses after a reply, credits may be exhausted until more are available.","product_once":null},{"id":"plane-authvm","label":"Membership evidence","kind":"plane","status":"lab","description":"Cold-path membership/deposit Evidence mock|auth-vm. Not hot completion. IMPL-03/04.","path":"crates/o-line/src/auth_plane/","variants":["overview","infra","descriptions"],"degree":3,"seq":[{"lane":"event-bringup","order":96,"phase":"H","phase_label":"Compute pulse"},{"lane":"compute-pulse","order":40,"phase":"H3","phase_label":"Evidence"},{"lane":"auth","order":30,"phase":"L2","phase_label":"Cold evidence"}],"seq_order":96,"seq_phase":"H","seq_lane":"event-bringup","seq_phase_label":"Compute pulse","kind_rank":7,"label_internal":"Auth Evidence / auth-vm","label_public":"Membership evidence","audience":["public","internal"],"tagline":"Cold-path membership/deposit Evidence mock|auth-vm. Not hot completion. IMPL-03/04.","public_journey":false,"journey_depth":null},{"id":"plane-law","label":"Access rules (summary)","kind":"description","status":"ready","description":"ADR-36 ≠ Nostr ≠ Hermes ≠ Headscale ≠ wake quota ≠ credit Bearer ≠ AUTH-LEVELS product ladder.","path":"crates/event-task/COMPUTE-INFRA-PULSE.md","variants":["overview","descriptions"],"degree":2,"seq":[{"lane":"compute-pulse","order":12,"phase":"H0","phase_label":"Policy freeze"}],"seq_order":12,"seq_phase":"H0","seq_lane":"compute-pulse","seq_phase_label":"Policy freeze","kind_rank":8,"label_internal":"Plane law","label_public":"Access rules (summary)","audience":["internal"],"tagline":"ADR-36 ≠ Nostr ≠ Hermes ≠ Headscale ≠ wake quota ≠ credit Bearer ≠ AUTH-LEVELS product lad…","public_journey":false,"journey_depth":null},{"id":"infra-buzz-relay","label":"Chat relay","kind":"infra","status":"ready","description":"Collab WSS relay (local compose or groot2 + public corridor buzz-lab.permissionless.money).","path":"docs/grant/zcash/buzz-lab-runbook.md","variants":["overview","infra","teams"],"degree":4,"seq":[{"lane":"event-bringup","order":25,"phase":"B","phase_label":"Buzz pack spawn"}],"seq_order":25,"seq_phase":"B","seq_lane":"event-bringup","seq_phase_label":"Buzz pack spawn","kind_rank":3,"label_internal":"Buzz relay lab","label_public":"Chat relay","audience":["public","internal"],"tagline":"Collab WSS relay (local compose or groot2 + public corridor buzz-lab.permissionless.money)…","public_journey":false,"journey_depth":null},{"id":"infra-hermes","label":"Private ops board host","kind":"infra","status":"ready","description":"Private ops SoR on groot :9119. Never public CF. Boards: community-gateway, event-ops, marketing-ops, groot2-ops.","path":"artifacts/community-core-local/HERMES-KANBAN-SOR.md","variants":["overview","infra","teams","workflows"],"degree":4,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":3,"label_internal":"Hermes kanban (groot)","label_public":"Private ops board host","audience":["internal"],"tagline":"Private ops SoR on groot :9119. Never public CF. Boards: community-gateway, event-ops, mar…","public_journey":false,"journey_depth":null},{"id":"infra-minio-s3","label":"File & state storage","kind":"infra","status":"ready","description":"State snapshots, static event assets, FE mirrors.","path":"crates/event-task/ENVIRONMENTS.md","variants":["overview","infra"],"degree":1,"seq":[{"lane":"event-bringup","order":62,"phase":"E","phase_label":"State / S3"}],"seq_order":62,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"State / S3","kind_rank":3,"label_internal":"MinIO / s3.terp.network","label_public":"File & state storage","audience":["public","internal"],"tagline":"State snapshots, static event assets, FE mirrors.","public_journey":false,"journey_depth":null},{"id":"infra-zot","label":"Container registry","kind":"infra","status":"ready","description":"Event container artifacts; forge ≠ Zot vocabulary.","path":"crates/buzz/deploy/compose/README-registry.md","variants":["overview","infra","tools"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":3,"label_internal":"Zot OCI registry","label_public":"Container registry","audience":["public","internal"],"tagline":"Event container artifacts; forge ≠ Zot vocabulary.","public_journey":false,"journey_depth":null},{"id":"infra-chain-lab","label":"Lab blockchain","kind":"infra","status":"ready","description":"Local/lab Terp chain + APPSTATE / OPEN_DAO pins for SDA.","path":"artifacts/community-core-local/","variants":["overview","infra","workflows"],"degree":3,"seq":[{"lane":"event-bringup","order":56,"phase":"E","phase_label":"cw-orch stack"}],"seq_order":56,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"cw-orch stack","kind_rank":3,"label_internal":"Lab chain 120u-1","label_public":"Lab blockchain","audience":["public","internal"],"tagline":"Local/lab Terp chain + APPSTATE / OPEN_DAO pins for SDA.","public_journey":false,"journey_depth":null},{"id":"infra-sda","label":"DAO app (SDA)","kind":"infra","status":"ready","description":"Participant FE: DAO, calendar, marketplace, embeds, bounties iframe.","path":"websites/dao-dao-ui/","variants":["overview","infra","tools"],"degree":3,"seq":[{"lane":"auth","order":20,"phase":"L1","phase_label":"FE surfaces"},{"lane":"event-bringup","order":40,"phase":"3","phase_label":"Use tools"}],"seq_order":40,"seq_phase":"D","seq_lane":"event-bringup","seq_phase_label":"FE / SDA","kind_rank":3,"label_internal":"dao-dao-ui SDA","label_public":"Open the community app","audience":["public","internal"],"tagline":"Use the shared app for DAO, calendar, and modules.","public_journey":false,"journey_depth":null,"description_public":"Open the community app in your browser to see governance, calendar, and related tools for the event.","product_once":"The app is our DAO interface (SDA)."},{"id":"infra-edge-cf","label":"Public HTTPS edge","kind":"infra","status":"partial","description":"HTTPS/WSS for browsers — nginx + Cloudflare preferred for public lab.","path":"crates/event-task/resources/edge/NOTES.md","variants":["overview","infra"],"degree":1,"seq":[{"lane":"event-bringup","order":10,"phase":"A","phase_label":"Network path"}],"seq_order":10,"seq_phase":"A","seq_lane":"event-bringup","seq_phase_label":"Network path","kind_rank":3,"label_internal":"Edge / CF corridor","label_public":"Public HTTPS edge","audience":["public","internal"],"tagline":"HTTPS/WSS for browsers — nginx + Cloudflare preferred for public lab.","public_journey":false,"journey_depth":null},{"id":"infra-headscale","label":"Private mesh VPN","kind":"infra","status":"partial","description":"Dumb control plane + ephemeral preauth lineage (D7). Resonant with auth plane, not chat login.","path":"crates/o-line/docs/workflow/session-map-headscale-auth-plane.md","variants":["overview","infra","descriptions"],"degree":1,"seq":[{"lane":"event-bringup","order":15,"phase":"A","phase_label":"Network path"}],"seq_order":15,"seq_phase":"A","seq_lane":"event-bringup","seq_phase_label":"Network path","kind_rank":3,"label_internal":"Headscale mesh fabric","label_public":"Private mesh VPN","audience":["public","internal"],"tagline":"Dumb control plane + ephemeral preauth lineage (D7). Resonant with auth plane, not chat lo…","public_journey":false,"journey_depth":null},{"id":"infra-inference-edge","label":"Model proxy & credits","kind":"infra","status":"ready","description":"OpenAI-compatible reverse proxy with CreditHold lab mint; B1/B2 CI scripts.","path":"crates/inference-edge/","variants":["overview","infra","tools","agents"],"degree":2,"seq":[{"lane":"event-bringup","order":95,"phase":"H","phase_label":"Compute pulse"},{"lane":"compute-pulse","order":32,"phase":"H2","phase_label":"Spend"}],"seq_order":95,"seq_phase":"H","seq_lane":"event-bringup","seq_phase_label":"Compute pulse","kind_rank":3,"label_internal":"inference-edge service","label_public":"Model proxy & credits","audience":["public","internal"],"tagline":"OpenAI-compatible reverse proxy with CreditHold lab mint; B1/B2 CI scripts.","public_journey":false,"journey_depth":null},{"id":"board-event-ops","label":"Event ops board","kind":"board","status":"ready","description":"Event-wide ops, FV epic skeleton, cross-track. Mint on groot only.","path":"crates/event-task/MANIFEST.toml","variants":["overview","teams","workflows"],"degree":4,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":4,"label_internal":"Hermes board: event-ops","label_public":"Event ops board","audience":["internal"],"tagline":"Event-wide ops, FV epic skeleton, cross-track. Mint on groot only.","public_journey":false,"journey_depth":null},{"id":"board-marketing","label":"Marketing board","kind":"board","status":"ready","description":"Pipeline epic REF t_66399a98. Groot SoR.","path":"crates/event-task/MANIFEST.toml","variants":["overview","teams","workflows"],"degree":3,"seq":[{"lane":"marketing","order":12,"phase":"M1","phase_label":"Pipeline"}],"seq_order":12,"seq_phase":"M1","seq_lane":"marketing","seq_phase_label":"Pipeline","kind_rank":4,"label_internal":"Hermes board: marketing-ops","label_public":"Marketing board","audience":["internal"],"tagline":"Pipeline epic REF t_66399a98. Groot SoR.","public_journey":false,"journey_depth":null},{"id":"board-gateway","label":"Community gateway board","kind":"board","status":"ready","description":"Infra tasks + sticky registry. Primary for INFRA-01/02 cards.","path":"artifacts/community-core-local/HERMES-KANBAN-SOR.md","variants":["overview","teams","workflows","infra"],"degree":3,"seq":[{"lane":"event-bringup","order":84,"phase":"G","phase_label":"Team sessions"}],"seq_order":84,"seq_phase":"G","seq_lane":"event-bringup","seq_phase_label":"Team sessions","kind_rank":4,"label_internal":"Hermes board: community-gateway","label_public":"Community gateway board","audience":["internal"],"tagline":"Infra tasks + sticky registry. Primary for INFRA-01/02 cards.","public_journey":false,"journey_depth":null},{"id":"tool-cw-orch","label":"Contract orchestrator","kind":"tool","status":"ready","description":"Engine for CosmWasm deploy/state; state.json per chain id.","path":"crates/cw-orchestrator/","variants":["overview","tools","workflows"],"degree":1,"seq":[{"lane":"event-bringup","order":52,"phase":"E","phase_label":"cw-orch stack"}],"seq_order":52,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"cw-orch stack","kind_rank":2,"label_internal":"cw-orchestrator","label_public":"Contract orchestrator","audience":["public","internal"],"tagline":"Engine for CosmWasm deploy/state; state.json per chain id.","public_journey":false,"journey_depth":null},{"id":"tool-dao-testing","label":"DAO deploy suite","kind":"tool","status":"partial","description":"DaoDaoSuite stack profile community-core-local; catalog + sync-live.","path":"crates/dao-contracts/packages/dao-testing/","variants":["overview","tools","workflows"],"degree":2,"seq":[{"lane":"event-bringup","order":54,"phase":"E","phase_label":"cw-orch stack"}],"seq_order":54,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"cw-orch stack","kind_rank":2,"label_internal":"dao-testing suite","label_public":"DAO deploy suite","audience":["public","internal"],"tagline":"DaoDaoSuite stack profile community-core-local; catalog + sync-live.","public_journey":false,"journey_depth":null},{"id":"tool-oline","label":"Event stack profiles","kind":"tool","status":"ready","description":"Event profiles, SDLs, auth_plane Evidence, stack-comms.","path":"crates/o-line/","variants":["overview","tools","infra"],"degree":3,"seq":[{"lane":"event-bringup","order":30,"phase":"C","phase_label":"Oline profiles"},{"lane":"compute-pulse","order":41,"phase":"H3","phase_label":"Evidence"}],"seq_order":30,"seq_phase":"C","seq_lane":"event-bringup","seq_phase_label":"Oline profiles","kind_rank":2,"label_internal":"o-line","label_public":"Event stack profiles","audience":["public","internal"],"tagline":"Event profiles, SDLs, auth_plane Evidence, stack-comms.","public_journey":false,"journey_depth":null},{"id":"tool-buzz","label":"Buzz collab app","kind":"tool","status":"ready","description":"Collab product: relay, desktop, ACP agents, forge git.","path":"crates/buzz/","variants":["overview","tools","teams","agents"],"degree":2,"seq":[{"lane":"event-bringup","order":93,"phase":"H","phase_label":"Compute pulse"},{"lane":"compute-pulse","order":21,"phase":"H1","phase_label":"Wake"}],"seq_order":93,"seq_phase":"H","seq_lane":"event-bringup","seq_phase_label":"Compute pulse","kind_rank":2,"label_internal":"Buzz (block/buzz)","label_public":"Buzz collab app","audience":["public","internal"],"tagline":"Collab product: relay, desktop, ACP agents, forge git.","public_journey":false,"journey_depth":null},{"id":"tool-playwright","label":"UI capture & checks","kind":"tool","status":"lab","description":"FE a11y/observe loops; marketing capture path; Sentry lab optional.","path":"websites/dao-dao-ui/","variants":["overview","tools","workflows"],"degree":2,"seq":[{"lane":"event-bringup","order":45,"phase":"D","phase_label":"FE / SDA"},{"lane":"marketing","order":30,"phase":"M3","phase_label":"Capture"}],"seq_order":45,"seq_phase":"D","seq_lane":"event-bringup","seq_phase_label":"FE / SDA","kind_rank":2,"label_internal":"Playwright lab observe","label_public":"UI capture & checks","audience":["public","internal"],"tagline":"FE a11y/observe loops; marketing capture path; Sentry lab optional.","public_journey":false,"journey_depth":null},{"id":"tool-dep-py","label":"Dep switch CLI","kind":"tool","status":"ready","description":"Operator CLI for matrix switch, heal, bootstrap, status.","path":"crates/terp-rs/tools/gen-tools/_scripts/","variants":["overview","tools"],"degree":2,"seq":[{"lane":"deps","order":25,"phase":"D1","phase_label":"Heal"}],"seq_order":25,"seq_phase":"D1","seq_lane":"deps","seq_phase_label":"Heal","kind_rank":2,"label_internal":"dep.py / just deps-*","label_public":"Dep switch CLI","audience":["internal"],"tagline":"Operator CLI for matrix switch, heal, bootstrap, status.","public_journey":false,"journey_depth":null},{"id":"tool-event-scripts","label":"Event helper scripts","kind":"tool","status":"ready","description":"inventory, event-ready, provides-from-appstate, spawn, seed, S3 sync.","path":"crates/event-task/scripts/","variants":["overview","tools","workflows"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":2,"label_internal":"event-task scripts","label_public":"Event helper scripts","audience":["public","internal"],"tagline":"inventory, event-ready, provides-from-appstate, spawn, seed, S3 sync.","public_journey":false,"journey_depth":null},{"id":"pack-hackathon","label":"This event pack","kind":"surface","status":"ready","description":"channels.toml, ACCESS-HIERARCHY, checklist, tasks/INFRA+IMPL DELTAs.","path":"crates/event-task/resources/packs/community-audit-design-hackathon/","variants":["overview","workflows","teams","infra"],"degree":11,"seq":[{"lane":"event-bringup","order":28,"phase":"B","phase_label":"Buzz pack spawn"},{"lane":"event-bringup","order":70,"phase":"F","phase_label":"Event pack"}],"seq_order":28,"seq_phase":"B","seq_lane":"event-bringup","seq_phase_label":"Buzz pack spawn","kind_rank":0,"label_internal":"Pack: audit-design-hackathon","label_public":"This event pack","audience":["public","internal"],"tagline":"channels.toml, ACCESS-HIERARCHY, checklist, tasks/INFRA+IMPL DELTAs.","public_journey":false,"journey_depth":null},{"id":"team-infra-ops","label":"Team · Infra","kind":"team","status":"ready","description":"Private Buzz room: edge, relay, oline deploy (no secrets). Home for compute pulse.","path":"…/ACCESS-HIERARCHY.md","variants":["overview","teams","infra","agents"],"degree":3,"seq":[{"lane":"event-bringup","order":80,"phase":"G","phase_label":"Team sessions"}],"seq_order":80,"seq_phase":"G","seq_lane":"event-bringup","seq_phase_label":"Team sessions","kind_rank":5,"label_internal":"Team - Infra ops","label_public":"Team · Infra","audience":["public","internal"],"tagline":"Private Buzz room: edge, relay, oline deploy (no secrets). Home for compute pulse.","public_journey":false,"journey_depth":null},{"id":"team-marketing","label":"Team · Marketing","kind":"team","status":"ready","description":"Outward messaging drafts + media pipeline coordination.","path":"…/ACCESS-HIERARCHY.md","variants":["overview","teams","workflows"],"degree":3,"seq":[{"lane":"marketing","order":15,"phase":"M1","phase_label":"Pipeline"}],"seq_order":15,"seq_phase":"M1","seq_lane":"marketing","seq_phase_label":"Pipeline","kind_rank":5,"label_internal":"Team - Marketing ops","label_public":"Team · Marketing","audience":["public","internal"],"tagline":"Outward messaging drafts + media pipeline coordination.","public_journey":false,"journey_depth":null},{"id":"team-grant","label":"Team · Grant coord","kind":"team","status":"ready","description":"Facilitation / grant residual ops.","path":"…/ACCESS-HIERARCHY.md","variants":["overview","teams"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":5,"label_internal":"Team - Grant DAO Coord","label_public":"Team · Grant coord","audience":["public","internal"],"tagline":"Facilitation / grant residual ops.","public_journey":false,"journey_depth":null},{"id":"team-manifold","label":"Team · Resources","kind":"team","status":"ready","description":"Internal ops resource map pin (index).","path":"…/ACCESS-HIERARCHY.md","variants":["overview","teams","descriptions"],"degree":2,"seq":[{"lane":"event-bringup","order":82,"phase":"G","phase_label":"Team sessions"}],"seq_order":82,"seq_phase":"G","seq_lane":"event-bringup","seq_phase_label":"Team sessions","kind_rank":5,"label_internal":"Team - Resource Manifold","label_public":"Team · Resources","audience":["public","internal"],"tagline":"Internal ops resource map pin (index).","public_journey":false,"journey_depth":null},{"id":"pub-welcome","label":"Welcome room","kind":"team","status":"ready","description":"Public land · intros · routing.","path":"…/channels.toml","variants":["overview","teams"],"degree":2,"seq":[{"lane":"event-bringup","order":10,"phase":"1","phase_label":"Arrive"}],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":5,"label_internal":"General - Welcome","label_public":"Arrive & say hello","audience":["public","internal"],"tagline":"Land in the welcome room and meet people.","public_journey":false,"journey_depth":null,"description_public":"Start in the welcome chat room. Introduce yourself and see where to go next.","product_once":"Chat rooms run on Buzz."},{"id":"pub-audit","label":"Community audit room","kind":"team","status":"ready","description":"Public-safe audit track.","path":"…/channels.toml","variants":["overview","teams"],"degree":2,"seq":[{"lane":"event-bringup","order":20,"phase":"2","phase_label":"Participate"}],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":5,"label_internal":"General - Community Audit","label_public":"Join the audit track","audience":["public","internal"],"tagline":"Follow the community audit conversation.","public_journey":false,"journey_depth":null,"description_public":"If you are reviewing or learning with the audit group, this is the open room for that track.","product_once":null},{"id":"pub-design","label":"Design hackathon room","kind":"team","status":"ready","description":"Design-space build track.","path":"…/channels.toml","variants":["overview","teams"],"degree":2,"seq":[{"lane":"event-bringup","order":25,"phase":"2","phase_label":"Participate"}],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":5,"label_internal":"General - Design Hackathon","label_public":"Join the build track","audience":["public","internal"],"tagline":"Follow the design-space hackathon conversation.","public_journey":false,"journey_depth":null,"description_public":"If you are building or exploring design space, this is the open room for that track.","product_once":null},{"id":"agent-gd","label":"Grok Dev","kind":"agent","status":"ready","description":"T2 implementer monorepo/harness/Cargo deps. Owns gen-tools heal claims.","path":"crates/buzz/examples/terp-lab-team/agents/grok-dev.persona.md","variants":["overview","agents","teams","tools"],"degree":4,"seq":[{"lane":"deps","order":15,"phase":"D1","phase_label":"Heal"}],"seq_order":15,"seq_phase":"D1","seq_lane":"deps","seq_phase_label":"Heal","kind_rank":6,"label_internal":"Grok Dev (GD)","label_public":"Grok Dev","audience":["internal"],"tagline":"T2 implementer monorepo/harness/Cargo deps. Owns gen-tools heal claims.","public_journey":false,"journey_depth":null},{"id":"agent-co","label":"Comms orchestrator","kind":"agent","status":"ready","description":"Routes multi-workspace epics; not day-to-day matrix owner.","path":"crates/buzz/examples/terp-lab-team/agents/comms-orchestrator.persona.md","variants":["overview","agents","teams"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":6,"label_internal":"Comms Orchestrator (CO)","label_public":"Comms orchestrator","audience":["internal"],"tagline":"Routes multi-workspace epics; not day-to-day matrix owner.","public_journey":false,"journey_depth":null},{"id":"agent-infra","label":"Infra DevOps","kind":"agent","status":"ready","description":"Chain/docker/edge — presence ACK for rebuilds.","path":"crates/buzz/examples/terp-lab-team/agents/infra-devops.persona.md","variants":["overview","agents","teams","infra"],"degree":2,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":6,"label_internal":"Infra DevOps","label_public":"Infra DevOps","audience":["internal"],"tagline":"Chain/docker/edge — presence ACK for rebuilds.","public_journey":false,"journey_depth":null},{"id":"agent-oline","label":"Oline implementor","kind":"agent","status":"ready","description":"o-line SDL/auth plane implementer.","path":"crates/buzz/examples/terp-lab-team/agents/oline-implementor.persona.md","variants":["overview","agents","tools"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":6,"label_internal":"Oline Implementor","label_public":"Oline implementor","audience":["internal"],"tagline":"o-line SDL/auth plane implementer.","public_journey":false,"journey_depth":null},{"id":"agent-daodao","label":"DaoDao UI","kind":"agent","status":"ready","description":"FE modules / SDA polish persona.","path":"crates/buzz/examples/terp-lab-team/agents/dao-dao-ui.persona.md","variants":["overview","agents","tools"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":6,"label_internal":"DaoDao UI","label_public":"DaoDao UI","audience":["internal"],"tagline":"FE modules / SDA polish persona.","public_journey":false,"journey_depth":null},{"id":"agent-hermes-coord","label":"Hermes coordinator","kind":"agent","status":"ready","description":"Kanban/dashboard agent runtime profile.","path":"crates/buzz/examples/terp-lab-team/agents/hermes-coord.persona.md","variants":["overview","agents","infra"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":6,"label_internal":"Hermes Coord","label_public":"Hermes coordinator","audience":["internal"],"tagline":"Kanban/dashboard agent runtime profile.","public_journey":false,"journey_depth":null},{"id":"agent-cs","label":"Channel steward","kind":"agent","status":"ready","description":"Room policy, soft-deny copy, public agent list freezes.","path":"crates/buzz/examples/terp-lab-team/agents/channel-steward.persona.md","variants":["overview","agents","teams"],"degree":2,"seq":[{"lane":"compute-pulse","order":23,"phase":"H1","phase_label":"Wake"}],"seq_order":23,"seq_phase":"H1","seq_lane":"compute-pulse","seq_phase_label":"Wake","kind_rank":6,"label_internal":"Channel Steward","label_public":"Channel steward","audience":["internal"],"tagline":"Room policy, soft-deny copy, public agent list freezes.","public_journey":false,"journey_depth":null},{"id":"agent-public-read","label":"Public helper agents","kind":"agent","status":"ready","description":"Always-on public rooms; wake-capped; mostly read/guide tools per PUBLIC-AGENTS-WAKE-POLICY.","path":"…/tasks/PUBLIC-AGENTS-WAKE-POLICY.md","variants":["overview","agents","descriptions","infra"],"degree":7,"seq":[{"lane":"compute-pulse","order":22,"phase":"H1","phase_label":"Wake"},{"lane":"event-bringup","order":60,"phase":"5","phase_label":"Get help"}],"seq_order":22,"seq_phase":"H1","seq_lane":"compute-pulse","seq_phase_label":"Wake","kind_rank":6,"label_internal":"Public agents (read/guide)","label_public":"Ask for guidance","audience":["public","internal"],"tagline":"Public helpers can point you to rooms and docs.","public_journey":false,"journey_depth":null,"description_public":"Helpers in open rooms mostly read and guide. If they ask you to try again later, wait a moment and ask again. If model help pauses, credits may be used up for now.","product_once":null},{"id":"agent-gb","label":"Grok Build runtime","kind":"agent","status":"ready","description":"ACP/TUI runtime for implement sessions (distinct from Hermes).","path":"crates/buzz/examples/terp-lab-team/agents/grok-build.persona.md","variants":["overview","agents","tools"],"degree":1,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":6,"label_internal":"Grok Build runtime","label_public":"Grok Build runtime","audience":["internal"],"tagline":"ACP/TUI runtime for implement sessions (distinct from Hermes).","public_journey":false,"journey_depth":null},{"id":"doc-provides","label":"What we provide","kind":"description","status":"ready","description":"Product capabilities for participants + operator refresh commands.","path":"crates/event-task/PROVIDES.md","variants":["overview","descriptions","workflows"],"degree":2,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":8,"label_internal":"PROVIDES catalog","label_public":"What we provide","audience":["public","internal"],"tagline":"Product capabilities for participants + operator refresh commands.","public_journey":false,"journey_depth":null},{"id":"doc-checklist","label":"Infra checklist","kind":"description","status":"ready","description":"§0–§13 surfaces including §8b compute pulse ticks.","path":"crates/event-task/INFRA-CHECKLIST.md","variants":["overview","descriptions","infra"],"degree":2,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":8,"label_internal":"INFRA-CHECKLIST","label_public":"Infra checklist","audience":["internal"],"tagline":"§0–§13 surfaces including §8b compute pulse ticks.","public_journey":false,"journey_depth":null},{"id":"doc-routes","label":"Path map","kind":"description","status":"ready","description":"Path map across product trees + compute pulse.","path":"crates/event-task/ROUTES.md","variants":["overview","descriptions","tools"],"degree":2,"seq":[],"seq_order":null,"seq_phase":null,"seq_lane":null,"seq_phase_label":null,"kind_rank":8,"label_internal":"ROUTES.md","label_public":"Path map","audience":["internal"],"tagline":"Path map across product trees + compute pulse.","public_journey":false,"journey_depth":null},{"id":"doc-policy-freeze","label":"Policy freeze","kind":"description","status":"ready","description":"Claim language for credits, agents, e2e bar, fail mode.","path":"…/tasks/POLICY-FREEZE-2026-08-06.md","variants":["overview","descriptions","agents"],"degree":2,"seq":[{"lane":"compute-pulse","order":10,"phase":"H0","phase_label":"Policy freeze"}],"seq_order":10,"seq_phase":"H0","seq_lane":"compute-pulse","seq_phase_label":"Policy freeze","kind_rank":8,"label_internal":"POLICY-FREEZE","label_public":"Policy freeze","audience":["internal"],"tagline":"Claim language for credits, agents, e2e bar, fail mode.","public_journey":false,"journey_depth":null},{"id":"doc-brand","label":"Brand guide","kind":"description","status":"partial","description":"Marketing visual tokens for VO/capture.","path":"docs/grant/zcash/participant-resources/BRAND-STYLE-BIBLE.md","variants":["overview","descriptions","workflows"],"degree":1,"seq":[{"lane":"marketing","order":20,"phase":"M2","phase_label":"Brand / transcript"}],"seq_order":20,"seq_phase":"M2","seq_lane":"marketing","seq_phase_label":"Brand / transcript","kind_rank":8,"label_internal":"Brand style bible","label_public":"Brand guide","audience":["public","internal"],"tagline":"Marketing visual tokens for VO/capture.","public_journey":false,"journey_depth":null},{"id":"part-context","label":"Why this event exists","label_public":"Why this event exists","label_internal":"Grant context (public desk)","kind":"surface","status":"ready","description":"Public residual narrative on permissionless.money/zk.","description_public":"Read the short story of this residual: a selective-disclosure VM, community audit, and design-space hackathon funded as one program.","tagline":"Context before you join.","product_once":null,"path":"websites/permissionless.money/pages/zk.html","audience":["public","internal"],"variants":["overview","workflows","descriptions"],"public_journey":true,"seq":[{"lane":"event-bringup","order":10,"phase":"A","phase_label":"Orient"},{"lane":"participant-voter","order":10,"phase":"A","phase_label":"Orient"}],"degree":2,"kind_rank":0,"seq_order":10,"seq_phase":"A","seq_lane":"event-bringup","seq_phase_label":"Orient"},{"id":"part-register","label":"Register for the event","label_public":"Register for the event","label_internal":"Registration / membership entry","kind":"workflow","status":"partial","description":"Registration path into event access and roles.","description_public":"Create or connect your account for the event. Registration unlocks rooms, the community app, and later steps like submissions or voting when those open.","tagline":"Get on the list so you can take part.","product_once":"Sign-in uses the same community app access flow.","path":"docs/grant/zcash/AUTH-LEVELS-REGISTRATION-TO-DAO.md","audience":["public","internal"],"variants":["overview","workflows","descriptions"],"public_journey":true,"seq":[{"lane":"event-bringup","order":20,"phase":"B","phase_label":"Register"},{"lane":"participant-audit","order":20,"phase":"B","phase_label":"Register"},{"lane":"participant-hack","order":20,"phase":"B","phase_label":"Register"},{"lane":"participant-voter","order":20,"phase":"B","phase_label":"Register"}],"degree":2,"kind_rank":1,"seq_order":20,"seq_phase":"B","seq_lane":"event-bringup","seq_phase_label":"Register"},{"id":"part-rooms","label":"Join open rooms","label_public":"Join open rooms","label_internal":"Public Buzz rooms","kind":"team","status":"ready","description":"Welcome, audit, and design-space rooms.","description_public":"Enter the welcome room first, then the audit room and/or the build room. Ask questions, follow announcements, and find people working on the same track.","tagline":"Where conversation and coordination happen.","product_once":"Chat rooms are hosted on Buzz.","path":"event-task pack channels","audience":["public","internal"],"variants":["overview","teams","workflows"],"public_journey":true,"seq":[{"lane":"event-bringup","order":30,"phase":"C","phase_label":"Connect"},{"lane":"participant-audit","order":30,"phase":"C","phase_label":"Connect"},{"lane":"participant-hack","order":30,"phase":"C","phase_label":"Connect"}],"degree":2,"kind_rank":5,"seq_order":30,"seq_phase":"C","seq_lane":"event-bringup","seq_phase_label":"Connect"},{"id":"part-discover","label":"Find work & demos","label_public":"Find work & demos","label_internal":"Discoverability surface","kind":"surface","status":"partial","description":"Discovery of bounties, demos, and open tasks.","description_public":"Browse open audit targets, demo surfaces, and hackathon briefs so you know what is fair game. Discovery is how newcomers avoid empty rooms and guesswork.","tagline":"See what you can review or build.","product_once":"Lists live on the community bounty board and grant desk.","path":"zec-bounties / desk demos","audience":["public","internal"],"variants":["overview","workflows","tools"],"public_journey":true,"seq":[{"lane":"event-bringup","order":40,"phase":"D","phase_label":"Discover"},{"lane":"participant-audit","order":40,"phase":"D","phase_label":"Discover"},{"lane":"participant-hack","order":40,"phase":"D","phase_label":"Discover"},{"lane":"participant-voter","order":40,"phase":"D","phase_label":"Review slate"}],"degree":4,"kind_rank":0,"seq_order":40,"seq_phase":"D","seq_lane":"event-bringup","seq_phase_label":"Discover"},{"id":"part-inference","label":"Use sponsored compute","label_public":"Use sponsored compute","label_internal":"Inference / credits utilization","kind":"plane","status":"ready","description":"Sponsored model help for participants.","description_public":"When helpers or tools offer model assistance, that uses sponsored compute. Use it for real audit or build work. If help pauses after a reply, credits may be temporarily exhausted — wait or continue without the model.","tagline":"Optional AI help with fair limits.","product_once":null,"path":"inference-edge / compute pulse","audience":["public","internal"],"variants":["overview","workflows","agents","descriptions"],"public_journey":true,"seq":[{"lane":"event-bringup","order":50,"phase":"E","phase_label":"Compute"},{"lane":"participant-audit","order":50,"phase":"E","phase_label":"Compute"},{"lane":"participant-hack","order":50,"phase":"E","phase_label":"Compute"}],"degree":4,"kind_rank":7,"seq_order":50,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"Compute"},{"id":"part-audit-submit","label":"Submit audit findings","label_public":"Submit audit findings","label_internal":"Audit submission path","kind":"workflow","status":"partial","description":"Audit track submissions and ranking inputs.","description_public":"On the audit track, record issues clearly: what you found, where, and why it matters. Follow the published submission format so reviewers and voters can compare work fairly.","tagline":"Turn review work into a shareable report.","product_once":"Submissions land through the elevated bounty / audit board.","path":"events audit track","audience":["public","internal"],"variants":["overview","workflows"],"public_journey":true,"seq":[{"lane":"event-bringup","order":60,"phase":"F","phase_label":"Audit"},{"lane":"participant-audit","order":60,"phase":"F","phase_label":"Submit"}],"degree":3,"kind_rank":1,"seq_order":60,"seq_phase":"F","seq_lane":"event-bringup","seq_phase_label":"Audit"},{"id":"part-hack-submit","label":"Submit a hackathon project","label_public":"Submit a hackathon project","label_internal":"Hackathon submission path","kind":"workflow","status":"partial","description":"Design-space hackathon deliverables.","description_public":"On the build track, ship a demo or design artifact the community can try or review. Include a short description, links, and anything voters need to understand your contribution.","tagline":"Show what you built.","product_once":null,"path":"events hackathon track","audience":["public","internal"],"variants":["overview","workflows"],"public_journey":true,"seq":[{"lane":"event-bringup","order":70,"phase":"G","phase_label":"Build"},{"lane":"participant-hack","order":70,"phase":"G","phase_label":"Submit"}],"degree":3,"kind_rank":1,"seq_order":70,"seq_phase":"G","seq_lane":"event-bringup","seq_phase_label":"Build"},{"id":"part-holder-vote","label":"Vote on top projects","label_public":"Vote on top projects","label_internal":"Coinholder / ZecHub ranking vote","kind":"workflow","status":"partial","description":"Holders rank top demos and audit work for reward pools.","description_public":"ZecHub coinholder voters help rank the top projects (including the top 10 demos for the bonus pool) and help rank audit work for improvements and vulnerabilities. Your vote steers how community rewards are distributed.","tagline":"Holders decide where rewards go.","product_once":"Ranking uses the community voting surface tied to this grant event.","path":"events rewards / vote-sdk patterns","audience":["public","internal"],"variants":["overview","workflows","descriptions"],"public_journey":true,"seq":[{"lane":"event-bringup","order":80,"phase":"H","phase_label":"Vote"},{"lane":"participant-audit","order":80,"phase":"H","phase_label":"Ranked"},{"lane":"participant-hack","order":80,"phase":"H","phase_label":"Vote"},{"lane":"participant-voter","order":80,"phase":"H","phase_label":"Vote"}],"degree":2,"kind_rank":1,"seq_order":80,"seq_phase":"H","seq_lane":"event-bringup","seq_phase_label":"Vote"},{"id":"part-help","label":"Get guidance","label_public":"Get guidance","label_internal":"Public helper agents","kind":"agent","status":"ready","description":"Public helpers guide without dumping secrets.","description_public":"Open-room helpers mostly answer questions and point to rooms, docs, and next steps. If they ask you to try again, wait a moment. Private security issues should not be posted in open rooms.","tagline":"Ask when you are stuck.","product_once":null,"path":"public agents","audience":["public","internal"],"variants":["overview","agents","workflows"],"public_journey":true,"seq":[{"lane":"event-bringup","order":55,"phase":"E","phase_label":"Compute"}],"degree":2,"kind_rank":6,"seq_order":55,"seq_phase":"E","seq_lane":"event-bringup","seq_phase_label":"Compute"}],"edges":[{"source":"event-task","target":"wf-event-bringup","rel":"indexes"},{"source":"event-task","target":"pack-hackathon","rel":"owns"},{"source":"event-task","target":"doc-provides","rel":"indexes"},{"source":"event-task","target":"doc-checklist","rel":"indexes"},{"source":"event-task","target":"doc-routes","rel":"indexes"},{"source":"event-task","target":"wf-compute-pulse","rel":"indexes"},{"source":"event-task","target":"tool-event-scripts","rel":"owns"},{"source":"grant-zk","target":"wf-auth-levels","rel":"narrates"},{"source":"grant-zk","target":"pack-hackathon","rel":"narrates"},{"source":"grant-zk","target":"wf-marketing","rel":"narrates"},{"source":"dep-map","target":"gen-tools","rel":"visualizes"},{"source":"gen-tools","target":"tool-dep-py","rel":"owns"},{"source":"gen-tools","target":"wf-dep-heal","rel":"drives"},{"source":"wf-event-bringup","target":"wf-spawn-buzz","rel":"includes"},{"source":"wf-event-bringup","target":"wf-cw-orch","rel":"includes"},{"source":"wf-event-bringup","target":"wf-s3-state","rel":"includes"},{"source":"wf-event-bringup","target":"wf-compute-pulse","rel":"includes"},{"source":"wf-cw-orch","target":"tool-cw-orch","rel":"uses"},{"source":"wf-cw-orch","target":"tool-dao-testing","rel":"uses"},{"source":"wf-cw-orch","target":"infra-chain-lab","rel":"targets"},{"source":"wf-s3-state","target":"infra-minio-s3","rel":"publishes"},{"source":"wf-spawn-buzz","target":"infra-buzz-relay","rel":"spawns"},{"source":"wf-spawn-buzz","target":"pack-hackathon","rel":"reads"},{"source":"wf-compute-pulse","target":"plane-wake","rel":"gates"},{"source":"wf-compute-pulse","target":"plane-spend","rel":"gates"},{"source":"wf-compute-pulse","target":"plane-authvm","rel":"gates"},{"source":"wf-compute-pulse","target":"doc-policy-freeze","rel":"claims"},{"source":"wf-compute-pulse","target":"plane-law","rel":"enforces"},{"source":"wf-marketing","target":"board-marketing","rel":"tracks"},{"source":"wf-marketing","target":"team-marketing","rel":"owns"},{"source":"wf-marketing","target":"doc-brand","rel":"uses"},{"source":"wf-marketing","target":"tool-playwright","rel":"uses"},{"source":"wf-auth-levels","target":"infra-sda","rel":"surfaces"},{"source":"wf-fv-synergy","target":"board-event-ops","rel":"tracks"},{"source":"wf-dep-heal","target":"agent-gd","rel":"owned_by"},{"source":"wf-dep-heal","target":"tool-dep-py","rel":"uses"},{"source":"plane-wake","target":"tool-buzz","rel":"implemented_in"},{"source":"plane-wake","target":"agent-public-read","rel":"limits"},{"source":"plane-spend","target":"infra-inference-edge","rel":"implemented_in"},{"source":"plane-authvm","target":"tool-oline","rel":"implemented_in"},{"source":"plane-law","target":"doc-policy-freeze","rel":"stated_in"},{"source":"infra-buzz-relay","target":"tool-buzz","rel":"runs"},{"source":"infra-hermes","target":"board-event-ops","rel":"hosts"},{"source":"infra-hermes","target":"board-marketing","rel":"hosts"},{"source":"infra-hermes","target":"board-gateway","rel":"hosts"},{"source":"infra-hermes","target":"agent-hermes-coord","rel":"runtime"},{"source":"infra-sda","target":"tool-playwright","rel":"observed_by"},{"source":"infra-chain-lab","target":"tool-dao-testing","rel":"deployed_by"},{"source":"infra-zot","target":"tool-oline","rel":"configured_by"},{"source":"infra-edge-cf","target":"infra-buzz-relay","rel":"fronts"},{"source":"infra-headscale","target":"plane-authvm","rel":"resonant"},{"source":"infra-inference-edge","target":"plane-spend","rel":"enforces"},{"source":"pack-hackathon","target":"team-infra-ops","rel":"defines"},{"source":"pack-hackathon","target":"team-marketing","rel":"defines"},{"source":"pack-hackathon","target":"team-grant","rel":"defines"},{"source":"pack-hackathon","target":"team-manifold","rel":"defines"},{"source":"pack-hackathon","target":"pub-welcome","rel":"defines"},{"source":"pack-hackathon","target":"pub-audit","rel":"defines"},{"source":"pack-hackathon","target":"pub-design","rel":"defines"},{"source":"team-infra-ops","target":"board-gateway","rel":"uses"},{"source":"team-infra-ops","target":"wf-compute-pulse","rel":"home"},{"source":"team-manifold","target":"event-task","rel":"indexes"},{"source":"team-marketing","target":"board-marketing","rel":"uses"},{"source":"pub-welcome","target":"agent-public-read","rel":"hosts"},{"source":"pub-audit","target":"agent-public-read","rel":"hosts"},{"source":"pub-design","target":"agent-public-read","rel":"hosts"},{"source":"agent-gd","target":"gen-tools","rel":"operates"},{"source":"agent-gd","target":"agent-gb","rel":"runs_on"},{"source":"agent-co","target":"agent-gd","rel":"routes"},{"source":"agent-infra","target":"infra-buzz-relay","rel":"operates"},{"source":"agent-infra","target":"infra-chain-lab","rel":"operates"},{"source":"agent-oline","target":"tool-oline","rel":"implements"},{"source":"agent-daodao","target":"infra-sda","rel":"implements"},{"source":"agent-cs","target":"agent-public-read","rel":"policies"},{"source":"agent-cs","target":"plane-wake","rel":"freezes_copy"},{"source":"agent-public-read","target":"plane-wake","rel":"gated_by"},{"source":"agent-public-read","target":"plane-spend","rel":"may_spend"},{"source":"board-gateway","target":"wf-compute-pulse","rel":"tracks"},{"source":"board-event-ops","target":"wf-event-bringup","rel":"tracks"},{"source":"board-event-ops","target":"wf-fv-synergy","rel":"tracks"},{"source":"doc-provides","target":"pack-hackathon","rel":"catalogs"},{"source":"doc-checklist","target":"wf-compute-pulse","rel":"ticks"},{"source":"doc-routes","target":"event-task","rel":"maps"},{"source":"dep-map","target":"event-task","rel":"inspires_ops_map"},{"source":"grant-zk","target":"event-task","rel":"extended_by"}],"notes":["Curated hand map — not auto-scraped from Cargo. Pair with dependency-map.html for crate SoT.","Hermes boards: mint only on groot (no dual-mint secrets from laptop).","wake ≠ spend ≠ AUTH-LEVELS product ladder.","Public grant UI: permissionless.money/zk desk; this page is the internal interactive ops twin."],"sequences":{"event-bringup":{"id":"event-bringup","label":"Event participation","description":"Participant-facing path for auditors, builders, and coinholder voters.","path":"crates/event-task/WORKFLOW.md","phases":[{"phase":"A","label":"Orient","orders":[10],"duration_weight":0.8,"moment":"start"},{"phase":"B","label":"Register","orders":[20],"duration_weight":1.0,"moment":"day 0"},{"phase":"C","label":"Connect","orders":[30],"duration_weight":1.2,"moment":"ongoing"},{"phase":"D","label":"Discover","orders":[40],"duration_weight":1.2,"moment":"ongoing"},{"phase":"E","label":"Compute & help","orders":[50,55],"duration_weight":1.1,"moment":"as needed"},{"phase":"F","label":"Audit","orders":[60],"duration_weight":1.3,"moment":"audit window"},{"phase":"G","label":"Build","orders":[70],"duration_weight":1.3,"moment":"hackathon window"},{"phase":"H","label":"Vote","orders":[80],"duration_weight":1.1,"moment":"ranking window"}],"story":"Orient → register → connect → discover work → use compute carefully → submit audit or hackathon work → holders vote on top projects for rewards.","label_public":"How to take part","label_internal":"Event participation workflow"},"compute-pulse":{"id":"compute-pulse","label":"Agent compute","description":"Wake → spend → cold evidence — dual-layer gates.","path":"crates/event-task/COMPUTE-INFRA-PULSE.md","phases":[{"phase":"H","label":"Pulse index","orders":[5],"duration_weight":0.5,"moment":"ref"},{"phase":"H0","label":"Rules freeze","orders":[10,12],"duration_weight":0.6,"moment":"pre"},{"phase":"H1","label":"Start a turn","orders":[20,23],"duration_weight":1.4,"moment":"each mention"},{"phase":"H2","label":"Burn credits","orders":[30,32],"duration_weight":1.4,"moment":"each call"},{"phase":"H3","label":"Prove membership","orders":[40,41],"duration_weight":0.9,"moment":"cold path"}],"story":"Policy → wake (try again) → spend (credits) → cold membership evidence.","label_public":"How helpers work","label_internal":"Agent compute"},"marketing":{"id":"marketing","label":"Media pipeline","description":"Transcript-first marketing coordination.","path":"docs/grant/zcash/participant-resources/WORKFLOW-MARKETING-MEDIA-PIPELINE.md","phases":[{"phase":"M0","label":"Public desk","orders":[5],"duration_weight":0.7,"moment":"always"},{"phase":"M1","label":"Pipeline","orders":[10,15],"duration_weight":1.2,"moment":"campaign"},{"phase":"M2","label":"Words & brand","orders":[20],"duration_weight":1.0,"moment":"pre-VO"},{"phase":"M3","label":"Capture","orders":[30],"duration_weight":1.1,"moment":"record"}],"story":"Desk → pipeline → brand/transcript → capture.","label_public":"Media journey","label_internal":"Media pipeline"},"deps":{"id":"deps","label":"Dependency plane","description":"Matrix heal → crate graph.","path":"crates/terp-rs/tools/gen-tools/_devops/STABLE.md","phases":[{"phase":"D1","label":"Heal","orders":[10,25],"duration_weight":1.3,"moment":"when broken"},{"phase":"D2","label":"Visualize","orders":[30],"duration_weight":0.9,"moment":"review"}],"story":"Heal matrix → see crate graph.","label_public":"Code dependencies","label_internal":"Dependency plane"},"auth":{"id":"auth","label":"Membership ladder","description":"Registration → DAO (product identity).","path":"docs/grant/zcash/AUTH-LEVELS-REGISTRATION-TO-DAO.md","phases":[{"phase":"L0","label":"Register","orders":[5,10],"duration_weight":1.2,"moment":"onboard"},{"phase":"L1","label":"Use the app","orders":[20],"duration_weight":1.4,"moment":"session"},{"phase":"L2","label":"Membership proof","orders":[30],"duration_weight":0.8,"moment":"cold"}],"story":"Registration ladder → FE surfaces → cold evidence.","label_public":"Joining the DAO","label_internal":"Membership ladder"},"participant-audit":{"id":"participant-audit","label":"Audit participant","label_public":"If you are auditing","story":"Register → rooms → discover targets → use compute carefully → submit findings → holders rank audit work.","description":"Path focused on community audit submissions.","path":"event audit track","phases":[{"phase":"B","label":"Register","orders":[20],"duration_weight":1.0,"moment":"start"},{"phase":"C","label":"Connect","orders":[30],"duration_weight":1.0,"moment":"ongoing"},{"phase":"D","label":"Discover","orders":[40],"duration_weight":1.2,"moment":"ongoing"},{"phase":"E","label":"Compute","orders":[50],"duration_weight":1.0,"moment":"as needed"},{"phase":"F","label":"Submit","orders":[60],"duration_weight":1.4,"moment":"deadline"},{"phase":"H","label":"Ranked","orders":[80],"duration_weight":1.0,"moment":"vote"}]},"participant-hack":{"id":"participant-hack","label":"Hackathon builder","label_public":"If you are building","story":"Register → rooms → discover briefs → use compute carefully → submit project → holders vote top demos.","description":"Path focused on design-space hackathon submissions.","path":"event hackathon track","phases":[{"phase":"B","label":"Register","orders":[20],"duration_weight":1.0,"moment":"start"},{"phase":"C","label":"Connect","orders":[30],"duration_weight":1.0,"moment":"ongoing"},{"phase":"D","label":"Discover","orders":[40],"duration_weight":1.2,"moment":"ongoing"},{"phase":"E","label":"Compute","orders":[50],"duration_weight":1.0,"moment":"as needed"},{"phase":"G","label":"Submit","orders":[70],"duration_weight":1.4,"moment":"deadline"},{"phase":"H","label":"Vote","orders":[80],"duration_weight":1.0,"moment":"vote"}]},"participant-voter":{"id":"participant-voter","label":"Coinholder voter","label_public":"If you vote on rewards","story":"Orient → register if required → discover submissions → vote top projects for reward distribution.","description":"ZecHub coinholder voters ranking top demos and audit work.","path":"events rewards ranking","phases":[{"phase":"A","label":"Orient","orders":[10],"duration_weight":0.8,"moment":"start"},{"phase":"B","label":"Register","orders":[20],"duration_weight":0.9,"moment":"if needed"},{"phase":"D","label":"Review slate","orders":[40],"duration_weight":1.2,"moment":"before vote"},{"phase":"H","label":"Vote","orders":[80],"duration_weight":1.5,"moment":"ranking window"}]}},"layout_modes":[{"id":"flow","label":"Journey","blurb":"Time-ordered path with flow arcs (default)."},{"id":"sequence","label":"By path","blurb":"Phase columns, compact."},{"id":"hierarchy","label":"By type","blurb":"Kind layers."},{"id":"force","label":"Organic","blurb":"Free force layout."}],"audiences":{"public":{"id":"public","label":"Participants","short":"Public","blurb":"Register, discover, submit, and vote — a clear path for participants.","page_title":"Your event journey","default_variant":"overview","default_layout":"flow","default_lane":"event-bringup","show_forces":true,"show_residuals":false,"verbose":false,"default_lane_only":true,"edge_mode":"flow","show_organic":false,"simplify":true,"lanes":["event-bringup","participant-audit","participant-hack","participant-voter"]},"internal":{"id":"internal","label":"Operators","short":"Team","blurb":"Workflow depth map — same elegant hierarchy style as the crate graph.","page_title":"Ops coordination map","default_variant":"workflows","default_layout":"flow","default_lane":"event-bringup","show_forces":true,"show_residuals":true,"verbose":true,"default_lane_only":false,"edge_mode":"flow+graph","show_organic":true,"simplify":false}},"notes_by_audience":{"public":["Start with **why this event exists**, then **register** so you can join rooms and later submit or vote.","**Auditors** submit findings; **builders** submit projects; **coinholder voters** rank the top work for rewards.","Sponsored compute is optional help with limits — use it for real work, not spam.","Discovery matters: find open targets and demos before you dive in."],"internal":["Curated hand map — pair with **crate dependency map** for Cargo SoT.","Hermes boards: mint only on **groot** (no dual-mint secrets from laptop).","wake ≠ spend ≠ AUTH-LEVELS product ladder.","Residuals stay soft: live-room soft-deny · B3 with keys · auth-vm product e2e.","Public grant UI is the narrative twin; this page is the coordination twin."]},"flow":{"event-bringup":[{"source":"event-task","target":"wf-event-bringup","rel":"then","kind":"same_phase","order_from":5,"order_to":8},{"source":"wf-event-bringup","target":"infra-edge-cf","rel":"then","kind":"next_phase","order_from":8,"order_to":10},{"source":"infra-edge-cf","target":"infra-headscale","rel":"then","kind":"same_phase","order_from":10,"order_to":15},{"source":"infra-headscale","target":"wf-spawn-buzz","rel":"then","kind":"next_phase","order_from":15,"order_to":20},{"source":"wf-spawn-buzz","target":"infra-buzz-relay","rel":"then","kind":"same_phase","order_from":20,"order_to":25},{"source":"infra-buzz-relay","target":"pack-hackathon","rel":"then","kind":"same_phase","order_from":25,"order_to":28},{"source":"pack-hackathon","target":"tool-oline","rel":"then","kind":"next_phase","order_from":28,"order_to":30},{"source":"tool-oline","target":"infra-sda","rel":"then","kind":"next_phase","order_from":30,"order_to":40},{"source":"infra-sda","target":"tool-playwright","rel":"then","kind":"same_phase","order_from":40,"order_to":45},{"source":"tool-playwright","target":"wf-cw-orch","rel":"then","kind":"next_phase","order_from":45,"order_to":50},{"source":"wf-cw-orch","target":"tool-cw-orch","rel":"then","kind":"same_phase","order_from":50,"order_to":52},{"source":"tool-cw-orch","target":"tool-dao-testing","rel":"then","kind":"same_phase","order_from":52,"order_to":54},{"source":"tool-dao-testing","target":"infra-chain-lab","rel":"then","kind":"same_phase","order_from":54,"order_to":56},{"source":"infra-chain-lab","target":"wf-s3-state","rel":"then","kind":"same_phase","order_from":56,"order_to":60},{"source":"wf-s3-state","target":"infra-minio-s3","rel":"then","kind":"same_phase","order_from":60,"order_to":62},{"source":"infra-minio-s3","target":"pack-hackathon","rel":"then","kind":"next_phase","order_from":62,"order_to":70},{"source":"pack-hackathon","target":"team-infra-ops","rel":"then","kind":"next_phase","order_from":70,"order_to":80},{"source":"team-infra-ops","target":"team-manifold","rel":"then","kind":"same_phase","order_from":80,"order_to":82},{"source":"team-manifold","target":"board-gateway","rel":"then","kind":"same_phase","order_from":82,"order_to":84},{"source":"board-gateway","target":"wf-compute-pulse","rel":"then","kind":"next_phase","order_from":84,"order_to":90},{"source":"wf-compute-pulse","target":"plane-wake","rel":"then","kind":"same_phase","order_from":90,"order_to":92},{"source":"plane-wake","target":"tool-buzz","rel":"then","kind":"same_phase","order_from":92,"order_to":93},{"source":"tool-buzz","target":"plane-spend","rel":"then","kind":"same_phase","order_from":93,"order_to":94},{"source":"plane-spend","target":"infra-inference-edge","rel":"then","kind":"same_phase","order_from":94,"order_to":95},{"source":"infra-inference-edge","target":"plane-authvm","rel":"then","kind":"same_phase","order_from":95,"order_to":96}],"compute-pulse":[{"source":"wf-compute-pulse","target":"doc-policy-freeze","rel":"then","kind":"next_phase","order_from":5,"order_to":10},{"source":"doc-policy-freeze","target":"plane-law","rel":"then","kind":"same_phase","order_from":10,"order_to":12},{"source":"plane-law","target":"plane-wake","rel":"then","kind":"next_phase","order_from":12,"order_to":20},{"source":"plane-wake","target":"tool-buzz","rel":"then","kind":"same_phase","order_from":20,"order_to":21},{"source":"tool-buzz","target":"agent-public-read","rel":"then","kind":"same_phase","order_from":21,"order_to":22},{"source":"agent-public-read","target":"agent-cs","rel":"then","kind":"same_phase","order_from":22,"order_to":23},{"source":"agent-cs","target":"plane-spend","rel":"then","kind":"next_phase","order_from":23,"order_to":30},{"source":"plane-spend","target":"infra-inference-edge","rel":"then","kind":"same_phase","order_from":30,"order_to":32},{"source":"infra-inference-edge","target":"plane-authvm","rel":"then","kind":"next_phase","order_from":32,"order_to":40},{"source":"plane-authvm","target":"tool-oline","rel":"then","kind":"same_phase","order_from":40,"order_to":41}],"marketing":[{"source":"grant-zk","target":"wf-marketing","rel":"then","kind":"next_phase","order_from":5,"order_to":10},{"source":"wf-marketing","target":"board-marketing","rel":"then","kind":"same_phase","order_from":10,"order_to":12},{"source":"board-marketing","target":"team-marketing","rel":"then","kind":"same_phase","order_from":12,"order_to":15},{"source":"team-marketing","target":"doc-brand","rel":"then","kind":"next_phase","order_from":15,"order_to":20},{"source":"doc-brand","target":"tool-playwright","rel":"then","kind":"next_phase","order_from":20,"order_to":30}],"deps":[{"source":"wf-dep-heal","target":"agent-gd","rel":"then","kind":"same_phase","order_from":10,"order_to":15},{"source":"agent-gd","target":"gen-tools","rel":"then","kind":"same_phase","order_from":15,"order_to":20},{"source":"gen-tools","target":"tool-dep-py","rel":"then","kind":"same_phase","order_from":20,"order_to":25},{"source":"tool-dep-py","target":"dep-map","rel":"then","kind":"next_phase","order_from":25,"order_to":30}],"auth":[{"source":"grant-zk","target":"wf-auth-levels","rel":"then","kind":"same_phase","order_from":5,"order_to":10},{"source":"wf-auth-levels","target":"infra-sda","rel":"then","kind":"next_phase","order_from":10,"order_to":20},{"source":"infra-sda","target":"plane-authvm","rel":"then","kind":"next_phase","order_from":20,"order_to":30}]},"viz":{"style":"hierarchy-depth","bg":"#0c1118","edge":"rgba(100,120,150,0.45)","spine":"rgba(94,176,229,0.75)","focus":"#5eb0e5","label":"rgba(232,238,247,0.92)","depth_label":"rgba(139,155,180,0.9)"},"public_flow":{"event-bringup":[{"source":"part-context","target":"part-register","rel":"then","kind":"next_phase"},{"source":"part-register","target":"part-rooms","rel":"then","kind":"next_phase"},{"source":"part-rooms","target":"part-discover","rel":"then","kind":"next_phase"},{"source":"part-discover","target":"part-inference","rel":"then","kind":"next_phase"},{"source":"part-inference","target":"part-help","rel":"then","kind":"same_phase"},{"source":"part-discover","target":"part-audit-submit","rel":"then","kind":"next_phase"},{"source":"part-discover","target":"part-hack-submit","rel":"then","kind":"next_phase"},{"source":"part-inference","target":"part-audit-submit","rel":"then","kind":"next_phase"},{"source":"part-inference","target":"part-hack-submit","rel":"then","kind":"next_phase"},{"source":"part-audit-submit","target":"part-holder-vote","rel":"then","kind":"next_phase"},{"source":"part-hack-submit","target":"part-holder-vote","rel":"then","kind":"next_phase"}],"compute-pulse":[{"source":"plane-wake","target":"plane-spend","rel":"then","kind":"next_phase"}],"marketing":[{"source":"grant-zk","target":"wf-marketing","rel":"then","kind":"next_phase"},{"source":"wf-marketing","target":"team-marketing","rel":"then","kind":"same_phase"},{"source":"team-marketing","target":"doc-brand","rel":"then","kind":"next_phase"},{"source":"doc-brand","target":"tool-playwright","rel":"then","kind":"next_phase"}],"auth":[{"source":"grant-zk","target":"wf-auth-levels","rel":"then","kind":"same_phase"},{"source":"wf-auth-levels","target":"infra-sda","rel":"then","kind":"next_phase"},{"source":"infra-sda","target":"plane-authvm","rel":"then","kind":"next_phase"}],"deps":[{"source":"wf-dep-heal","target":"gen-tools","rel":"then","kind":"same_phase"},{"source":"gen-tools","target":"dep-map","rel":"then","kind":"next_phase"}],"participant-audit":[{"source":"part-register","target":"part-rooms","rel":"then","kind":"next_phase"},{"source":"part-rooms","target":"part-discover","rel":"then","kind":"next_phase"},{"source":"part-discover","target":"part-inference","rel":"then","kind":"next_phase"},{"source":"part-inference","target":"part-audit-submit","rel":"then","kind":"next_phase"},{"source":"part-audit-submit","target":"part-holder-vote","rel":"then","kind":"next_phase"}],"participant-hack":[{"source":"part-register","target":"part-rooms","rel":"then","kind":"next_phase"},{"source":"part-rooms","target":"part-discover","rel":"then","kind":"next_phase"},{"source":"part-discover","target":"part-inference","rel":"then","kind":"next_phase"},{"source":"part-inference","target":"part-hack-submit","rel":"then","kind":"next_phase"},{"source":"part-hack-submit","target":"part-holder-vote","rel":"then","kind":"next_phase"}],"participant-voter":[{"source":"part-context","target":"part-register","rel":"then","kind":"next_phase"},{"source":"part-register","target":"part-discover","rel":"then","kind":"next_phase"},{"source":"part-discover","target":"part-holder-vote","rel":"then","kind":"next_phase"}]},"content_brief":{"audience":"public_participants_only","voice":"plain_activity_words_plus_real_name_once","stops":"5-7 milestones","ban_public":["file paths","deploy layout","DELTA","pack SoT","residual","Phase A","WakeAdmit","inference-edge","auth-vm","CreditHold","Headscale","groot","mbp","dual-mint","Hermes boards","claim evidence"],"chrome":"nuke_internal_paths_and_claim_meta_on_public","first_pass":"json_labels_and_guides","participant_roles":["auditor","hackathon_builder","coinholder_voter","general"],"public_milestones":["why","register","rooms","discover","inference","audit_submit","hack_submit","holder_vote","help"]}}</script>
+<script>
+(function () {
+  function showError(err) {
+    const el = document.getElementById('bootError');
+    if (!el) return;
+    el.style.display = 'block';
+    el.textContent = 'Graph failed:\n' + (err && err.stack ? err.stack : String(err));
+    console.error(err);
+  }
+  try {
+  const DATA = JSON.parse(document.getElementById('DATA').textContent);
+  const KINDS = DATA.kinds || {};
+  const STATUS = DATA.status || {};
+  const SEQUENCES = DATA.sequences || {};
+  const AUDIENCES = DATA.audiences || {};
+
+  const params = new URLSearchParams(location.search);
+  let audience = params.get('audience') === 'internal' ? 'internal' : 'public';
+  const EMBED = window.self !== window.top || params.get('embed') === '1';
+  document.documentElement.classList.toggle('is-embed', EMBED);
+  let variant = 'overview';
+  let layoutMode = 'flow';
+  let seqLane = 'event-bringup';
+  let laneFilterOnly = false;
+  let edgeMode = 'flow+graph'; // flow | flow+graph | graph
+  let selectedId = null;
+  let simNodes = [], simEdges = [], nodeIndex = {};
+  let running = true;
+  const cam = { x: 0, y: 0, k: 1 };
+  let drag = null, pan = null;
+  let invPane = 'items';
+
+  const F = {
+    charge: 240, linkLen: 100, linkStiff: 0.048, gravity: 0.0018,
+    radial: 0, orbitR: 200, collide: 10, damp: 0.84, maxV: 12,
+    hub: 0.30, hier: 0, dt: 1.0, arrows: true, labels: true, phaseBands: true,
+  };
+  const PRESETS = {
+    default:   { charge: 240, linkLen: 100, linkStiff: 48, gravity: 18, radial: 0,  collide: 10, damp: 84, hub: 30, hier: 0 },
+    cluster:   { charge: 150, linkLen: 58,  linkStiff: 90, gravity: 38, radial: 0,  collide: 14, damp: 88, hub: 55, hier: 0 },
+    explode:   { charge: 560, linkLen: 150, linkStiff: 16, gravity: 4,  radial: 0,  collide: 4,  damp: 78, hub: 10, hier: 0 },
+    orbit:     { charge: 200, linkLen: 110, linkStiff: 24, gravity: 6,  radial: 48, collide: 6,  damp: 85, hub: 15, hier: 0 },
+    hierarchy: { charge: 180, linkLen: 95,  linkStiff: 52, gravity: 14, radial: 0,  collide: 11, damp: 86, hub: 40, hier: 38 },
+  };
+
+  const canvas = document.getElementById('graphCanvas');
+  const wrap = document.getElementById('canvasWrap');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function cssSize() {
+    return {
+      w: Math.max(1, wrap.clientWidth || 800),
+      h: Math.max(1, wrap.clientHeight || 480),
+    };
+  }
+  function resizeMain() {
+    const { w, h } = cssSize();
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resizeMain();
+  window.addEventListener('resize', () => { resizeMain(); if (layoutMode !== 'force') applyPinnedLayout(false); fitView(); });
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => resizeMain()).observe(wrap);
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function renderMd(src) {
+    if (!src) return '';
+    const lines = String(src).replace(/\r\n/g, '\n').split('\n');
+    let html = '', inUl=false, inOl=false, inTable=false, inCode=false, codeBuf=[];
+    const closeLists = () => { if (inUl){html+='</ul>';inUl=false;} if(inOl){html+='</ol>';inOl=false;} };
+    const closeTable = () => { if (inTable){html+='</tbody></table>';inTable=false;} };
+    const inline = (t) => {
+      t = escapeHtml(t);
+      t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+      t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      return t;
+    };
+    for (const raw of lines) {
+      if (raw.trim().startsWith('```')) {
+        if (!inCode) { closeLists(); closeTable(); inCode=true; codeBuf=[]; }
+        else { html += '<pre><code>'+escapeHtml(codeBuf.join('\n'))+'</code></pre>'; inCode=false; }
+        continue;
+      }
+      if (inCode) { codeBuf.push(raw); continue; }
+      if (/^\|/.test(raw)) {
+        closeLists();
+        const cells = raw.split('|').slice(1,-1).map(c=>c.trim());
+        if (cells.every(c=>/^[-:]+$/.test(c))) continue;
+        if (!inTable) { html += '<table><thead><tr>'+cells.map(c=>'<th>'+inline(c)+'</th>').join('')+'</tr></thead><tbody>'; inTable=true; }
+        else html += '<tr>'+cells.map(c=>'<td>'+inline(c)+'</td>').join('')+'</tr>';
+        continue;
+      } else closeTable();
+      const h = raw.match(/^(#{1,3})\s+(.*)$/);
+      if (h) { closeLists(); html += '<h'+h[1].length+'>'+inline(h[2])+'</h'+h[1].length+'>'; continue; }
+      const ul = raw.match(/^[-*]\s+(.*)$/);
+      if (ul) { if(inOl){html+='</ol>';inOl=false;} if(!inUl){html+='<ul>';inUl=true;} html+='<li>'+inline(ul[1])+'</li>'; continue; }
+      const ol = raw.match(/^\d+\.\s+(.*)$/);
+      if (ol) { if(inUl){html+='</ul>';inUl=false;} if(!inOl){html+='<ol>';inOl=true;} html+='<li>'+inline(ol[1])+'</li>'; continue; }
+      if (!raw.trim()) { closeLists(); continue; }
+      closeLists(); html += '<p>'+inline(raw.trim())+'</p>';
+    }
+    closeLists(); closeTable();
+    if (inCode) html += '<pre><code>'+escapeHtml(codeBuf.join('\n'))+'</code></pre>';
+    return html;
+  }
+
+  function nodeLabel(n) {
+    if (audience === 'public') return n.label_public || n.label;
+    return n.label_internal || n.label;
+  }
+  function kindLabel(k) { return (KINDS[k] && KINDS[k].label) || k; }
+  function kindColor(k) { return (KINDS[k] && KINDS[k].color) || '#8b96b8'; }
+  function statusBadge(st) {
+    if (audience === 'public' && !AUDIENCES.public?.show_residuals && (st==='residual'||st==='lab')) {
+      return st === 'lab' ? '<span class="badge lab">preview</span>' : '';
+    }
+    const s = STATUS[st] || {};
+    const cls = st === 'lab' ? 'lab' : (s.badge || 'warn');
+    return `<span class="badge ${cls}">${st||'—'}</span>`;
+  }
+  function audProfile() { return AUDIENCES[audience] || AUDIENCES.internal || {}; }
+
+  function inAudience(n) {
+    const a = n.audience || ['public','internal'];
+    return a.includes(audience);
+  }
+  function inVariant(n) {
+    if (variant === 'overview') return true;
+    return (n.variants || []).includes(variant);
+  }
+  function laneEntry(n, lane) { return (n.seq || []).find(s => s.lane === lane) || null; }
+  function inLaneFilter(n) { return !laneFilterOnly || !!laneEntry(n, seqLane); }
+  function filteredNodes() {
+    const simplify = !!(audProfile().simplify);
+    return DATA.nodes.filter(n => {
+      if (!inAudience(n) || !inVariant(n) || !inLaneFilter(n)) return false;
+      if (simplify && !n.public_journey) return false;
+      return true;
+    });
+  }
+  function filteredEdges(nodes) {
+    const ids = new Set(nodes.map(n => n.id));
+    return DATA.edges.filter(e => ids.has(e.source) && ids.has(e.target));
+  }
+
+  /* UI chrome */
+  function applyAudienceChrome() {
+    const p = audProfile();
+    document.getElementById('pageTitle').textContent = p.page_title || 'Resource map';
+    document.getElementById('pageSub').textContent = p.blurb || DATA.subtitle || '';
+    document.querySelectorAll('#audienceSeg button').forEach(b => {
+      b.classList.toggle('active', b.dataset.aud === audience);
+    });
+    // Forces / Presets always stay in the toolbar (public + internal).
+    // Earlier public profile hid them and left the bar looking broken in fullscreen.
+    const forces = document.getElementById('ddForces');
+    const presets = document.getElementById('ddPresets');
+    const forceRow = document.getElementById('forceToolbarRow');
+    if (forces) forces.style.display = '';
+    if (presets) presets.style.display = '';
+    if (forceRow) forceRow.style.display = '';
+    edgeMode = p.edge_mode || (audience === 'public' ? 'flow' : 'flow+graph');
+    // Organic option visibility
+    const layoutSel = document.getElementById('layoutMode');
+    if (layoutSel) {
+      [...layoutSel.options].forEach(o => {
+        if (o.value === 'force') o.hidden = p.show_organic === false;
+      });
+    }
+    if (typeof p.default_lane_only === 'boolean') {
+      laneFilterOnly = p.default_lane_only;
+      const b = document.getElementById('btnShowSeqOnly');
+      if (b) b.textContent = laneFilterOnly ? 'Show all' : 'Lane only';
+    }
+    const link = document.getElementById('linkCompanion');
+    if (audience === 'public') {
+      link.href = './ops-resource-map.participants.md';
+      link.textContent = 'Participant guide';
+      document.getElementById('hintText').innerHTML = 'Left → right is <b>depth along the journey</b> (crate-map style). Soft curves connect steps. Click a stop for a short summary.';
+    } else {
+      link.href = './ops-resource-map.operators.md';
+      link.textContent = 'Operator guide';
+      document.getElementById('hintText').innerHTML = '<b>Journey</b> uses hierarchy-depth columns (same elegance as the crate graph). Inventory stays full for operators.';
+    }
+    document.getElementById('contextHint').textContent =
+      audience === 'public' ? 'What this is · your selection · simple notes' : 'Guide · selection · ops notes';
+    // URL without reload spam
+    try {
+      const u = new URL(location.href);
+      u.searchParams.set('audience', audience);
+      history.replaceState(null, '', u);
+    } catch (_) {}
+  }
+
+  document.getElementById('legend').innerHTML = Object.entries(KINDS).map(([k,v]) =>
+    `<span><i style="background:${v.color}"></i>${v.short||v.label}</span>`
+  ).join('');
+
+  const vBar = document.getElementById('variantBar');
+  const blurb = document.createElement('div');
+  blurb.className = 'variant-blurb'; blurb.id = 'variantBlurb';
+  (DATA.variants||[]).forEach(v => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = (audience === 'public' && v.label_public) ? v.label_public : v.label; b.dataset.variant = v.id;
+    if (v.id === variant) b.classList.add('active');
+    b.onclick = () => setVariant(v.id);
+    vBar.appendChild(b);
+  });
+  vBar.appendChild(blurb);
+
+  function fillLanes() {
+    const allow = audProfile().lanes;
+    const list = Object.values(SEQUENCES).filter(s => {
+      if (!allow || !allow.length) return true;
+      return allow.includes(s.id);
+    });
+    const opts = list.map(s => {
+      const lab = audience === 'public' && s.label_public ? s.label_public
+        : (s.label_internal || s.label);
+      return `<option value="${s.id}">${escapeHtml(lab)}</option>`;
+    }).join('');
+    const sel = document.getElementById('seqLane');
+    const sel2 = document.getElementById('seqLaneSide');
+    if (sel) sel.innerHTML = opts;
+    if (sel2) sel2.innerHTML = opts;
+    if (allow && allow.length && !allow.includes(seqLane)) {
+      seqLane = audProfile().default_lane || allow[0];
+    }
+    if (sel) sel.value = seqLane;
+    if (sel2) sel2.value = seqLane;
+  }
+  fillLanes();
+
+  const kindFilter = document.getElementById('kindFilter');
+  Object.entries(KINDS).forEach(([k,v]) => {
+    const o = document.createElement('option'); o.value=k; o.textContent=v.label;
+    kindFilter.appendChild(o);
+  });
+
+  document.getElementById('audienceSeg').onclick = (e) => {
+    const b = e.target.closest('button[data-aud]');
+    if (!b) return;
+    audience = b.dataset.aud;
+    applyAudienceChrome();
+    // refresh view chip labels for audience voice
+    document.querySelectorAll('#variantBar button[data-variant]').forEach(btn => {
+      const meta = (DATA.variants || []).find(x => x.id === btn.dataset.variant);
+      if (!meta) return;
+      btn.textContent = (audience === 'public' && meta.label_public) ? meta.label_public : meta.label;
+    });
+    const p2 = audProfile();
+    if (p2.default_layout) {
+      layoutMode = p2.default_layout;
+      document.getElementById('layoutMode').value = layoutMode;
+    }
+    if (p2.default_lane) { seqLane = p2.default_lane; fillLanes(); }
+    if (p2.default_variant) variant = p2.default_variant;
+    vBar.querySelectorAll('button[data-variant]').forEach(x =>
+      x.classList.toggle('active', x.dataset.variant === variant));
+    rebuildGraph();
+    refreshContext();
+    refreshInventory();
+  };
+
+  document.getElementById('invSeg').onclick = (e) => {
+    const b = e.target.closest('button[data-inv]');
+    if (!b) return;
+    invPane = b.dataset.inv;
+    document.querySelectorAll('#invSeg button').forEach(x => x.classList.toggle('active', x.dataset.inv === invPane));
+    document.querySelectorAll('.inv-pane').forEach(p => p.classList.toggle('active', p.id === 'inv-' + invPane));
+  };
+
+  document.getElementById('btnToggleSide').onclick = () => {
+    document.getElementById('sidePanel').classList.toggle('collapsed');
+    setTimeout(resizeMain, 220);
+  };
+
+  /* dropdowns — fixed position so panels sit above the graph canvas */
+  function placeDdPanel(btn, panel) {
+    if (!btn || !panel) return;
+    const r = btn.getBoundingClientRect();
+    const margin = 8;
+    const gap = 6;
+    const wasOpen = panel.classList.contains('open');
+    if (!wasOpen) {
+      panel.style.visibility = 'hidden';
+      panel.classList.add('open');
+    }
+    const pw = Math.max(panel.offsetWidth || 0, 280);
+    const ph = Math.max(panel.offsetHeight || 0, 200);
+    if (!wasOpen) {
+      panel.classList.remove('open');
+      panel.style.visibility = '';
+    }
+
+    let top = r.bottom + gap;
+    let left = panel.classList.contains('right') ? (r.right - pw) : r.left;
+    if (top + ph > window.innerHeight - margin && r.top - gap - ph > margin) {
+      top = r.top - gap - ph;
+    }
+    left = Math.max(margin, Math.min(left, window.innerWidth - pw - margin));
+    top = Math.max(margin, Math.min(top, window.innerHeight - Math.min(ph, window.innerHeight * 0.68) - margin));
+    panel.style.top = Math.round(top) + 'px';
+    panel.style.left = Math.round(left) + 'px';
+    panel.style.right = 'auto';
+  }
+  function closeAllDd(except) {
+    document.querySelectorAll('.dd-panel').forEach(p => { if (p!==except) p.classList.remove('open'); });
+    document.querySelectorAll('.dd-trigger').forEach(b => {
+      if (except && b.nextElementSibling === except) return;
+      b.setAttribute('aria-expanded','false');
+    });
+  }
+  function wireDd(btnId, panelId) {
+    const btn = document.getElementById(btnId), panel = document.getElementById(panelId);
+    if (!btn || !panel) return;
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = !panel.classList.contains('open');
+      closeAllDd(open ? panel : null);
+      if (open) {
+        placeDdPanel(btn, panel);
+        panel.classList.add('open');
+        requestAnimationFrame(() => placeDdPanel(btn, panel));
+      } else {
+        panel.classList.remove('open');
+      }
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  wireDd('btnPresets','panelPresets');
+  wireDd('btnForces','panelForces');
+  document.addEventListener('click', () => closeAllDd());
+  window.addEventListener('resize', () => closeAllDd());
+  window.addEventListener('scroll', () => closeAllDd(), true);
+  document.querySelectorAll('.dd-panel').forEach(p => p.addEventListener('click', e => e.stopPropagation()));
+
+  function refreshContext() {
+    const meta = (DATA.variants||[]).find(x => x.id === variant);
+    const guide = audience === 'public'
+      ? (meta && (meta.guide_public || meta.guide_md))
+      : (meta && (meta.guide_internal || meta.guide_md));
+    document.getElementById('guideMd').innerHTML = renderMd(guide || meta?.blurb || '');
+    const blurbEl = document.getElementById('variantBlurb');
+    if (blurbEl) {
+      blurbEl.textContent = audience === 'public'
+        ? ((meta && (meta.blurb_public || meta.blurb)) || '')
+        : ((meta && meta.blurb) || '');
+    }
+    const notes = (DATA.notes_by_audience && DATA.notes_by_audience[audience]) || DATA.notes || [];
+    document.getElementById('notesList').innerHTML = notes.map(n => `<li>${renderMd(n).replace(/^<p>|<\/p>$/g,'')}</li>`).join('');
+    const rel = DATA.related || {};
+    const keys = audience === 'public'
+      ? ['grant_zk_url']  // public: only public grant URL, no monorepo paths
+      : Object.keys(rel);
+    document.getElementById('relatedList').innerHTML = keys.filter(k => rel[k]).map(k => {
+      if (audience === 'public') {
+        return `<li><a href="${escapeHtml(rel[k])}" target="_blank" rel="noopener">Public grant page</a></li>`;
+      }
+      return `<li><code>${escapeHtml(k)}</code> · <a href="${escapeHtml(rel[k])}">${escapeHtml(rel[k])}</a></li>`;
+    }).join('');
+    if (selectedId) renderFocus(selectedId); else {
+      document.getElementById('secFocus').style.display = 'none';
+    }
+  }
+
+  function renderFocus(id) {
+    const n = DATA.nodes.find(x => x.id === id);
+    const sec = document.getElementById('secFocus');
+    const body = document.getElementById('focusBody');
+    if (!n || !inAudience(n)) {
+      sec.style.display = 'none'; return;
+    }
+    sec.style.display = '';
+    const out = DATA.edges.filter(e => e.source === id);
+    const inn = DATA.edges.filter(e => e.target === id);
+    const verbose = audProfile().verbose !== false;
+    const seqBits = (n.seq||[]).map(s =>
+      `<span class="badge phase">${escapeHtml(s.phase)}</span> ${escapeHtml(s.phase_label||s.lane)}`
+    ).join(' · ') || '—';
+    body.innerHTML = `
+      <h3>${escapeHtml(nodeLabel(n))}</h3>
+      <div style="display:flex;gap:0.3rem;flex-wrap:wrap;align-items:center">
+        <span class="kind-dot" style="background:${kindColor(n.kind)}"></span>
+        <span class="badge kind">${escapeHtml(kindLabel(n.kind))}</span>
+        ${statusBadge(n.status)}
+      </div>
+      <p>${escapeHtml((audience==='public' && n.description_public) ? n.description_public : (n.description||n.tagline||''))}</p>
+      ${(audience==='public' && n.product_once) ? `<p class="muted" style="font-size:0.78rem;margin:0.35rem 0 0">${escapeHtml(n.product_once)}</p>` : ''}
+      <div class="btn-row">
+        <button type="button" id="btnFocusPath">Show on journey</button>
+        <button type="button" id="btnFocusType">Layout by type</button>
+        <button type="button" id="btnClearFocus">Clear</button>
+      </div>
+      ${verbose ? `<dl>
+        <dt>id</dt><dd><code>${escapeHtml(n.id)}</code></dd>
+        <dt>path</dt><dd><code>${escapeHtml(n.path||'—')}</code></dd>
+        <dt>paths</dt><dd>${seqBits}</dd>
+      </dl>` : `<dl><dt>paths</dt><dd>${seqBits}</dd></dl>`}
+      <h4>Connects out (${out.length})</h4>
+      <ul>${out.slice(0, audience==='public'?12:30).map(e => {
+        const t = DATA.nodes.find(x => x.id === e.target);
+        if (t && !inAudience(t) && audience==='public') return '';
+        return `<li><a href="#" data-go="${e.target}">${escapeHtml(t?nodeLabel(t):e.target)}</a>
+          <span class="muted">· ${escapeHtml(e.rel||'')}</span></li>`;
+      }).join('') || '<li class="muted">none</li>'}</ul>
+      <h4>Connects in (${inn.length})</h4>
+      <ul>${inn.slice(0, audience==='public'?12:30).map(e => {
+        const s = DATA.nodes.find(x => x.id === e.source);
+        if (s && !inAudience(s) && audience==='public') return '';
+        return `<li><a href="#" data-go="${e.source}">${escapeHtml(s?nodeLabel(s):e.source)}</a>
+          <span class="muted">· ${escapeHtml(e.rel||'')}</span></li>`;
+      }).join('') || '<li class="muted">none</li>'}</ul>
+    `;
+    body.querySelectorAll('[data-go]').forEach(a => {
+      a.onclick = ev => { ev.preventDefault(); selectNode(a.dataset.go, true); };
+    });
+    document.getElementById('btnFocusPath').onclick = () => {
+      const pref = (n.seq && n.seq[0] && n.seq[0].lane) || seqLane;
+      setLane(pref);
+      layoutMode = 'flow';
+      document.getElementById('layoutMode').value = 'flow';
+      applyPinnedLayout(true); fitView(); setInv('path');
+    };
+    document.getElementById('btnFocusType').onclick = () => {
+      layoutMode = 'hierarchy';
+      document.getElementById('layoutMode').value = 'hierarchy';
+      applyPinnedLayout(true); fitView();
+    };
+    document.getElementById('btnClearFocus').onclick = () => {
+      selectedId = null; renderList(); document.getElementById('secFocus').style.display='none';
+    };
+  }
+
+  function setInv(name) {
+    invPane = name;
+    document.querySelectorAll('#invSeg button').forEach(x => x.classList.toggle('active', x.dataset.inv === name));
+    document.querySelectorAll('.inv-pane').forEach(p => p.classList.toggle('active', p.id === 'inv-' + name));
+  }
+
+  function renderList() {
+    const q = (document.getElementById('qNode').value||'').toLowerCase();
+    const kf = kindFilter.value, sf = document.getElementById('statusFilter').value;
+    let rows = filteredNodes();
+    if (kf) rows = rows.filter(n => n.kind === kf);
+    if (sf) rows = rows.filter(n => n.status === sf);
+    if (q) rows = rows.filter(n => (nodeLabel(n)+n.id+(n.description||'')+(n.path||'')).toLowerCase().includes(q));
+    rows.sort((a,b) => {
+      const ae = laneEntry(a, seqLane), be = laneEntry(b, seqLane);
+      if (ae && be) return ae.order - be.order;
+      if (ae) return -1; if (be) return 1;
+      return (b.degree||0)-(a.degree||0) || nodeLabel(a).localeCompare(nodeLabel(b));
+    });
+    document.getElementById('countNodes').textContent = rows.length + ' items';
+    document.getElementById('nodeList').innerHTML = rows.map(n => {
+      const e = laneEntry(n, seqLane);
+      return `<div class="item ${selectedId===n.id?'selected':''}" data-id="${n.id}">
+        <div class="row">
+          <span class="kind-dot" style="background:${kindColor(n.kind)}"></span>
+          <span class="title">${escapeHtml(nodeLabel(n))}</span>
+          ${statusBadge(n.status)}
+          ${e?`<span class="badge phase">${escapeHtml(e.phase)}</span>`:''}
+        </div>
+        <div class="tagline">${escapeHtml(n.tagline || n.description || '')}</div>
+      </div>`;
+    }).join('') || '<div class="empty">No items in this view.</div>';
+    document.querySelectorAll('#nodeList .item').forEach(el => {
+      el.onclick = () => selectNode(el.dataset.id, true);
+    });
+  }
+
+  function renderEdges() {
+    const edges = filteredEdges(filteredNodes());
+    const q = (document.getElementById('qEdge').value||'').toLowerCase();
+    let rows = edges;
+    if (q) rows = rows.filter(e => (e.source+e.target+(e.rel||'')).toLowerCase().includes(q));
+    document.getElementById('countEdges').textContent = rows.length + ' links';
+    document.getElementById('edgeList').innerHTML = rows.slice(0, 180).map(e => {
+      const s = DATA.nodes.find(n => n.id === e.source);
+      const t = DATA.nodes.find(n => n.id === e.target);
+      return `<div class="item" data-s="${e.source}">
+        <div class="row">
+          <span class="title" style="font-weight:600;font-size:0.76rem">${escapeHtml(s?nodeLabel(s):e.source)}</span>
+          <span class="muted">→</span>
+          <span class="title" style="font-weight:600;font-size:0.76rem">${escapeHtml(t?nodeLabel(t):e.target)}</span>
+          <span class="badge phase" style="margin-left:auto">${escapeHtml(e.rel||'')}</span>
+        </div>
+      </div>`;
+    }).join('') || '<div class="empty">No links.</div>';
+    document.querySelectorAll('#edgeList .item').forEach(el => {
+      el.onclick = () => selectNode(el.dataset.s, true);
+    });
+  }
+
+  function renderKinds() {
+    const nodes = filteredNodes();
+    const counts = {};
+    nodes.forEach(n => { counts[n.kind]=(counts[n.kind]||0)+1; });
+    document.getElementById('kindList').innerHTML = Object.entries(KINDS).map(([k,v]) => {
+      const c = counts[k]||0;
+      if (audience==='public' && c===0) return '';
+      return `<div class="kind-card">
+        <div class="row">
+          <span class="kind-dot" style="background:${v.color}"></span>
+          <strong style="font-size:0.8rem">${escapeHtml(v.label)}</strong>
+          <span class="muted" style="margin-left:auto;font-size:0.72rem">${c}</span>
+        </div>
+      </div>`;
+    }).join('') || '<div class="empty">No types.</div>';
+  }
+
+  function renderSequence() {
+    const seq = SEQUENCES[seqLane];
+    if (!seq) { document.getElementById('seqList').innerHTML = '<div class="empty">No path.</div>'; return; }
+    const lab = audience === 'public' && seq.label_public ? seq.label_public : (seq.label_internal || seq.label);
+    document.getElementById('seqMeta').textContent = lab;
+    const story = seq.story || seq.description || '';
+    document.getElementById('seqIntro').innerHTML = renderMd(
+      `**${lab}**\n\n${story}\n\n${seq.description && seq.description !== story ? seq.description : ''}`
+    );
+    const members = DATA.nodes.filter(n => inAudience(n) && inVariant(n) && laneEntry(n, seqLane));
+    const byPhase = {};
+    members.forEach(n => {
+      const e = laneEntry(n, seqLane);
+      const key = e.phase + '::' + e.phase_label;
+      if (!byPhase[key]) byPhase[key] = { phase: e.phase, label: e.phase_label, order: e.order, nodes: [] };
+      byPhase[key].nodes.push({ n, e });
+      byPhase[key].order = Math.min(byPhase[key].order, e.order);
+    });
+    let phases = Object.values(byPhase).sort((a,b)=>a.order-b.order);
+    if (seq.phases) {
+      const rank = Object.fromEntries(seq.phases.map((p,i)=>[p.phase,i]));
+      phases.sort((a,b)=>(rank[a.phase]??99)-(rank[b.phase]??99)||a.order-b.order);
+    }
+    document.getElementById('seqList').innerHTML = phases.map(p => `
+      <div class="seq-phase">
+        <h4><span class="badge phase">${escapeHtml(p.phase)}</span> ${escapeHtml(p.label)}
+          <span class="muted" style="font-weight:500;font-size:0.68rem">${p.nodes.length}</span></h4>
+        ${p.nodes.sort((a,b)=>a.e.order-b.e.order).map(({n,e}) => `
+          <div class="seq-step" data-id="${n.id}">
+            <div class="ord">${e.order}</div>
+            <div>
+              <div class="name">${escapeHtml(nodeLabel(n))}</div>
+              <div class="meta">${escapeHtml(kindLabel(n.kind))}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    `).join('') || '<div class="empty">Nothing on this path in the current view.</div>';
+    document.querySelectorAll('#seqList .seq-step').forEach(el => {
+      el.onclick = () => selectNode(el.dataset.id, true);
+    });
+  }
+
+  function refreshInventory() {
+    renderList(); renderEdges(); renderKinds(); renderSequence();
+    const nodes = filteredNodes();
+    document.getElementById('topStats').innerHTML = `
+      <div class="stat"><b>${nodes.length}</b><span>items</span></div>
+      <div class="stat"><b>${filteredEdges(nodes).length}</b><span>links</span></div>
+      <div class="stat"><b>${Object.keys(SEQUENCES).length}</b><span>paths</span></div>
+    `;
+  }
+
+  function selectNode(id, center) {
+    selectedId = id;
+    renderList();
+    renderFocus(id);
+    document.getElementById('sidePanel').classList.remove('collapsed');
+    if (center && nodeIndex[id]) {
+      const { w, h } = cssSize();
+      const n2 = nodeIndex[id];
+      cam.x = w/2 - cam.k * n2.x;
+      cam.y = h/2 - cam.k * n2.y;
+    }
+  }
+
+  function updateModePill() {
+    const lane = SEQUENCES[seqLane];
+    const laneName = laneLabel(lane);
+    let t = layoutMode === 'force' ? 'Organic'
+      : layoutMode === 'hierarchy' ? 'By type'
+      : layoutMode === 'flow' ? ('Journey · ' + laneName)
+      : ('Path · ' + laneName);
+    if (laneFilterOnly) t += ' · lane only';
+    const el = document.getElementById('modePill');
+    el.textContent = t;
+    el.classList.toggle('journey', layoutMode === 'flow' || layoutMode === 'sequence');
+  }
+  function laneLabel(lane) {
+    if (!lane) return seqLane;
+    if (audience === 'public' && lane.label_public) return lane.label_public;
+    if (audience === 'internal' && lane.label_internal) return lane.label_internal;
+    return lane.label || seqLane;
+  }
+
+  function applyPinnedLayout(relayoutSeed) {
+    const { w, h } = cssSize();
+    const padX = 72, padY = 56;
+    const elegant = layoutMode === 'flow' || layoutMode === 'sequence';
+
+    if (layoutMode === 'hierarchy') {
+      // Kind-rank columns — crate-map hierarchy style
+      const byLayer = new Map();
+      simNodes.forEach(n => {
+        const L = n.kind_rank ?? 5;
+        if (!byLayer.has(L)) byLayer.set(L, []);
+        byLayer.get(L).push(n);
+      });
+      const layers = [...byLayer.keys()].sort((a, b) => a - b);
+      const colW = Math.max(120, w / Math.max(3, layers.length + 0.5));
+      layers.forEach((L, li) => {
+        const col = byLayer.get(L);
+        col.sort((a, b) => (b.degree || 0) - (a.degree || 0) || nodeLabel(a).localeCompare(nodeLabel(b)));
+        const x = (li + 0.55) * colW;
+        col.forEach((n, i) => {
+          const y = ((i + 1) / (col.length + 1)) * Math.max(h * 0.92, col.length * 40);
+          n.tx = x; n.ty = y; n.pinned = true;
+          n.layer = li;
+          n.flowRole = 'type';
+          if (relayoutSeed || n.x == null) { n.x = x; n.y = y; }
+          n.vx = n.vy = 0;
+        });
+      });
+      wrap._phaseOrder = null;
+      wrap._flowBands = null;
+      wrap._layerMeta = layers.map((L, li) => ({
+        layer: li,
+        x: (li + 0.55) * colW,
+        label: kindLabel((byLayer.get(L)[0] || {}).kind) || String(L),
+      }));
+    } else if (elegant) {
+      // Journey as hierarchy depth: equal elegant columns by phase (crate-map DNA)
+      const seq = SEQUENCES[seqLane] || {};
+      const catalog = seq.phases || [];
+      const phaseIdx = {};
+      catalog.forEach((p, i) => { phaseIdx[p.phase] = i; });
+
+      const items = simNodes.map(n => {
+        const e = laneEntry(n, seqLane);
+        const ph = e ? e.phase : '·';
+        let layer = e && phaseIdx[e.phase] != null ? phaseIdx[e.phase] : 999;
+        if (!e) layer = 999;
+        return {
+          n, e,
+          order: e ? e.order : 9999,
+          phase: ph,
+          layer,
+          plabel: e
+            ? (e.phase_label || (catalog.find(c => c.phase === e.phase) || {}).label || e.phase)
+            : 'Related',
+          moment: e ? ((catalog.find(c => c.phase === e.phase) || {}).moment || '') : '',
+        };
+      });
+
+      // Only place nodes that belong on path when simplified; outside parked far right for operators
+      let layersUsed = [...new Set(items.filter(x => x.e).map(x => x.layer))].sort((a, b) => a - b);
+      if (!layersUsed.length) layersUsed = [0];
+      const hasOutside = items.some(x => !x.e) && !laneFilterOnly && !audProfile().simplify;
+      if (hasOutside) layersUsed = layersUsed.concat([1000]);
+
+      const colW = Math.max(130, w / Math.max(3, layersUsed.length + 0.35));
+      const layerToCol = Object.fromEntries(layersUsed.map((L, i) => [L, i]));
+
+      layersUsed.forEach((L) => {
+        const li = layerToCol[L];
+        const arr = items
+          .filter(x => (L === 1000 ? !x.e : x.layer === L))
+          .sort((a, b) => a.order - b.order || nodeLabel(a.n).localeCompare(nodeLabel(b.n)));
+        const x = (li + 0.55) * colW;
+        arr.forEach((item, i) => {
+          const n = item.n;
+          // even vertical rhythm like crate hierarchy
+          const y = ((i + 1) / (arr.length + 1)) * Math.max(h * 0.9, arr.length * 44);
+          n.tx = x; n.ty = y; n.pinned = true;
+          n.layer = li;
+          n.phaseKey = item.phase;
+          n.phaseLabel = item.plabel;
+          n.seqOrder = item.order;
+          n.flowRole = item.e ? 'on_path' : 'side';
+          n.isFocusLayer = li === 0;
+          if (relayoutSeed || n.x == null) { n.x = x; n.y = y; }
+          n.vx = n.vy = 0;
+        });
+      });
+
+      wrap._layerMeta = layersUsed.map((L) => {
+        const li = layerToCol[L];
+        const sample = items.find(x => (L === 1000 ? !x.e : x.layer === L));
+        return {
+          layer: li,
+          x: (li + 0.55) * colW,
+          phase: L === 1000 ? '·' : (sample && sample.phase) || '',
+          label: L === 1000 ? 'Related' : (sample ? sample.plabel : ''),
+          moment: L === 1000 ? '' : (sample ? sample.moment : ''),
+        };
+      });
+      wrap._phaseOrder = wrap._layerMeta;
+      wrap._flowBands = wrap._layerMeta;
+      wrap._journeyStory = seq.story || '';
+      wrap._vizStyle = (DATA.viz && DATA.viz.style) || 'hierarchy-depth';
+    } else {
+      simNodes.forEach(n => {
+        n.pinned = false; n.tx = n.ty = null; n.flowRole = null; n.layer = null;
+      });
+      wrap._phaseOrder = null;
+      wrap._flowBands = null;
+      wrap._layerMeta = null;
+    }
+
+    updateModePill();
+    const { w: ww, h: hh } = cssSize();
+    document.getElementById('graphStats').textContent =
+      simNodes.length + ' · ' + simEdges.length + ' · ' + layoutMode +
+      ((layoutMode === 'flow' || layoutMode === 'sequence') ? ' / ' + seqLane : '') +
+      ' · ' + Math.round(ww) + '×' + Math.round(hh);
+  }
+
+  function rebuildGraph() {
+    resizeMain();
+    const base = filteredNodes();
+    const prev = Object.fromEntries(simNodes.map(n => [n.id, n]));
+    const { w, h } = cssSize();
+    simNodes = base.map((n, i) => {
+      const p = prev[n.id];
+      return {
+        ...n,
+        x: p ? p.x : Math.cos(i*2.4)*160 + w/2,
+        y: p ? p.y : Math.sin(i*2.4)*130 + h/2,
+        vx:0, vy:0, pinned:false, tx:null, ty:null,
+      };
+    });
+    nodeIndex = Object.fromEntries(simNodes.map(n => [n.id, n]));
+    simEdges = filteredEdges(base)
+      .filter(e => nodeIndex[e.source] && nodeIndex[e.target])
+      .map(e => ({ ...e, s: nodeIndex[e.source], t: nodeIndex[e.target] }));
+    applyPinnedLayout(true);
+    running = true;
+    document.getElementById('btnPause').textContent = 'Pause';
+    requestAnimationFrame(fitView);
+  }
+
+  function setVariant(id) {
+    variant = id;
+    vBar.querySelectorAll('button[data-variant]').forEach(b => b.classList.toggle('active', b.dataset.variant===id));
+    rebuildGraph(); refreshContext(); refreshInventory();
+  }
+  function setLane(id) {
+    seqLane = id;
+    document.getElementById('seqLane').value = id;
+    document.getElementById('seqLaneSide').value = id;
+    if (layoutMode === 'sequence') applyPinnedLayout(true);
+    refreshInventory(); updateModePill();
+  }
+
+  document.getElementById('layoutMode').onchange = e => {
+    layoutMode = e.target.value; applyPinnedLayout(true); fitView();
+  };
+  document.getElementById('seqLane').onchange = e => setLane(e.target.value);
+  document.getElementById('seqLaneSide').onchange = e => setLane(e.target.value);
+  document.getElementById('btnApplySeqLayout').onclick = () => {
+    layoutMode = 'flow'; document.getElementById('layoutMode').value='flow';
+    applyPinnedLayout(true); fitView(); setInv('path');
+  };
+  document.getElementById('btnShowSeqOnly').onclick = () => {
+    laneFilterOnly = !laneFilterOnly;
+    document.getElementById('btnShowSeqOnly').textContent = laneFilterOnly ? 'Show all' : 'Lane only';
+    rebuildGraph(); refreshInventory();
+  };
+  document.getElementById('qNode').oninput = renderList;
+  kindFilter.onchange = renderList;
+  document.getElementById('statusFilter').onchange = renderList;
+  document.getElementById('qEdge').oninput = renderEdges;
+
+  function bindForce(id, apply) {
+    const el = document.getElementById(id);
+    const val = document.querySelector('.val[data-for="'+id+'"]');
+    const sync = () => { const v=+el.value; if(val) val.textContent=String(v); apply(v); };
+    el.addEventListener('input', sync); sync();
+  }
+  bindForce('fCharge', v => F.charge=v);
+  bindForce('fLinkLen', v => F.linkLen=v);
+  bindForce('fLinkStiff', v => F.linkStiff=v/1000);
+  bindForce('fGravity', v => F.gravity=v/10000);
+  bindForce('fRadial', v => F.radial=v/1000);
+  bindForce('fCollide', v => F.collide=v);
+  bindForce('fDamp', v => F.damp=v/100);
+  bindForce('fHub', v => F.hub=v/100);
+  bindForce('fHier', v => F.hier=v/1000);
+  document.getElementById('fArrows').onchange = e => F.arrows=e.target.checked;
+  document.getElementById('fLabels').onchange = e => F.labels=e.target.checked;
+  document.getElementById('fPhaseBands').onchange = e => F.phaseBands=e.target.checked;
+  function applyPreset(name) {
+    const p = PRESETS[name]; if (!p) return;
+    const map = { fCharge:p.charge,fLinkLen:p.linkLen,fLinkStiff:p.linkStiff,fGravity:p.gravity,fRadial:p.radial,fCollide:p.collide,fDamp:p.damp,fHub:p.hub,fHier:p.hier };
+    for (const [id,v] of Object.entries(map)) {
+      const el=document.getElementById(id); if(!el) continue; el.value=String(v); el.dispatchEvent(new Event('input'));
+    }
+    running=true; document.getElementById('btnPause').textContent='Pause';
+  }
+  document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => applyPreset(b.dataset.preset));
+  document.getElementById('btnPause').onclick = () => {
+    running=!running; document.getElementById('btnPause').textContent = running?'Pause':'Resume';
+  };
+  document.getElementById('btnJitter').onclick = () => {
+    if (layoutMode!=='force') return;
+    simNodes.forEach(n => { n.vx+=(Math.random()-0.5)*8; n.vy+=(Math.random()-0.5)*8; });
+    running=true;
+  };
+  document.getElementById('btnRelayout').onclick = () => {
+    if (layoutMode==='force') {
+      const {w,h}=cssSize();
+      simNodes.forEach((n,i) => {
+        n.x=Math.cos(i*2.399)*(110+(n.degree||1)*5)+w/2;
+        n.y=Math.sin(i*2.399)*(90+(n.degree||1)*4)+h/2;
+        n.vx=n.vy=0;
+      });
+    } else applyPinnedLayout(true);
+    running=true;
+  };
+  document.getElementById('btnFit').onclick = fitView;
+
+  function fitView() {
+    if (!simNodes.length) return;
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    for (const n of simNodes) {
+      minX=Math.min(minX,n.x); maxX=Math.max(maxX,n.x);
+      minY=Math.min(minY,n.y); maxY=Math.max(maxY,n.y);
+    }
+    const {w,h}=cssSize();
+    const bw=Math.max(40,maxX-minX), bh=Math.max(40,maxY-minY);
+    cam.k=Math.min(2.4, Math.max(0.28, 0.82*Math.min(w/bw,h/bh)));
+    cam.x=w/2 - cam.k*(minX+maxX)/2;
+    cam.y=h/2 - cam.k*(minY+maxY)/2;
+  }
+  function screenToWorld(sx,sy){ return {x:(sx-cam.x)/cam.k, y:(sy-cam.y)/cam.k}; }
+  function nodeRadius(n){ return 7+Math.min(13, Math.sqrt(n.degree||1)*2.1); }
+
+  function tick() {
+    if (running && !drag && simNodes.length) {
+      const n=simNodes.length, {w,h}=cssSize(), cx=w/2, cy=h/2, dt=F.dt;
+      const pin = layoutMode === 'hierarchy' || layoutMode === 'sequence' || layoutMode === 'flow';
+      if (!pin) {
+        for (let i=0;i<n;i++) for (let j=i+1;j<n;j++) {
+          const a=simNodes[i], b=simNodes[j];
+          let dx=a.x-b.x, dy=a.y-b.y, dist2=dx*dx+dy*dy+0.01, dist=Math.sqrt(dist2);
+          const ma=1+(a.degree||0)*F.hub*0.15, mb=1+(b.degree||0)*F.hub*0.15;
+          const f=(F.charge*dt)/dist2, fx=f*dx/dist, fy=f*dy/dist;
+          a.vx+=fx/ma; a.vy+=fy/ma; b.vx-=fx/mb; b.vy-=fy/mb;
+          if (F.collide>0) {
+            const minD=nodeRadius(a)+nodeRadius(b)+F.collide;
+            if (dist<minD) {
+              const push=(minD-dist)*0.35*dt, px=push*dx/dist, py=push*dy/dist;
+              a.vx+=px/ma; a.vy+=py/ma; b.vx-=px/mb; b.vy-=py/mb;
+            }
+          }
+        }
+        for (const e of simEdges) {
+          const a=e.s,b=e.t; let dx=b.x-a.x, dy=b.y-a.y, dist=Math.sqrt(dx*dx+dy*dy)+0.01;
+          const f=(dist-F.linkLen)*F.linkStiff*dt, fx=f*dx/dist, fy=f*dy/dist;
+          const ma=1+(a.degree||0)*F.hub*0.1, mb=1+(b.degree||0)*F.hub*0.1;
+          a.vx+=fx/ma; a.vy+=fy/ma; b.vx-=fx/mb; b.vy-=fy/mb;
+        }
+      }
+      for (const nd of simNodes) {
+        if (pin && nd.tx!=null) {
+          nd.vx+=(nd.tx-nd.x)*0.18*dt; nd.vy+=(nd.ty-nd.y)*0.18*dt;
+          nd.vx*=0.7; nd.vy*=0.7;
+        } else {
+          nd.vx-=(nd.x-cx)*F.gravity*dt; nd.vy-=(nd.y-cy)*F.gravity*dt;
+          if (F.radial>0) {
+            const dx=nd.x-cx, dy=nd.y-cy, dist=Math.sqrt(dx*dx+dy*dy)+0.01;
+            const want=F.orbitR+((nd.kind_rank||0)-4)*20;
+            const f=(dist-want)*F.radial*dt; nd.vx-=f*dx/dist; nd.vy-=f*dy/dist;
+          }
+          if (F.hier>0) nd.vy+=((cy+((nd.kind_rank||0)-4)*55)-nd.y)*F.hier*dt;
+          nd.vx*=F.damp; nd.vy*=F.damp;
+        }
+        const sp=Math.sqrt(nd.vx*nd.vx+nd.vy*nd.vy);
+        if (sp>F.maxV){ nd.vx*=F.maxV/sp; nd.vy*=F.maxV/sp; }
+        nd.x+=nd.vx*dt; nd.y+=nd.vy*dt;
+      }
+    }
+    draw();
+    
+  window.addEventListener('message', (ev) => {
+    const d = ev && ev.data;
+    if (!d || (d.type !== 'graph-refit' && d.type !== 'pm-graph-refit')) return;
+    try {
+      if (typeof resizeMain === 'function') resizeMain();
+      if (typeof fitView === 'function') fitView();
+      if (typeof applyPinnedLayout === 'function') applyPinnedLayout(false);
+    } catch (_) {}
+  });
+
+  requestAnimationFrame(tick);
+  }
+
+  function draw() {
+    const { w, h } = cssSize();
+    if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) resizeMain();
+    ctx.clearRect(0, 0, w, h);
+
+    // Crate-map atmosphere
+    const g0 = ctx.createRadialGradient(w * 0.4, h * 0.3, 0, w * 0.4, h * 0.3, Math.max(w, h) * 0.55);
+    g0.addColorStop(0, 'rgba(94,176,229,0.06)');
+    g0.addColorStop(1, 'rgba(12,17,24,0)');
+    ctx.fillStyle = '#0c1118';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = g0;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.translate(cam.x, cam.y);
+    ctx.scale(cam.k, cam.k);
+
+    const elegant = layoutMode === 'flow' || layoutMode === 'sequence' || layoutMode === 'hierarchy';
+    const simplify = !!(audProfile().simplify);
+    const layers = wrap._layerMeta || wrap._flowBands || [];
+
+    // Soft column guides (not heavy phase bands)
+    if (F.phaseBands && elegant && layers.length) {
+      for (let i = 0; i < layers.length; i++) {
+        const b = layers[i];
+        const x = b.x;
+        ctx.strokeStyle = 'rgba(42,54,72,0.55)';
+        ctx.lineWidth = 1 / cam.k;
+        ctx.setLineDash([4 / cam.k, 6 / cam.k]);
+        ctx.beginPath();
+        ctx.moveTo(x, -40);
+        ctx.lineTo(x, 4000);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // depth header like crate map
+        ctx.fillStyle = 'rgba(139,155,180,0.85)';
+        ctx.font = (10 / cam.k) + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+        ctx.textAlign = 'center';
+        const depthTag = b.phase && b.phase !== '·' ? String(b.phase) : (i === 0 ? '●' : String(i));
+        ctx.fillText(depthTag, x, 8 / cam.k);
+        if (b.label) {
+          ctx.fillStyle = 'rgba(232,238,247,0.55)';
+          ctx.font = (10.5 / cam.k) + 'px ui-sans-serif, system-ui, sans-serif';
+          const lab = b.label.length > 18 ? b.label.slice(0, 16) + '…' : b.label;
+          ctx.fillText(lab, x, 22 / cam.k);
+        }
+      }
+    }
+
+    // Edges — bezier like crate hierarchy (horizontal control points)
+    const simplifyFlow = simplify && DATA.public_flow && DATA.public_flow[seqLane];
+    const flowEdges = simplifyFlow
+      ? DATA.public_flow[seqLane]
+      : ((DATA.flow && DATA.flow[seqLane]) || []);
+    const flowSet = new Set(flowEdges.map(e => e.source + '→' + e.target));
+    const journey = layoutMode === 'flow' || layoutMode === 'sequence';
+    const showGraph = edgeMode === 'graph' || edgeMode === 'flow+graph' || layoutMode === 'force' || layoutMode === 'hierarchy';
+    const dimGraph = journey && edgeMode === 'flow+graph';
+
+    function bezierEdge(a, b, style, width) {
+      ctx.strokeStyle = style;
+      ctx.lineWidth = width / cam.k;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      const mx = (a.x + b.x) / 2;
+      ctx.moveTo(a.x, a.y);
+      ctx.bezierCurveTo(mx, a.y, mx, b.y, b.x, b.y);
+      ctx.stroke();
+    }
+
+    // support graph edges under spine
+    if (showGraph && !simplify) {
+      for (const e of simEdges) {
+        const key = e.source + '→' + e.target;
+        if (journey && flowSet.has(key)) continue;
+        const a = e.s, b = e.t;
+        if (!a || !b) continue;
+        const hi = selectedId && (a.id === selectedId || b.id === selectedId);
+        bezierEdge(
+          a, b,
+          hi ? 'rgba(94,176,229,0.45)' : (dimGraph ? 'rgba(100,120,150,0.18)' : 'rgba(100,120,150,0.42)'),
+          hi ? 1.6 : 1.15
+        );
+      }
+    }
+
+    // hierarchy layout: all simEdges as soft beziers
+    if (layoutMode === 'hierarchy') {
+      for (const e of simEdges) {
+        const a = e.s, b = e.t;
+        if (!a || !b) continue;
+        const hi = selectedId && (a.id === selectedId || b.id === selectedId);
+        bezierEdge(a, b, hi ? 'rgba(94,176,229,0.55)' : 'rgba(100,120,150,0.48)', hi ? 1.5 : 1.2);
+      }
+    }
+
+    // Journey spine (then…) — crate elegance + teal focus
+    if (journey) {
+      for (const fe of flowEdges) {
+        const a = nodeIndex[fe.source], b = nodeIndex[fe.target];
+        if (!a || !b) continue;
+        const hi = selectedId && (a.id === selectedId || b.id === selectedId);
+        bezierEdge(
+          a, b,
+          hi ? 'rgba(94,176,229,0.95)' : 'rgba(94,176,229,0.72)',
+          hi ? 2.4 : 1.85
+        );
+        if (F.arrows) {
+          const ang = Math.atan2(b.y - a.y, b.x - a.x);
+          // end tangent for cubic with horizontal controls ≈ horizontal then to b
+          const tAng = Math.atan2(b.y - a.y, Math.max(40, Math.abs(b.x - a.x) * 0.35));
+          const br = nodeRadius(b);
+          const ex = b.x - Math.cos(tAng) * (br + 2);
+          const ey = b.y - Math.sin(tAng) * (br + 2);
+          const as = 6.5 / cam.k;
+          ctx.beginPath();
+          ctx.moveTo(ex, ey);
+          ctx.lineTo(ex - as * Math.cos(tAng - 0.4), ey - as * Math.sin(tAng - 0.4));
+          ctx.lineTo(ex - as * Math.cos(tAng + 0.4), ey - as * Math.sin(tAng + 0.4));
+          ctx.closePath();
+          ctx.fillStyle = hi ? 'rgba(94,176,229,0.95)' : 'rgba(94,176,229,0.75)';
+          ctx.fill();
+        }
+      }
+    } else if (F.arrows && layoutMode === 'force') {
+      for (const e of simEdges) {
+        const a = e.s, b = e.t;
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const br = nodeRadius(b);
+        const ex = b.x - dx / dist * (br + 2);
+        const ey = b.y - dy / dist * (br + 2);
+        const ang = Math.atan2(dy, dx);
+        const as = 6 / cam.k;
+        ctx.beginPath();
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - as * Math.cos(ang - 0.4), ey - as * Math.sin(ang - 0.4));
+        ctx.lineTo(ex - as * Math.cos(ang + 0.4), ey - as * Math.sin(ang + 0.4));
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(100,120,150,0.5)';
+        ctx.fill();
+      }
+    }
+
+    // Nodes — crate hierarchy look: focus layer larger cyan, others status/kind
+    for (const n of simNodes) {
+      const focus = n.layer === 0 || n.isFocusLayer;
+      const side = n.flowRole === 'side';
+      const r = focus ? 13 : (side ? 7.5 : 9.5);
+      const sel = n.id === selectedId;
+      const col = focus
+        ? '#5eb0e5'
+        : (side ? 'rgba(90,109,133,0.85)' : kindColor(n.kind));
+
+      if (sel) {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r + 6 / cam.k, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(94,176,229,0.16)';
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.globalAlpha = side ? 0.55 : 0.95;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = (sel ? 2 : 1.1) / cam.k;
+      ctx.strokeStyle = sel ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)';
+      ctx.stroke();
+
+      // depth index above node (crate style ↑↓ layer)
+      if (elegant && n.layer != null && !simplify) {
+        ctx.fillStyle = 'rgba(139,155,180,0.9)';
+        ctx.font = (9 / cam.k) + 'px ui-monospace, Menlo, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(n.layer), n.x, n.y - r - 5 / cam.k);
+      } else if (elegant && simplify && n.phaseKey && n.phaseKey !== '·') {
+        ctx.fillStyle = 'rgba(139,155,180,0.85)';
+        ctx.font = (9 / cam.k) + 'px ui-monospace, Menlo, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(n.phaseKey), n.x, n.y - r - 5 / cam.k);
+      }
+
+      if (F.labels || sel || elegant || cam.k > 1.0) {
+        ctx.fillStyle = sel ? 'rgba(232,238,247,0.98)' : 'rgba(232,238,247,0.9)';
+        ctx.font = (11 / cam.k) + 'px ui-sans-serif, system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        const label = nodeLabel(n);
+        const max = simplify ? 20 : 22;
+        const t = label.length > max ? label.slice(0, max - 1) + '…' : label;
+        ctx.fillText(t, n.x, n.y + r + 10 / cam.k);
+      }
+    }
+    ctx.restore();
+
+    if (!simNodes.length) {
+      ctx.fillStyle = 'rgba(139,155,180,0.85)';
+      ctx.font = '14px ui-sans-serif, system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(simplify ? 'No stops on this journey' : 'No nodes in this view', w / 2, h / 2);
+    }
+  }
+
+  function hitTest(sx,sy) {
+    const w=screenToWorld(sx,sy); let best=null, bestD=Infinity;
+    for (const n of simNodes) {
+      const d=Math.hypot(n.x-w.x,n.y-w.y);
+      if (d<nodeRadius(n)+4 && d<bestD){ best=n; bestD=d; }
+    }
+    return best;
+  }
+  canvas.addEventListener('pointerdown', e => {
+    canvas.setPointerCapture(e.pointerId);
+    const rect=canvas.getBoundingClientRect();
+    const hit=hitTest(e.clientX-rect.left, e.clientY-rect.top);
+    if (hit) { drag={id:hit.id}; selectNode(hit.id,false); }
+    else pan={x:e.clientX,y:e.clientY,cx:cam.x,cy:cam.y};
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (drag) {
+      const n=nodeIndex[drag.id]; if(!n) return;
+      const rect=canvas.getBoundingClientRect();
+      const w=screenToWorld(e.clientX-rect.left, e.clientY-rect.top);
+      n.x=w.x; n.y=w.y; n.vx=n.vy=0;
+      if (n.pinned) { n.tx=n.x; n.ty=n.y; }
+    } else if (pan) {
+      cam.x=pan.cx+(e.clientX-pan.x); cam.y=pan.cy+(e.clientY-pan.y);
+    }
+  });
+  canvas.addEventListener('pointerup', () => { drag=null; pan=null; });
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const rect=canvas.getBoundingClientRect();
+    const sx=e.clientX-rect.left, sy=e.clientY-rect.top;
+    const before=screenToWorld(sx,sy);
+    cam.k=Math.min(3.5, Math.max(0.2, cam.k*(e.deltaY>0?0.92:1.08)));
+    const after=screenToWorld(sx,sy);
+    cam.x+=(after.x-before.x)*cam.k; cam.y+=(after.y-before.y)*cam.k;
+  }, {passive:false});
+
+  // boot
+  applyAudienceChrome();
+  const p = audProfile();
+  if (p.default_layout) { layoutMode = p.default_layout; document.getElementById('layoutMode').value = layoutMode; }
+  edgeMode = p.edge_mode || edgeMode;
+  if (typeof p.default_lane_only === 'boolean') laneFilterOnly = p.default_lane_only;
+  if (p.default_lane) { seqLane = p.default_lane; fillLanes(); }
+  setVariant(p.default_variant || 'overview');
+  requestAnimationFrame(tick);
+  setTimeout(() => { resizeMain(); rebuildGraph(); refreshContext(); refreshInventory(); }, 50);
+  setTimeout(() => { resizeMain(); fitView(); }, 200);
+
+  } catch (err) { showError(err); }
+})();
+</script>
+</body>
+</html>

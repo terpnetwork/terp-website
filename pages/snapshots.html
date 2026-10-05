@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/nav-guard.js">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Resources | Terp Network</title>
 <meta name="description" content="Snapshots, installer, upgrades, and terpd releases for Terp Network.">
@@ -13,6 +18,11 @@
 <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
 <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
 <link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script>
+<script type="module" src="/lib/section-shield.js"></script>
 
 <style>
 .main {
@@ -32,25 +42,28 @@
 .res-panel[hidden] { display: none !important; }
 body.graphs-open { overflow: hidden; }
 .page-title {
-    font-size: clamp(2.1rem, 4.2vw, 2.7rem);
-    font-weight: 500;
-    color: #cfffcf;
+    font-size: var(--tn-size-display);
+    font-weight: var(--tn-weight-display);
+    color: var(--tn-mint);
     text-align: center;
     margin-bottom: 0.45rem;
+    letter-spacing: var(--tn-track-display);
+    font-family: var(--tn-font-display);
 }
 .page-subtitle {
-    font-size: 1.1rem;
-    color: #ffffda;
+    font-size: var(--tn-size-kicker);
+    color: var(--tn-kicker);
     text-shadow: 0 0 3px rgba(71, 50, 102, 0.9);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: var(--tn-track-label);
     text-align: center;
     margin-bottom: 2rem;
     line-height: 1.5;
+    font-weight: var(--tn-font-weight-medium);
 }
 .lead {
     font-size: 1.15rem;
-    color: #d2d3d8;
+    color: var(--tn-text);
     line-height: 1.65;
     text-align: center;
     margin: 0 auto 2rem;
@@ -58,62 +71,63 @@ body.graphs-open { overflow: hidden; }
 }
 .section-label {
     font-size: 0.9rem;
-    letter-spacing: 0.1em;
+    letter-spacing: var(--tn-track-label);
     text-transform: uppercase;
-    color: #bd93f9;
+    color: var(--tn-purple);
     margin: 1.75rem 0 0.75rem;
     text-align: left;
     width: 100%;
 }
 .tabs-row {
-    display: flex;
-    gap: 0.45rem;
-    margin-bottom: 1rem;
-    width: 100%;
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: 1rem; width: 100%;
 }
 .tab-btn {
-    flex: 1;
-    padding: 0.6rem;
-    border-radius: 8px;
-    border: 1px solid rgba(152, 232, 193, 0.2);
-    background: transparent;
-    color: #6272a4;
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 2.25rem; padding: 0.36rem 0.7rem;
+    border-radius: var(--tn-radius-ctl, 2px);
+    border: 1px solid rgb(var(--tn-teal-rgb) / 0.45);
+    background: transparent; color: var(--tn-text-bright, var(--tn-text));
+    font-family: var(--tn-font, inherit); font-size: 0.88rem;
+    font-weight: var(--tn-font-weight-medium, 500);
+    letter-spacing: var(--tn-track-nav, 0.01em); line-height: 1.25;
+    cursor: pointer; white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
+.tab-btn:hover { color: var(--tn-mint); border-color: var(--tn-teal); background: rgb(var(--tn-teal-rgb) / 0.06); }
 .tab-btn.active {
-    color: #98e8c1;
-    border-color: rgba(152, 232, 193, 0.4);
-    background: rgba(152, 232, 193, 0.1);
+    color: var(--tn-teal); border-color: rgb(var(--tn-teal-rgb) / 0.6); background: transparent;
 }
+.tab-btn:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+.res-group.is-flat { margin-top: 0.5rem; }
+.res-group.is-flat h4 { display: none; }
+.as-chains { margin-top: 0.35rem; }
 .muted {
     font-size: 0.98rem;
-    color: #6272a4;
+    color: var(--tn-text-dim);
     line-height: 1.5;
     margin-top: 0.5rem;
 }
 .state-status {
     font-size: 0.95rem;
-    color: #98e8c1;
+    color: var(--tn-teal);
     margin-top: 0.5rem;
 }
-.state-status.err { color: #fe7d7d; }
+.state-status.err { color: var(--tn-coral); }
 .res-head { text-align: center; width: 100%; margin-bottom: 0.35rem; }
 .res-title-row {
     display: flex; align-items: center; justify-content: center; gap: 0.5rem;
 }
 .res-info {
     width: 28px; height: 28px; border-radius: 50%;
-    border: 1px solid rgba(152, 232, 193, 0.35);
-    background: rgba(152, 232, 193, 0.08);
-    color: #98e8c1; font-size: 0.85rem; font-weight: 600;
+    border: 1px solid rgb(var(--tn-teal-rgb) / 0.35);
+    background: rgb(var(--tn-teal-rgb) / 0.08);
+    color: var(--tn-teal); font-size: 0.85rem; font-weight: 600;
     cursor: pointer; line-height: 1; font-family: inherit;
 }
-.res-info:hover { background: rgba(152, 232, 193, 0.18); }
+.res-info:hover { background: rgb(var(--tn-teal-rgb) / 0.18); }
 .res-desc {
-    font-size: 1.05rem; color: #d2d3d8; line-height: 1.6;
+    font-size: 1.05rem; color: var(--tn-text); line-height: 1.6;
     text-align: center; max-width: 34rem; margin: 0.35rem auto 1.1rem;
 }
 .res-layout {
@@ -128,17 +142,17 @@ body.graphs-open { overflow: hidden; }
     width: 100%;
     height: calc(100vh - 11rem);
     min-height: 32rem;
-    border: 1px solid rgba(152, 232, 193, 0.16);
-    border-radius: 12px;
+    border: 0; border-radius: 0;
     overflow: hidden;
-    background: #000;
+    background: transparent;
 }
 .graph-frame {
     display: block;
     width: 100%;
     height: 100%;
     border: 0;
-    background: #000;
+    background: transparent;
+    color-scheme: inherit;
 }
 .res-side {
     display: flex;
@@ -155,8 +169,8 @@ body.graphs-open { overflow: hidden; }
     border: 1px solid transparent;
 }
 .res-side-item.active {
-    border-color: rgba(152,232,193,0.35);
-    background: rgba(152,232,193,0.1);
+    border-color: rgb(var(--tn-teal-rgb) / 0.35);
+    background: rgb(var(--tn-teal-rgb) / 0.1);
 }
 .res-side-item.is-blur { opacity: 0.5; }
 .res-side a {
@@ -166,10 +180,10 @@ body.graphs-open { overflow: hidden; }
     font-family: inherit;
     font-size: 0.92rem;
     font-weight: 500;
-    color: var(--tn-text, #d2d3d8);
+    color: var(--tn-text, var(--tn-text));
 }
-.res-side-item.active a { color: var(--tn-mint, #cfffcf); }
-.res-side a:hover { color: var(--tn-teal, #98e8c1); }
+.res-side-item.active a { color: var(--tn-mint, var(--tn-mint)); }
+.res-side a:hover { color: var(--tn-teal, var(--tn-teal)); }
 .res-side .res-info {
     width: 22px; height: 22px; font-size: 0.75rem; flex-shrink: 0; margin-right: 0.35rem;
 }
@@ -186,77 +200,141 @@ body.graphs-open { overflow: hidden; }
 .res-blur-note {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 2; pointer-events: none;
-    color: #ffffda; letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.85rem;
+    color: var(--tn-kicker); letter-spacing: var(--tn-track-label); text-transform: uppercase; font-size: 0.85rem;
 }
 .res-info-overlay {
     display: none; position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.65); align-items: center; justify-content: center; padding: 1rem;
+    align-items: center; justify-content: center; padding: 1.25rem;
+    background: rgb(var(--tn-canvas-rgb, var(--tn-shade-rgb)) / 0.55);
 }
 .res-info-overlay.open { display: flex; }
 .res-info-modal {
-    max-width: 460px; width: 100%;
-    background: rgba(10,10,15,0.94);
-    border: 1px solid rgba(152,232,193,0.2);
-    border-radius: 12px; padding: 1.35rem 1.45rem; color: #d2d3d8;
-    font-size: 1rem; line-height: 1.6;
+    max-width: 32rem; width: 100%;
+    max-height: calc(100vh - 2.5rem); max-height: calc(100dvh - 2.5rem); overflow-y: auto; overscroll-behavior: contain;
+    background: transparent; border: 0; border-radius: 0;
+    padding: 0.25rem 0.15rem 0.5rem; color: var(--tn-text);
+    font-family: var(--tn-font); font-size: 0.98rem; line-height: 1.6;
+    text-shadow: var(--tnw-halo, 0 0 10px rgb(var(--tn-canvas-rgb) / .85));
 }
-.res-info-modal h3 { color: #cfffcf; margin: 0 0 0.7rem; font-size: 1.15rem; font-weight: 500; }
+.res-info-modal .ri-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
+    margin: 0 0 0.85rem;
+}
+.res-info-modal h3 {
+    color: var(--tn-mint); margin: 0; font-size: 1.35rem; font-weight: var(--tn-font-weight-medium, 500);
+    letter-spacing: -0.02em; line-height: 1.25;
+}
 .res-info-modal p { margin: 0 0 0.7rem; }
-.res-info-modal ul { margin: 0 0 0.85rem; padding: 0 0 0 1.1rem; }
-.res-info-modal li { margin: 0.25rem 0; }
-.res-info-modal .close-info {
-    width: 100%; padding: 0.55rem; border-radius: 6px;
-    border: 1px solid rgba(152,232,193,0.3);
-    background: rgba(152,232,193,0.1); color: #98e8c1;
-    cursor: pointer; font-family: inherit;
+.res-info-modal .ri-lede { font-size: 1.05rem; line-height: 1.55; margin: 0 0 1rem; color: var(--tn-text); }
+.res-info-modal .ri-foot { font-size: 0.88rem; color: var(--tnw-ink-dim, var(--tn-text-muted)); margin: 1rem 0 0; }
+.res-info-modal dl.ri-stack {
+    display: grid; grid-template-columns: minmax(6.5rem, 28%) 1fr; gap: 0.55rem 1rem;
+    margin: 0 0 0.25rem; font-size: 0.95rem;
 }
-.snap-lead { font-size: 1.08rem; color: #d2d3d8; line-height: 1.6; margin: 0 0 1.25rem; }
-.snap-blurb { font-size: 0.98rem; color: #d2d3d8; line-height: 1.55; margin: 0 0 0.85rem; }
+.res-info-modal dl.ri-stack dt { margin: 0; font-weight: 600; color: var(--tn-mint); }
+.res-info-modal dl.ri-stack dd { margin: 0; color: var(--tn-text); }
+.res-info-modal .ri-section { margin: 1.1rem 0 0; }
+.res-info-modal .ri-section h4 {
+    margin: 0 0 0.35rem; font-size: 0.78rem; font-weight: 600; letter-spacing: var(--tn-track-label, 0.04em);
+    text-transform: uppercase; color: var(--tn-teal);
+}
+.res-info-modal .close-info {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    min-height: 2.25rem; padding: 0.36rem 0.7rem;
+    font-family: var(--tn-font); font-size: 0.88rem; font-weight: var(--tn-font-weight-medium, 500);
+    letter-spacing: var(--tn-track-nav, 0.01em); line-height: 1.25;
+    border-radius: var(--tn-radius-ctl, 2px);
+    border: 1px solid rgb(var(--tn-teal-rgb) / 0.45);
+    background: transparent; color: var(--tn-text-bright, var(--tn-text));
+    cursor: pointer; white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.res-info-modal .close-info:hover { color: var(--tn-mint); border-color: var(--tn-teal); background: rgb(var(--tn-teal-rgb) / 0.06); }
+.res-info-modal .close-info:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+@media (max-width: 599px) {
+  .res-info-modal dl.ri-stack { grid-template-columns: 1fr; gap: 0.15rem; }
+  .res-info-modal dl.ri-stack dd { margin-bottom: 0.55rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .res-info-modal .close-info { transition: none; }
+}
+.snap-lead { font-size: 1.08rem; color: var(--tn-text); line-height: 1.6; margin: 0 0 1.25rem; }
+.snap-blurb { font-size: 0.98rem; color: var(--tn-text); line-height: 1.55; margin: 0 0 0.85rem; }
 .snap-height {
-    font-size: clamp(1.45rem, 3vw, 1.85rem); font-weight: 500; color: #cfffcf;
+    font-size: clamp(1.45rem, 3vw, 1.85rem); font-weight: 500; color: var(--tn-mint);
     margin: 0 0 0.85rem; letter-spacing: -0.02em;
 }
 .snap-facts { margin-top: 0.25rem; }
 .snap-file { margin: 0.65rem 0 0; }
 .snap-run { margin-top: 1.5rem; }
-.snap-run h3 { color: #cfffcf; font-size: 1.25rem; margin: 0 0 0.5rem; }
+.snap-run h3 { color: var(--tn-mint); font-size: 1.25rem; margin: 0 0 0.5rem; }
 .snap-run-tabs { display: flex; gap: 0.4rem; margin: 0.75rem 0 0.65rem; }
 .res-kicker {
-    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
-    color: #bd93f9; margin: 0 0 0.35rem;
+    font-size: var(--tn-size-label); letter-spacing: var(--tn-track-label); text-transform: uppercase;
+    color: var(--tn-purple); margin: 0 0 0.35rem;
 }
-.res-note { color: #a0a8c0; line-height: 1.55; max-width: 68ch; margin: 0 0 0.75rem; }
-.res-note a { color: #98e8c1; }
+.res-note { color: var(--tn-text-muted); line-height: 1.55; max-width: 68ch; margin: 0 0 0.75rem; }
+.res-note a { color: var(--tn-teal); }
 .res-pill {
-    display: inline-block; border: 1px solid rgba(152,232,193,0.35);
-    border-radius: 999px; padding: 0.05rem 0.45rem; font-size: 0.72rem; color: #98e8c1;
+    display: inline-block; border: 1px solid rgb(var(--tn-teal-rgb) / 0.35);
+    border-radius: var(--tn-radius-ctl); padding: 0.05rem 0.45rem; font-size: 0.72rem; color: var(--tn-teal);
     vertical-align: middle;
 }
-.res-pill.current, .res-pill.applied { color: #cfffcf; border-color: rgba(152,232,193,0.55); background: rgba(152,232,193,0.1); }
-.res-pill.pending { color: #ffb86c; border-color: rgba(255,184,108,0.45); background: rgba(255,184,108,0.1); }
-.res-pill.upcoming { color: #bd93f9; border-color: rgba(189,147,249,0.45); background: rgba(189,147,249,0.1); }
-.res-pill.unverified { color: #6272a4; border-color: rgba(98,114,164,0.45); background: rgba(98,114,164,0.12); }
+.res-pill.current, .res-pill.applied { color: var(--tn-mint); border-color: rgb(var(--tn-teal-rgb) / 0.55); background: rgb(var(--tn-teal-rgb) / 0.1); }
+.res-pill.pending { color: var(--tn-amber); border-color: rgb(var(--tn-amber-rgb) / 0.45); background: rgb(var(--tn-amber-rgb) / 0.1); }
+.res-pill.upcoming { color: var(--tn-purple); border-color: rgb(var(--tn-purple-rgb) / 0.45); background: rgb(var(--tn-purple-rgb) / 0.1); }
+.res-pill.unverified { color: var(--tn-text-dim); border-color: rgb(var(--tn-text-dim-rgb) / 0.45); background: rgb(var(--tn-text-dim-rgb) / 0.12); }
+.res-pill.rolling-coordination { color: var(--tn-amber); border-color: rgb(var(--tn-amber-rgb) / 0.45); background: transparent; }
+.upg-announce { margin: 0 0 1.75rem; }
+.upg-announce h3 { color: var(--tn-mint); font-size: 1.25rem; margin: 0 0 0.5rem; }
+.upg-list { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+.upg-item { margin: 0 0 1.25rem; padding: 0 0 1.1rem; border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.14); }
+.upg-item:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+.upg-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.55rem; margin: 0 0 0.35rem; }
+.upg-item-head .res-tag { font-weight: 600; color: var(--tn-mint); font-size: 1.05rem; }
+.upg-summary { margin: 0.25rem 0 0.6rem; line-height: 1.55; max-width: 68ch; color: var(--tn-text); }
+.upg-actions { margin: 0; }
+.upg-unified { margin-top: 0.35rem; }
+.upg-unified .upg-item { list-style: none; }
+.upg-filters {
+  display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem;
+  margin: 0.65rem 0 1rem;
+}
+.upg-filter {
+  font-family: inherit; font-size: 0.82rem; font-weight: 500;
+  letter-spacing: 0.02em; line-height: 1.25;
+  padding: 0.32rem 0.65rem; border-radius: 2px; cursor: pointer;
+  border: 1px solid rgb(var(--tn-teal-rgb) / 0.45);
+  background: transparent; color: var(--tn-text-bright);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.upg-filter:hover { color: var(--tn-mint); border-color: var(--tn-teal); background: rgb(var(--tn-teal-rgb) / 0.06); }
+.upg-filter.is-on {
+  color: var(--tn-mint); border-color: var(--tn-teal);
+  background: rgb(var(--tn-teal-rgb) / 0.12);
+}
+.upg-filter:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
 .rel-pick {
     display: flex; flex-wrap: wrap; gap: 0.55rem 0.75rem; align-items: center;
     margin: 0.75rem 0 0.85rem;
 }
 .rel-pick label {
-    font-size: 0.72rem; color: #bd93f9; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: var(--tn-size-label); color: var(--tn-purple); letter-spacing: var(--tn-track-label); text-transform: uppercase;
 }
 .rel-pick select {
     appearance: none; -webkit-appearance: none;
     flex: 1; min-width: 14rem; max-width: 24rem;
     padding: 0.55rem 2.4rem 0.55rem 0.75rem;
     border-radius: 8px;
-    border: 1px solid rgba(152, 232, 193, 0.28);
-    background-color: rgba(152, 232, 193, 0.08);
+    border: 1px solid rgb(var(--tn-teal-rgb) / 0.28);
+    background-color: rgb(var(--tn-teal-rgb) / 0.08);
     background-image:
-      linear-gradient(45deg, transparent 50%, #98e8c1 50%),
+      linear-gradient(45deg, transparent 50%, var(--tn-teal) 50%),
       linear-gradient(135deg, #98e8c1 50%, transparent 50%);
     background-position: calc(100% - 16px) calc(50% - 2px), calc(100% - 11px) calc(50% - 2px);
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
-    color: #cfffcf;
+    color: var(--tn-mint);
     font-family: inherit;
     font-size: 1rem;
     font-weight: 500;
@@ -264,53 +342,53 @@ body.graphs-open { overflow: hidden; }
     outline: none;
 }
 .rel-pick select:hover {
-    border-color: rgba(152, 232, 193, 0.5);
-    background-color: rgba(152, 232, 193, 0.14);
+    border-color: rgb(var(--tn-teal-rgb) / 0.5);
+    background-color: rgb(var(--tn-teal-rgb) / 0.14);
 }
 .rel-pick select:focus {
-    border-color: rgba(152, 232, 193, 0.65);
-    box-shadow: 0 0 0 2px rgba(152, 232, 193, 0.12);
+    border-color: rgb(var(--tn-teal-rgb) / 0.65);
+    box-shadow: 0 0 0 2px rgb(var(--tn-teal-rgb) / 0.12);
 }
 .rel-pick select option {
     background: #0a0c0e;
-    color: #d2d3d8;
+    color: var(--tn-text);
 }
-.res-subhead { color: #cfffcf; font-size: 1.02rem; font-weight: 500; margin: 1.15rem 0 0.45rem; }
+.res-subhead { color: var(--tn-mint); font-size: 1.02rem; font-weight: 500; margin: 1.15rem 0 0.45rem; }
 .res-table-wrap { overflow-x: auto; margin: 0.5rem 0 0.85rem; }
 .res-table {
     width: 100%; border-collapse: collapse; font-size: 0.86rem;
 }
 .res-table th {
-    text-align: left; color: #98e8c1; font-size: 0.7rem; text-transform: uppercase;
-    letter-spacing: 0.06em; padding: 0.5rem 0.55rem;
-    border-bottom: 1px solid rgba(152,232,193,0.2); background: rgba(152,232,193,0.04);
+    text-align: left; color: var(--tn-teal); font-size: var(--tn-size-label); text-transform: uppercase;
+    letter-spacing: var(--tn-track-label); padding: 0.5rem 0.55rem;
+    border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.2); background: rgb(var(--tn-teal-rgb) / 0.04);
 }
 .res-table td {
-    padding: 0.45rem 0.55rem; border-bottom: 1px solid rgba(152,232,193,0.08);
-    vertical-align: top; color: #d2d3d8;
+    padding: 0.45rem 0.55rem; border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.08);
+    vertical-align: top; color: var(--tn-text);
 }
-.res-table a { color: #98e8c1; }
+.res-table a { color: var(--tn-teal); }
 .res-table .hash, .res-table .cid, .res-table code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.72rem; word-break: break-all; color: #98e8c1;
+    font-size: 0.72rem; word-break: break-all; color: var(--tn-teal);
 }
-.res-table .cid { color: #6272a4; margin-top: 0.2rem; }
+.res-table .cid { color: var(--tn-text-dim); margin-top: 0.2rem; }
 .res-release {
-    border: 1px solid rgba(152,232,193,0.14); border-radius: 10px;
-    margin: 0.55rem 0; background: rgba(0,0,0,0.22);
+    border: 1px solid rgb(var(--tn-teal-rgb) / 0.14); border-radius: 10px;
+    margin: 0.55rem 0; background: rgb(var(--tn-shade-rgb) / 0.22);
 }
 .res-release summary {
-    cursor: pointer; padding: 0.7rem 0.9rem; color: #cfffcf; font-weight: 500;
+    cursor: pointer; padding: 0.7rem 0.9rem; color: var(--tn-mint); font-weight: 500;
     display: flex; align-items: center; gap: 0.45rem;
 }
-.res-release[open] summary { border-bottom: 1px solid rgba(152,232,193,0.1); }
+.res-release[open] summary { border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.1); }
 .res-release-body { padding: 0.75rem 0.9rem 1rem; }
 .res-tag { font-family: ui-monospace, monospace; }
 .res-index h3 { margin-bottom: 0.45rem; }
 .res-filter {
     width: 100%; margin: 0.5rem 0 0.75rem; padding: 0.5rem 0.7rem; border-radius: 8px;
-    border: 1px solid rgba(152,232,193,0.2); background: rgba(0,0,0,0.35);
-    color: #f8f8f2; font-size: 0.9rem; font-family: inherit;
+    border: 1px solid rgb(var(--tn-teal-rgb) / 0.2); background: rgb(var(--tn-shade-rgb) / 0.35);
+    color: var(--tn-text-bright); font-size: 0.9rem; font-family: inherit;
 }
 .res-main .snap-card { box-sizing: border-box; }
 .res-guide-modal {
@@ -323,23 +401,23 @@ body.graphs-open { overflow: hidden; }
     gap: 0.75rem; margin-bottom: 0.85rem;
 }
 .guide-modal-head h3 { margin: 0; }
-.md-guide h3, .md-guide .guide-h { color: #cfffcf; margin: 1rem 0 0.4rem; font-size: 1.05rem; }
-.md-guide h4 { color: #98e8c1; margin: 0.85rem 0 0.35rem; font-size: 0.95rem; }
+.md-guide h3, .md-guide .guide-h { color: var(--tn-mint); margin: 1rem 0 0.4rem; font-size: 1.05rem; }
+.md-guide h4 { color: var(--tn-teal); margin: 0.85rem 0 0.35rem; font-size: 0.95rem; }
 .md-guide p { margin: 0 0 0.65rem; }
 .md-guide ul, .md-guide ol { margin: 0 0 0.75rem; padding-left: 1.15rem; }
 .md-guide li { margin: 0.2rem 0; }
-.md-guide hr { border: 0; border-top: 1px solid rgba(152,232,193,0.15); margin: 1rem 0; }
+.md-guide hr { border: 0; border-top: 1px solid rgb(var(--tn-teal-rgb) / 0.15); margin: 1rem 0; }
 .md-guide .snap-code { margin: 0.4rem 0 0.85rem; }
-.md-guide a { color: #98e8c1; }
+.md-guide a { color: var(--tn-teal); }
 .res-group { margin: 1.1rem 0 0.4rem; }
 .res-group h4 {
-    color: #cfffcf; font-size: 0.92rem; font-weight: 500;
+    color: var(--tn-mint); font-size: 0.92rem; font-weight: 500;
     letter-spacing: 0.04em; margin: 0 0 0.35rem;
 }
-.res-group .count { color: #6272a4; font-weight: 400; font-size: 0.78rem; margin-left: 0.35rem; }
+.res-group .count { color: var(--tn-text-dim); font-weight: 400; font-size: 0.78rem; margin-left: 0.35rem; }
 .addr-cell { min-width: 12rem; }
 .addr-cell .addr-full {
-    display: block; word-break: break-all; color: #98e8c1;
+    display: block; word-break: break-all; color: var(--tn-teal);
     font-size: 0.72rem; line-height: 1.4; margin-bottom: 0.28rem;
 }
 .addr-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
@@ -348,29 +426,93 @@ body.graphs-open { overflow: hidden; }
     display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
     gap: 0.55rem; margin: 0.75rem 0 1rem;
 }
-.plan-facts dt { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6272a4; }
-.plan-facts dd { color: #cfffcf; font-size: 1.02rem; margin: 0.15rem 0 0; }
-.plan-none { color: #d2d3d8; }
+.plan-facts dt { font-size: var(--tn-size-label); letter-spacing: var(--tn-track-label); text-transform: uppercase; color: var(--tn-text-dim); }
+.plan-facts dd { color: var(--tn-mint); font-size: 1.02rem; margin: 0.15rem 0 0; }
+.plan-none { color: var(--tn-text); }
+/* snapshot views + history record */
+.sh-views { display: flex; gap: 0.4rem; margin: 0 0 1rem; }
+.sh-views a { padding: 0.4rem 0.85rem; border-radius: var(--tn-radius-ctl); border: 1px solid rgb(var(--tn-teal-rgb) / 0.22); color: var(--tn-text-muted); text-decoration: none; font-size: 0.9rem; }
+.sh-views a:hover { border-color: rgb(var(--tn-teal-rgb) / 0.5); color: var(--tn-mint); }
+.sh-views a.active { color: var(--tn-teal); border-color: rgb(var(--tn-teal-rgb) / 0.5); background: rgb(var(--tn-teal-rgb) / 0.1); }
+.sh-card h3 { color: var(--tn-mint); margin: 0 0 0.4rem; }
+.sh-card .n, .sh-card code { font-family: var(--tn-font-mono, ui-monospace, monospace); }
+.sh-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; margin: 0.75rem 0 1rem; }
+.sh-stats > div { border: 1px solid rgb(var(--tn-teal-rgb) / 0.16); border-radius: 10px; padding: 0.55rem 0.7rem; background: rgb(var(--tn-tint-rgb) / 0.02); }
+.sh-stats b { display: block; color: var(--tn-mint); font-weight: 500; font-size: 1.02rem; font-family: var(--tn-font-mono, ui-monospace, monospace); }
+.sh-stats span { color: var(--tn-text-muted); font-size: 0.78rem; }
+.sh-tools { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--tn-text-muted); }
+.sh-tools label { display: inline-flex; gap: 0.4rem; align-items: center; }
+.sh-tools select { background: rgb(var(--tn-teal-rgb) / 0.08); color: var(--tn-mint); border: 1px solid rgb(var(--tn-teal-rgb) / 0.28); border-radius: 6px; padding: 0.25rem 0.4rem; font-family: inherit; }
+.sh-zoom { display: inline-flex; gap: 0.35rem; }
+.sh-zoom .snap-btn { min-width: 36px; min-height: 32px; padding: 0.2rem 0.6rem; }
+.sh-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; padding: 0; margin: 0 0 0.5rem; font-size: 0.8rem; color: var(--tn-text-muted); }
+.sh-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem; vertical-align: -1px; }
+.sw.full, .sh-pack.full { background: var(--tn-success); fill: var(--tn-success); }
+.sw.live, .sh-pack.live { background: #6ea8ff; fill: #6ea8ff; }
+.sw.upg { background: #c9b8ff; }
+.sw.gap { background: rgba(196,92,74,0.55); }
+.sw.stall { background: #ff7a59; }
+.sh-stage { width: 100%; }
+.sh-svg { display: block; width: 100%; height: 330px; background: rgb(var(--tn-shade-rgb) / 0.25); border: 1px solid rgb(var(--tn-teal-rgb) / 0.16); border-radius: 10px; touch-action: pan-y; user-select: none; }
+.sh-svg .sh-lane { fill: var(--tn-text-muted); font-size: 11px; }
+.sh-svg .sh-axis { fill: var(--tn-text-muted); font-size: 10px; }
+.sh-svg .sh-rule { stroke: rgb(var(--tn-teal-rgb) / 0.14); }
+.sh-svg .sh-gap { fill: #c45c4a; opacity: 0.22; cursor: pointer; }
+.sh-svg .sh-pack { cursor: pointer; opacity: 0.9; }
+.sh-svg .sh-pack:hover, .sh-svg .sh-pack:focus { opacity: 1; }
+.sh-svg .sh-upg { stroke: #c9b8ff; stroke-dasharray: 3 4; pointer-events: none; }
+.sh-svg .sh-upg-label { fill: #c9b8ff; font-size: 10px; pointer-events: none; }
+.sh-svg .sh-hit { fill: transparent; cursor: pointer; }
+.sh-svg .sh-stall { stroke: #ff7a59; stroke-width: 2; pointer-events: none; }
+.sh-svg .sh-stall-label { fill: #ff7a59; font-size: 10px; pointer-events: none; }
+.sh-svg [tabindex]:focus { outline: none; stroke: #fff; stroke-width: 1.5; }
+.sh-hint { font-size: 0.78rem; color: var(--tn-text-muted); margin: 0.4rem 0 0.75rem; }
+.sh-detail { border: 1px solid rgb(var(--tn-teal-rgb) / 0.16); border-radius: 10px; padding: 0.8rem 0.95rem; margin: 0 0 1rem; min-height: 4.5rem; font-size: 0.9rem; line-height: 1.55; overflow-wrap: anywhere; }
+.sh-detail h4 { margin: 0.3rem 0 0.4rem; color: var(--tn-mint); font-size: 1rem; }
+.sh-detail p { margin: 0 0 0.5rem; }
+.sh-dl { display: grid; grid-template-columns: 6rem 1fr; gap: 0.2rem 0.75rem; margin: 0 0 0.6rem; }
+.sh-dl dt { color: var(--tn-text-muted); }
+.sh-dl dd { margin: 0; }
+.sh-tag { display: inline-block; padding: 0.05rem 0.5rem; border-radius: var(--tn-radius-ctl); font-size: 0.72rem; border: 1px solid rgb(var(--tn-teal-rgb) / 0.3); white-space: nowrap; }
+.sh-tag.full { color: var(--tn-success); border-color: rgb(var(--tn-success-rgb) / 0.45); }
+.sh-tag.live { color: #6ea8ff; border-color: rgba(110,168,255,0.45); }
+.sh-tag.gap { color: #e07a66; border-color: rgba(196,92,74,0.5); }
+.sh-tag.upg { color: #c9b8ff; border-color: rgba(201,184,255,0.5); }
+.sh-h { color: var(--tn-mint); margin: 0.5rem 0 0.4rem; font-size: 1rem; }
+.sh-scroll { overflow-x: auto; }
+.sh-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.sh-table th { text-align: left; color: var(--tn-text-muted); font-weight: 500; padding: 0.4rem 0.6rem 0.4rem 0; border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.25); white-space: nowrap; }
+.sh-table td { padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.1); vertical-align: top; }
+.sh-table td.n { white-space: nowrap; }
+.sh-table tr.sh-row { cursor: pointer; }
+.sh-table tr.sh-row:hover td, .sh-table tr.sh-row:focus td { background: rgb(var(--tn-teal-rgb) / 0.05); }
+.sh-file { font-size: 0.74rem; overflow-wrap: anywhere; color: var(--tn-text-muted); }
+.sh-foot { margin-top: 0.9rem; }
 </style>
 </head>
 <body>
 <script src="/lib/fab.js"></script>
-<canvas id="glow-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
 
 <main class="main">
-    <div class="res-head">
+    <div class="res-title-row" data-tn-head>
         <h1 class="page-title" id="res-title" style="margin:0;">Resources</h1>
+        <button type="button" class="res-info" id="res-info-current" data-info="page" aria-label="About the Resources page" aria-haspopup="dialog" aria-controls="res-info-modal">?</button>
+        <button type="button" id="res-info-section" data-info="install" aria-label="Install details" aria-haspopup="dialog" aria-controls="res-info-modal" hidden>Section details</button>
+    </div>
+    <div class="res-head">
         <p class="page-subtitle" id="res-sub" style="margin-bottom:0.35rem;">Join the network</p>
         <p class="res-desc" id="res-desc">
             Install the node, download a snapshot, grab a binary, or check the next upgrade.
         </p>
     </div>
 
-    <div class="res-info-overlay" id="res-info-modal" role="dialog" aria-modal="true">
+    <div class="res-info-overlay" id="res-info-modal" role="dialog" aria-modal="true" aria-labelledby="res-info-title">
         <div class="res-info-modal">
-            <h3 id="res-info-title">Resources</h3>
+            <div class="ri-head">
+                <h3 id="res-info-title">Resources</h3>
+                <button type="button" class="close-info" id="res-info-close">Close</button>
+            </div>
             <div id="res-info-body"></div>
-            <button type="button" class="close-info" id="res-info-close">Close</button>
         </div>
     </div>
 
@@ -404,12 +546,16 @@ body.graphs-open { overflow: hidden; }
     <div class="res-main">
 
     <section class="res-panel" id="panel-snapshots">
+        <nav class="sh-views" aria-label="Snapshot views">
+            <a href="#snapshots" data-view="packs">Current packs</a>
+            <a href="#snapshot-history" data-view="history">History</a>
+        </nav>
         <div id="snapshots-host"></div>
+        <div id="snapshot-history-host" hidden></div>
     </section>
 
     <section class="res-panel" id="panel-app-state" hidden>
         <div id="app-state-host"></div>
-        <div id="contracts-host"></div>
     </section>
 
     <section class="res-panel" id="panel-install" hidden>
@@ -417,7 +563,7 @@ body.graphs-open { overflow: hidden; }
             <p class="res-kicker">Install</p>
             <h3>One-liner</h3>
             <p class="res-note">Paste in a terminal on Linux or macOS. Downloads <code>terpd</code>, then can walk you through joining a network.</p>
-            <pre class="snap-code" id="install-cmd">curl -sL https://terp.network/get/terp-installer.sh | bash</pre>
+            <pre class="snap-code" id="install-cmd" data-lang="bash" data-copy="row">curl -sL https://terp.network/get/terp-installer.sh | bash</pre>
             <div class="snap-actions">
                 <button type="button" class="snap-btn primary" id="copy-install">Copy</button>
                 <a class="snap-btn" href="/get" target="_blank" rel="noopener">View installer script</a>
@@ -435,7 +581,7 @@ body.graphs-open { overflow: hidden; }
     </section>
     <section class="res-panel" id="panel-graphs" hidden>
         <div class="graph-stage">
-            <iframe class="graph-frame" id="graph-frame" title="Crate dependency graph" src="/public/graphs/dependency-map.html"></iframe>
+            <iframe class="graph-frame" id="graph-frame" title="Crate dependency graph" src="/public/graphs/dependency-map.html?embed=1"></iframe>
         </div>
     </section>
     </div>
@@ -500,39 +646,65 @@ async function main() {
   const { mountSnapshotPanel } = await import('/lib/snapshots.js');
   const kinds = ['snapshots', 'install', 'upgrades', 'releases', 'graphs', 'app-state'];
   const info = {
+    page: {
+      title: 'Resources',
+      html: `<p class="ri-lede">Run a node, check the live chain, or find a contract — six sections, each with its own address so you can bookmark or share the exact view.</p>
+        <dl class="ri-stack">
+          <dt>Install</dt><dd>One line for Linux or macOS. It installs <code>terpd</code> and can join mainnet or testnet.</dd>
+          <dt>App state</dt><dd>Published addresses for each network: live CosmWasm programs (name, address, code ID) and app state.</dd>
+          <dt>Graphs</dt><dd>How Terp’s software crates depend on each other.</dd>
+          <dt>Releases</dt><dd>Published <code>terpd</code> builds with checksums, tagged against the live chain and governance.</dd>
+          <dt>Upgrades</dt><dd>One chronological list of governance halt plans and rolling operator notes, with a small All / Governance / Rolling filter.</dd>
+          <dt>Snapshot</dt><dd>A recent chain pack so a new node can start without syncing from genesis, with a history of which heights are still archived.</dd>
+        </dl>
+        <p class="ri-foot">Previous and Next step through the sections. Details explains the one you are on. Back and forward follow the sections you visited.</p>`,
+    },
     snapshots: {
       title: 'Snapshot',
-      html: `<p>Download a recent chain pack instead of syncing from genesis. The current pack is <strong>pruned</strong> — enough state to run a node, without historic blocks.</p>
-        <p>Unpack it with <code>lz4</code> and <code>tar</code>, then start <code>terpd</code> v6. Stop the node first. The pack does not contain keys.</p>
-        <p>Archive packs keep full history and are much larger. The archive on this page is older than the v6 upgrade; use pruned to join the live chain.</p>`,
+      html: `<p class="ri-lede">Download a recent chain pack instead of syncing from genesis.</p>
+        <div class="ri-section"><h4>Current pack</h4>
+        <p>Pruned — enough state to run a node, without historic blocks. Unpack with <code>lz4</code> and <code>tar</code>, then start <code>terpd</code> v6. Stop the node first. The pack does not contain keys.</p></div>
+        <div class="ri-section"><h4>Archives</h4>
+        <p>Keep block history and are much larger. Use pruned to join the live chain quickly.</p></div>
+        <div class="ri-section"><h4>History</h4>
+        <p>Which block heights can still be queried from an archive, with each pack, gap and upgrade on one diagram.</p></div>`,
     },
     install: {
       title: 'Install',
-      html: `<p>Paste the one-liner in a terminal on Linux or macOS. It installs <code>terpd</code> and can join mainnet or testnet.</p>`,
+      html: `<p class="ri-lede">Paste the one-liner in a terminal on Linux or macOS.</p>
+        <p>It installs <code>terpd</code> and can walk you through joining mainnet or testnet. Copy the command, or open the installer script to read it first.</p>`,
     },
     releases: {
       title: 'Releases',
-      html: `<p>Published <code>terpd</code> builds. Pick a version — the address bar keeps that choice so you can share it.</p>
-        <p><strong>Current</strong> is what the live chain is running. <strong>Pending</strong> is named in the live upgrade plan. <strong>Upcoming</strong> is named in a passed governance proposal. <strong>Unverified</strong> is in the bucket but not live, not in the plan, and not in a passed proposal.</p>`,
+      html: `<p class="ri-lede">Published <code>terpd</code> builds from the releases bucket. Pick a version — the address bar keeps that choice so you can share it.</p>
+        <dl class="ri-stack">
+          <dt>Current</dt><dd>What the live chain is running.</dd>
+          <dt>Pending</dt><dd>Named in the live upgrade plan.</dd>
+          <dt>Upcoming</dt><dd>Named in a passed governance proposal.</dd>
+          <dt>Unverified</dt><dd>In the bucket, but not live, not in the plan, and not in a passed proposal.</dd>
+        </dl>`,
     },
     upgrades: {
       title: 'Upgrades',
-      html: `<p>Each room is a Cosmovisor plan, ordered by halt height. Applied plans already happened; pending is the live chain plan; unverified has no halt height yet.</p>
-        <p>Cosmovisor wants the archive whose name ends in <code>-cv.tar.gz</code>.</p>`,
+      html: `<p class="ri-lede">Governance halt plans and rolling operator notes in one chronological list, newest first.</p>
+        <p>Filter with All, Governance, or Rolling coordination. Governance rows open to Cosmovisor binaries and a how-to guide. Rolling rows link to their <code>OPERATOR.html</code>.</p>`,
     },
     graphs: {
       title: 'Graphs',
-      html: `<p>How Terp software crates depend on each other.</p>`,
+      html: `<p class="ri-lede">An interactive map of how Terp’s software crates depend on each other.</p>
+        <p>Map shows every repository and the libraries it uses; select a disc to light up its links. Layers lists what one repository depends on and what uses it, a few steps out. List has the full repository and crate tables. The map opens on CosmWasm, the library most of the stack builds on.</p>`,
     },
     'app-state': {
       title: 'App state',
-      html: `<p>The published address file, by network — live CosmWasm programs (name, address, code ID) plus app state. Mainnet first. Local Abstract accounts stay hidden unless you ask for them.</p>`,
+      html: `<p class="ri-lede">The published address file for each network, organised by category.</p>
+        <p>Pick Abstract, Accounts, Apps, IBC and the rest from the picker. Each row is a name, address and code ID — copy the address or open it in the explorer. Mainnet first.</p>`,
     },
   };
 
   const modal = document.getElementById('res-info-modal');
-  function openInfo(kind) {
+  function openInfo(kind, opener) {
     const pack = info[kind] || info.install;
+    if (modal) modal.__opener = opener || document.activeElement;
     document.getElementById('res-info-title').textContent = pack.title;
     document.getElementById('res-info-body').innerHTML = pack.html;
     modal?.classList.add('open');
@@ -542,10 +714,18 @@ async function main() {
     if (infoBtn) {
       e.preventDefault();
       e.stopPropagation();
-      openInfo(infoBtn.dataset.info);
+      openInfo(infoBtn.dataset.info, infoBtn);
     }
   });
+  document.getElementById('res-info-current')?.addEventListener('click', (e) => openInfo('page', e.currentTarget));
+  document.getElementById('res-info-section')?.addEventListener('click', (e) => openInfo(e.currentTarget.dataset.info, document.activeElement));
   document.getElementById('res-info-close')?.addEventListener('click', () => modal?.classList.remove('open'));
+  addEventListener('tn:theme', (ev) => {
+    const theme = (ev && ev.detail && ev.detail.theme) || localStorage.getItem('tn-theme') || 'default';
+    const frame = document.getElementById('graph-frame');
+    if (!document.body.classList.contains('graphs-open')) return;
+    try { frame?.contentWindow?.postMessage({ type: 'tn-theme', theme }, '*'); } catch (e) { /* ignore */ }
+  });
   modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') modal?.classList.remove('open');
@@ -556,6 +736,7 @@ async function main() {
     const parts = h.split('/').filter(Boolean);
     let kind = parts[0] || 'install';
     if (kind === 'snapshot') kind = 'snapshots';
+    if (kind === 'snapshot-history' || kind === 'snapshots-history') { kind = 'snapshots'; parts[1] = 'history'; }
     if (kind === 'contracts') kind = 'app-state';
     if (kind.includes('=')) {
       const [k, v] = kind.split('=');
@@ -576,12 +757,43 @@ async function main() {
     const graphOn = kind === 'graphs';
     document.querySelector('main.main')?.classList.toggle('graphs-wide', graphOn);
     document.body.classList.toggle('graphs-open', graphOn);
+    if (graphOn) {
+      const frame = document.getElementById('graph-frame');
+      const theme = localStorage.getItem('tn-theme') || document.documentElement.dataset.theme || 'default';
+      const ping = () => {
+        try {
+          frame?.contentWindow?.postMessage({ type: 'graph-refit', theme }, '*');
+        } catch (e) { /* ignore */ }
+      };
+      ping();
+      requestAnimationFrame(ping);
+      setTimeout(ping, 120);
+      setTimeout(ping, 400);
+    }
     document.querySelectorAll('#res-subtabs .res-side-item').forEach((a) => {
       a.classList.toggle('active', a.dataset.kind === kind);
     });
+    const infoNow = document.getElementById('res-info-section');
+    if (infoNow) {
+      infoNow.dataset.info = kind;
+      infoNow.setAttribute('aria-label', `${(info[kind] || info.install).title} details`);
+    }
     if (kind === 'snapshots') {
+      const history = sub === 'history';
       const host = document.getElementById('snapshots-host');
-      if (host && !host.dataset.ready) {
+      const hist = document.getElementById('snapshot-history-host');
+      if (host) host.hidden = history;
+      if (hist) hist.hidden = !history;
+      document.querySelectorAll('#panel-snapshots .sh-views a').forEach((a) => {
+        const on = (a.dataset.view === 'history') === history;
+        a.classList.toggle('active', on);
+        if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      });
+      if (history && hist && !hist.dataset.ready) {
+        const { mountSnapshotHistory } = await import('/lib/snapshot-history.js');
+        mountSnapshotHistory(hist);
+      }
+      if (!history && host && !host.dataset.ready) {
         await mountSnapshotPanel(host);
         host.dataset.ready = '1';
       }
@@ -604,22 +816,17 @@ async function main() {
     }
     if (kind === 'app-state') {
       const host = document.getElementById('app-state-host');
+      const cat = (sub || '').split('/')[0];
       if (host && !host.dataset.ready) {
         const { mountAppState } = await import('/lib/app-state.js');
         await mountAppState(host, {
           url: 'https://s3.terp.network/snapshots/mainnet/morocco-1/state.json',
           defaultChain: 'morocco-1',
+          category: cat,
         });
         host.dataset.ready = '1';
-      }
-      const strip = document.getElementById('contracts-host');
-      if (strip && !strip.dataset.ready) {
-        const { loadSiteConfig } = await import('/lib/config.js');
-        const { mountContractStrip } = await import('/lib/contract-strip.js');
-        const cfg = { pageId: 'resources', chainId: 'morocco-1', rest: 'https://api.terp.network', contracts: {} };
-        await loadSiteConfig(cfg, { pageId: 'resources' }).catch(() => {});
-        await mountContractStrip(strip, cfg);
-        strip.dataset.ready = '1';
+      } else if (host?.__selectCategory && cat) {
+        host.__selectCategory(cat);
       }
     }
   }

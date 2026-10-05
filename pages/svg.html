@@ -1,10 +1,20 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes"> <meta name="description" content="Browse and mint generative on-chain SVG art on Terp Network. Fully client-side rendered, parameterized by on-chain data, unique to every token."> <title>SVG | Terp Network — Generative On-Chain Art</title> <meta property="og:title" content="SVG | Terp Network — Generative On-Chain Art"> <meta property="og:description" content="Fully client-side rendered generative SVGs, parameterized by on-chain token data."> <meta property="og:type" content="website"> <meta property="twitter:card" content="summary_large_image"> <meta property="twitter:title" content="SVG | Terp Network — Generative On-Chain Art"> <meta name="twitter:creator" content="@terpculture"> <link rel="icon" type="image/x-icon" href="/public/favicons/terp-32x32.png?v=edd0d8634c"> <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png?v=edd0d8634c"> <link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png?v=edd0d8634c"> <link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png?v=edd0d8634c"> <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi"> <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet"> <link rel="stylesheet" href="/public/global.css?v=edd0d8634c"> <style> .btn-docs {
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/config.js">
+<link rel="modulepreload" href="/lib/nav-guard.js">
+ <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes"> <meta name="description" content="Browse and mint generative on-chain SVG art on Terp Network. Fully client-side rendered, parameterized by on-chain data, unique to every token."> <title>SVG | Terp Network — Generative On-Chain Art</title> <meta property="og:title" content="SVG | Terp Network — Generative On-Chain Art"> <meta property="og:description" content="Fully client-side rendered generative SVGs, parameterized by on-chain token data."> <meta property="og:type" content="website"> <meta property="twitter:card" content="summary_large_image"> <meta property="twitter:title" content="SVG | Terp Network — Generative On-Chain Art"> <meta name="twitter:creator" content="@terpculture"> <link rel="icon" type="image/x-icon" href="/public/favicons/terp-32x32.png"> <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png"> <link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png"> <link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png"> <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi"> <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet"> <link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script> <style> .btn-docs {
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            border: 1px solid rgba(152, 232, 193, 0.2);
-            background: rgba(152, 232, 193, 0.06);
-            color: rgba(152, 232, 193, 0.6);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.2);
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+            color: rgb(var(--tn-teal-rgb) / max(0.6, var(--tn-alpha-floor)));
             font-family: var(--tn-font);
             font-size: 0.85rem;
             font-weight: 500;
@@ -17,15 +27,15 @@
         }
 
         .btn-docs:hover {
-            background: rgba(152, 232, 193, 0.12);
-            border-color: rgba(152, 232, 193, 0.4);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            border-color: rgb(var(--tn-teal-rgb) / 0.4);
+            color: var(--tn-teal);
         }
 
         .btn-collection {
-            background: rgba(189, 147, 249, 0.1);
-            border: 1px solid rgba(189, 147, 249, 0.3);
-            color: #bd93f9;
+            background: rgb(var(--tn-purple-rgb) / 0.1);
+            border: 1px solid rgb(var(--tn-purple-rgb) / 0.3);
+            color: var(--tn-purple);
             padding: 0.5rem 1rem;
             font-family: var(--tn-font);
             font-size: 0.8rem;
@@ -35,8 +45,8 @@
         }
 
         .btn-collection:hover {
-            background: rgba(189, 147, 249, 0.2);
-            border-color: rgba(189, 147, 249, 0.5);
+            background: rgb(var(--tn-purple-rgb) / 0.2);
+            border-color: rgb(var(--tn-purple-rgb) / 0.5);
         }
 
         /* Main content */
@@ -54,22 +64,26 @@
         }
 
         .page-title {
-            font-size: 2.2rem;
-            font-weight: 500;
-            color: #cfffcf;
+            font-size: var(--tn-size-display);
+            font-weight: var(--tn-weight-display);
+            color: var(--tn-mint);
             text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
             text-align: center;
             margin-bottom: 0.5rem;
+            letter-spacing: var(--tn-track-display);
+            font-family: var(--tn-font-display);
         }
+        html[data-theme="permissionless"] .page-title { text-shadow: 0 0 9.2px rgb(var(--tn-glow-rgb) / calc(0.070 * var(--tn-glow-tk))), 0 0 30px rgb(var(--tn-glow-rgb) / calc(0.084 * var(--tn-glow-tk))); }
 
         .page-subtitle {
-            font-size: 0.85rem;
-            color: #ffffda;
+            font-size: var(--tn-size-kicker);
+            color: var(--tn-kicker);
             text-shadow: 0 0 3px rgba(71, 50, 102, 0.9);
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: var(--tn-track-label);
             text-align: center;
             margin-bottom: 2.5rem;
+            font-weight: var(--tn-font-weight-medium);
         }
 
         /* Loading */
@@ -79,14 +93,14 @@
             align-items: center;
             gap: 1rem;
             padding: 4rem 0;
-            color: #d2d3d8;
+            color: var(--tn-text);
         }
 
         .spinner {
             width: 36px;
             height: 36px;
-            border: 2px solid rgba(152, 232, 193, 0.2);
-            border-top-color: #98e8c1;
+            border: 2px solid rgb(var(--tn-teal-rgb) / 0.2);
+            border-top-color: var(--tn-teal);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -101,12 +115,32 @@
         .demo-notice {
             margin-top: 1rem;
             padding: 0.6rem 1.2rem;
-            background: rgba(189, 147, 249, 0.08);
-            border: 1px solid rgba(189, 147, 249, 0.2);
+            background: rgb(var(--tn-purple-rgb) / 0.08);
+            border: 1px solid rgb(var(--tn-purple-rgb) / 0.2);
             border-radius: 4px;
             font-size: 0.75rem;
-            color: rgba(189, 147, 249, 0.8);
+            color: rgb(var(--tn-purple-rgb) / max(0.8, var(--tn-alpha-floor)));
             text-align: center;
+        }
+
+        .mint-notice {
+            margin: 0.25rem 0 0.5rem;
+            padding: 0.55rem 0.7rem;
+            border-left: 2px solid var(--tn-accent, var(--tn-teal));
+            background: var(--tn-surface-2, rgb(var(--tn-teal-rgb) / 0.06));
+            font-size: var(--tn-size-caption, 0.75rem);
+            line-height: 1.45;
+            color: var(--tn-text-2, var(--tn-text));
+        }
+        .btn-retry {
+            margin-left: 0.5rem;
+            padding: 0.2rem 0.6rem;
+            border: 1px solid currentColor;
+            border-radius: var(--tn-radius-sm, 2px);
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
         }
 
         /* ─── Collection Grid (list view) ─── */
@@ -118,8 +152,8 @@
         }
 
         .collection-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(152, 232, 193, 0.1);
+            background: rgb(var(--tn-shade-rgb) / 0.3);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
             border-radius: 10px;
             overflow: hidden;
             transition: all 0.2s ease;
@@ -128,15 +162,16 @@
         }
 
         .collection-card:hover {
-            border-color: rgba(152, 232, 193, 0.3);
-            box-shadow: 0 0 25px rgba(152, 232, 193, 0.06);
+            border-color: rgb(var(--tn-teal-rgb) / 0.3);
+            box-shadow: 0 0 25px rgb(var(--tn-halo-rgb) / calc(0.06 * var(--tn-halo-k)));
             transform: translateY(-2px);
         }
+        html[data-theme="permissionless"] .collection-card:hover { box-shadow: 0 0 5.5px rgb(var(--tn-glow-rgb) / calc(0.08 * var(--tn-glow-k))), 0 0 12.5px rgb(var(--tn-glow-rgb) / calc(0.06 * var(--tn-glow-k))), 0 0 25px rgb(var(--tn-glow-2-rgb) / calc(0.04 * var(--tn-glow-k))); }
 
         .col-card-preview {
             aspect-ratio: 1;
             overflow: hidden;
-            background: #050508;
+            background: var(--tn-bg-deep);
             flex-shrink: 0;
         }
 
@@ -157,14 +192,14 @@
         .col-card-name {
             font-size: 1rem;
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
         }
 
         .col-card-symbol {
-            font-size: 0.65rem;
-            color: rgba(207, 255, 207, 0.5);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .col-card-meta {
@@ -182,15 +217,15 @@
         }
 
         .col-stat-label {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.4);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.4, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .col-stat-value {
             font-size: 0.85rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-weight: 500;
         }
 
@@ -202,28 +237,28 @@
         }
 
         .col-status-badge.live {
-            background: rgba(152, 232, 193, 0.1);
-            border: 1px solid rgba(152, 232, 193, 0.25);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.1);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.25);
+            color: var(--tn-teal);
         }
 
         .col-status-badge.ended {
-            background: rgba(254, 125, 125, 0.1);
-            border: 1px solid rgba(254, 125, 125, 0.25);
-            color: #fe7d7d;
+            background: rgb(var(--tn-coral-rgb) / 0.1);
+            border: 1px solid rgb(var(--tn-coral-rgb) / 0.25);
+            color: var(--tn-coral);
         }
 
         .col-status-badge.upcoming {
-            background: rgba(189, 147, 249, 0.1);
-            border: 1px solid rgba(189, 147, 249, 0.25);
-            color: #bd93f9;
+            background: rgb(var(--tn-purple-rgb) / 0.1);
+            border: 1px solid rgb(var(--tn-purple-rgb) / 0.25);
+            color: var(--tn-purple);
         }
 
         .btn-browse {
             margin-top: 0.75rem;
-            background: rgba(152, 232, 193, 0.08);
-            border: 1px solid rgba(152, 232, 193, 0.25);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.08);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.25);
+            color: var(--tn-teal);
             padding: 0.55rem 1rem;
             font-family: var(--tn-font);
             font-size: 0.8rem;
@@ -233,12 +268,12 @@
             text-align: center;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .btn-browse:hover {
-            background: rgba(152, 232, 193, 0.16);
-            border-color: rgba(152, 232, 193, 0.45);
+            background: rgb(var(--tn-teal-rgb) / 0.16);
+            border-color: rgb(var(--tn-teal-rgb) / 0.45);
         }
 
         /* ─── Collection Detail (collection view) ─── */
@@ -246,9 +281,9 @@
             display: flex;
             align-items: center;
             gap: 0.4rem;
-            background: rgba(152, 232, 193, 0.06);
-            border: 1px solid rgba(152, 232, 193, 0.15);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
+            color: var(--tn-teal);
             padding: 0.45rem 0.9rem;
             font-family: var(--tn-font);
             font-size: 0.8rem;
@@ -260,8 +295,8 @@
         }
 
         .btn-back:hover {
-            background: rgba(152, 232, 193, 0.12);
-            border-color: rgba(152, 232, 193, 0.3);
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            border-color: rgb(var(--tn-teal-rgb) / 0.3);
         }
 
         .col-detail-header {
@@ -278,8 +313,8 @@
             flex-shrink: 0;
             border-radius: 10px;
             overflow: hidden;
-            background: #050508;
-            border: 1px solid rgba(152, 232, 193, 0.12);
+            background: var(--tn-bg-deep);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
         }
 
         .col-detail-preview svg {
@@ -299,13 +334,13 @@
         .col-detail-name {
             font-size: 1.8rem;
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
         }
 
         .col-detail-desc {
             font-size: 0.9rem;
             line-height: 1.6;
-            color: #d2d3d8;
+            color: var(--tn-text);
         }
 
         .col-detail-stats {
@@ -322,15 +357,15 @@
         }
 
         .detail-stat-label {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.5);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .detail-stat-value {
             font-size: 1rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-weight: 500;
         }
 
@@ -340,10 +375,10 @@
         }
 
         .price-tiers-label {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.45);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.45, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
             margin-bottom: 0.35rem;
         }
 
@@ -367,17 +402,17 @@
         .price-tier.ended {
             opacity: 0.3;
             filter: blur(0.3px);
-            color: rgba(207, 255, 207, 0.4);
+            color: rgb(var(--tn-mint-rgb) / max(0.4, var(--tn-alpha-floor)));
         }
 
         .price-tier.current {
-            background: rgba(152, 232, 193, 0.07);
-            border-color: rgba(152, 232, 193, 0.28);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.07);
+            border-color: rgb(var(--tn-teal-rgb) / 0.28);
+            color: var(--tn-teal);
         }
 
         .price-tier.future {
-            color: rgba(207, 255, 207, 0.55);
+            color: rgb(var(--tn-mint-rgb) / max(0.55, var(--tn-alpha-floor)));
         }
 
         .price-tier-dot {
@@ -388,16 +423,17 @@
         }
 
         .price-tier.ended .price-tier-dot {
-            background: rgba(152, 232, 193, 0.3);
+            background: rgb(var(--tn-teal-rgb) / 0.3);
         }
 
         .price-tier.current .price-tier-dot {
-            background: #98e8c1;
-            box-shadow: 0 0 5px rgba(152, 232, 193, 0.7);
+            background: var(--tn-teal);
+            box-shadow: 0 0 5px rgb(var(--tn-halo-rgb) / calc(0.7 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .price-tier.current .price-tier-dot { box-shadow: 0 0 1.1px rgb(var(--tn-glow-rgb) / calc(0.91 * var(--tn-glow-k))), 0 0 2.5px rgb(var(--tn-glow-rgb) / calc(0.7 * var(--tn-glow-k))), 0 0 5px rgb(var(--tn-glow-2-rgb) / calc(0.49 * var(--tn-glow-k))); }
 
         .price-tier.future .price-tier-dot {
-            background: rgba(152, 232, 193, 0.35);
+            background: rgb(var(--tn-teal-rgb) / 0.35);
         }
 
         .price-tier-range {
@@ -411,17 +447,17 @@
         }
 
         .price-tier-current-tag {
-            font-size: 0.6rem;
+            font-size: var(--tn-size-label);
             opacity: 0.65;
-            letter-spacing: 0.04em;
+            letter-spacing: var(--tn-track-label);
             text-transform: uppercase;
         }
 
         /* ─── Mint Panel ─── */
         .mint-panel {
             width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(152, 232, 193, 0.12);
+            background: rgb(var(--tn-shade-rgb) / 0.3);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
             border-radius: 8px;
             padding: 1.2rem 1.5rem;
             display: flex;
@@ -438,15 +474,15 @@
         }
 
         .mint-panel-price-label {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.5);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .mint-panel-price-value {
             font-size: 1.1rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-weight: 500;
         }
 
@@ -459,9 +495,9 @@
         .qty-btn {
             width: 32px;
             height: 32px;
-            background: rgba(152, 232, 193, 0.08);
-            border: 1px solid rgba(152, 232, 193, 0.25);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.08);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.25);
+            color: var(--tn-teal);
             font-size: 1.1rem;
             cursor: pointer;
             border-radius: 5px;
@@ -474,8 +510,8 @@
         }
 
         .qty-btn:hover {
-            background: rgba(152, 232, 193, 0.16);
-            border-color: rgba(152, 232, 193, 0.4);
+            background: rgb(var(--tn-teal-rgb) / 0.16);
+            border-color: rgb(var(--tn-teal-rgb) / 0.4);
         }
 
         .qty-btn:disabled {
@@ -486,7 +522,7 @@
         .qty-display {
             font-size: 1.2rem;
             font-weight: 700;
-            color: #f8f8f2;
+            color: var(--tn-text-bright);
             min-width: 1.8rem;
             text-align: center;
         }
@@ -498,22 +534,22 @@
         }
 
         .mint-total-label {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.5);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .mint-total-value {
             font-size: 1rem;
-            color: #cfffcf;
+            color: var(--tn-mint);
             font-weight: 500;
         }
 
         .btn-mint {
-            background: linear-gradient(135deg, rgba(152, 232, 193, 0.15), rgba(152, 232, 193, 0.08));
-            border: 1px solid rgba(152, 232, 193, 0.4);
-            color: #cfffcf;
+            background: linear-gradient(135deg, rgb(var(--tn-teal-rgb) / 0.15), rgb(var(--tn-teal-rgb) / 0.08));
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.4);
+            color: var(--tn-mint);
             padding: 0.75rem 1.8rem;
             font-family: var(--tn-font);
             font-size: 0.95rem;
@@ -522,16 +558,17 @@
             border-radius: 6px;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
             margin-left: auto;
         }
 
         .btn-mint:hover {
-            background: linear-gradient(135deg, rgba(152, 232, 193, 0.25), rgba(152, 232, 193, 0.15));
-            border-color: rgba(152, 232, 193, 0.6);
-            box-shadow: 0 0 25px rgba(152, 232, 193, 0.15);
+            background: linear-gradient(135deg, rgb(var(--tn-teal-rgb) / 0.25), rgb(var(--tn-teal-rgb) / 0.15));
+            border-color: rgb(var(--tn-teal-rgb) / 0.6);
+            box-shadow: 0 0 25px rgb(var(--tn-halo-rgb) / calc(0.15 * var(--tn-halo-k)));
             transform: translateY(-1px);
         }
+        html[data-theme="permissionless"] .btn-mint:hover { box-shadow: 0 0 5.5px rgb(var(--tn-glow-rgb) / calc(0.2 * var(--tn-glow-k))), 0 0 12.5px rgb(var(--tn-glow-rgb) / calc(0.15 * var(--tn-glow-k))), 0 0 25px rgb(var(--tn-glow-2-rgb) / calc(0.1 * var(--tn-glow-k))); }
 
         .btn-mint:active {
             transform: translateY(0);
@@ -548,16 +585,16 @@
         .payment-section {
             width: 100%;
             flex-basis: 100%;
-            border-top: 1px solid rgba(152, 232, 193, 0.08);
+            border-top: 1px solid rgb(var(--tn-teal-rgb) / 0.08);
             padding-top: 0.9rem;
             margin-top: 0.2rem;
         }
 
         .payment-section-label {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.45);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.45, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: var(--tn-track-label);
             margin-bottom: 0.5rem;
         }
 
@@ -569,8 +606,8 @@
         }
 
         .payment-chip {
-            background: rgba(152, 232, 193, 0.05);
-            border: 1px solid rgba(152, 232, 193, 0.18);
+            background: rgb(var(--tn-teal-rgb) / 0.05);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.18);
             border-radius: 6px;
             padding: 0.35rem 0.6rem;
             display: flex;
@@ -580,27 +617,27 @@
         }
 
         .payment-chip.shitstrap-chip {
-            border-color: rgba(189, 147, 249, 0.3);
+            border-color: rgb(var(--tn-purple-rgb) / 0.3);
         }
 
         .payment-chip.insufficient {
-            border-color: rgba(255, 85, 85, 0.3);
+            border-color: rgb(var(--tn-danger-rgb) / 0.3);
         }
 
         .chip-label {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.4);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.4, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .chip-denom {
             font-size: 0.72rem;
-            color: rgba(207, 255, 207, 0.65);
+            color: rgb(var(--tn-mint-rgb) / max(0.65, var(--tn-alpha-floor)));
         }
 
         .chip-amount {
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-weight: 500;
         }
 
@@ -611,24 +648,25 @@
 
         .chip-desc {
             font-size: 0.65rem;
-            color: rgba(207, 255, 207, 0.5);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
         }
 
         .chip-warn {
             font-size: 0.6rem;
-            color: rgba(189, 147, 249, 0.7);
+            color: rgb(var(--tn-purple-rgb) / max(0.7, var(--tn-alpha-floor)));
         }
 
         .payment-chip.recommended {
-            border-color: rgba(152, 232, 193, 0.5);
-            background: rgba(152, 232, 193, 0.08);
+            border-color: rgb(var(--tn-teal-rgb) / 0.5);
+            background: rgb(var(--tn-teal-rgb) / 0.08);
         }
 
         .payment-chip.selected {
-            border-color: #98e8c1;
-            box-shadow: 0 0 10px rgba(152, 232, 193, 0.2);
-            background: rgba(152, 232, 193, 0.1);
+            border-color: var(--tn-teal);
+            box-shadow: 0 0 10px rgb(var(--tn-halo-rgb) / calc(0.2 * var(--tn-halo-k)));
+            background: rgb(var(--tn-teal-rgb) / 0.1);
         }
+        html[data-theme="permissionless"] .payment-chip.selected { box-shadow: 0 0 2.2px rgb(var(--tn-glow-rgb) / calc(0.26 * var(--tn-glow-k))), 0 0 5px rgb(var(--tn-glow-rgb) / calc(0.2 * var(--tn-glow-k))), 0 0 10px rgb(var(--tn-glow-2-rgb) / calc(0.14 * var(--tn-glow-k))); }
 
         .payment-chip.chip-atomic {
             cursor: pointer;
@@ -636,7 +674,7 @@
 
         .payment-chip.chip-cross-chain {
             cursor: pointer;
-            border-color: rgba(189, 147, 249, 0.35);
+            border-color: rgb(var(--tn-purple-rgb) / 0.35);
         }
 
         .payment-chip.chip-wallet {
@@ -648,31 +686,31 @@
         }
 
         .confirm-step-atomic {
-            border-color: rgba(152, 232, 193, 0.35) !important;
-            background: rgba(152, 232, 193, 0.06) !important;
+            border-color: rgb(var(--tn-teal-rgb) / 0.35) !important;
+            background: rgb(var(--tn-teal-rgb) / 0.06) !important;
         }
 
         .confirm-step-mint {
-            border-color: rgba(152, 232, 193, 0.4) !important;
-            background: rgba(152, 232, 193, 0.08) !important;
+            border-color: rgb(var(--tn-teal-rgb) / 0.4) !important;
+            background: rgb(var(--tn-teal-rgb) / 0.08) !important;
         }
 
         /* ─── Confirm Panel ─── */
         .confirm-panel {
             width: 100%;
             flex-basis: 100%;
-            background: rgba(152, 232, 193, 0.03);
-            border: 1px solid rgba(152, 232, 193, 0.2);
+            background: rgb(var(--tn-teal-rgb) / 0.03);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.2);
             border-radius: 7px;
             padding: 1rem 1.2rem;
             margin-top: 0.6rem;
         }
 
         .confirm-title {
-            font-size: 0.6rem;
+            font-size: var(--tn-size-label);
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: rgba(207, 255, 207, 0.45);
+            letter-spacing: var(--tn-track-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.45, var(--tn-alpha-floor)));
             margin-bottom: 0.75rem;
         }
 
@@ -681,7 +719,7 @@
             align-items: center;
             gap: 0.6rem;
             padding: 0.35rem 0;
-            border-bottom: 1px solid rgba(152, 232, 193, 0.06);
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.06);
             font-size: 0.85rem;
         }
 
@@ -690,19 +728,19 @@
         }
 
         .confirm-step-icon {
-            color: rgba(207, 255, 207, 0.35);
+            color: rgb(var(--tn-mint-rgb) / max(0.35, var(--tn-alpha-floor)));
             font-size: 0.9rem;
             width: 1.2rem;
             text-align: center;
         }
 
         .confirm-step-desc {
-            color: #d2d3d8;
+            color: var(--tn-text);
             flex: 1;
         }
 
         .confirm-step-amount {
-            color: #98e8c1;
+            color: var(--tn-teal);
             font-weight: 500;
             white-space: nowrap;
         }
@@ -716,8 +754,8 @@
 
         .btn-cancel-confirm {
             background: transparent;
-            border: 1px solid rgba(152, 232, 193, 0.18);
-            color: rgba(207, 255, 207, 0.55);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.18);
+            color: rgb(var(--tn-mint-rgb) / max(0.55, var(--tn-alpha-floor)));
             padding: 0.45rem 1rem;
             border-radius: 5px;
             cursor: pointer;
@@ -727,13 +765,13 @@
         }
 
         .btn-cancel-confirm:hover {
-            border-color: rgba(152, 232, 193, 0.35);
+            border-color: rgb(var(--tn-teal-rgb) / 0.35);
         }
 
         .btn-confirm-mint {
-            background: linear-gradient(135deg, rgba(152, 232, 193, 0.22), rgba(152, 232, 193, 0.12));
-            border: 1px solid rgba(152, 232, 193, 0.5);
-            color: #cfffcf;
+            background: linear-gradient(135deg, rgb(var(--tn-teal-rgb) / 0.22), rgb(var(--tn-teal-rgb) / 0.12));
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.5);
+            color: var(--tn-mint);
             padding: 0.45rem 1.4rem;
             border-radius: 5px;
             cursor: pointer;
@@ -741,13 +779,14 @@
             font-weight: 500;
             font-family: var(--tn-font);
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: var(--tn-track-label);
             transition: all 0.2s;
         }
 
         .btn-confirm-mint:hover {
-            box-shadow: 0 0 14px rgba(152, 232, 193, 0.15);
+            box-shadow: 0 0 14px rgb(var(--tn-halo-rgb) / calc(0.15 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .btn-confirm-mint:hover { box-shadow: 0 0 3.08px rgb(var(--tn-glow-rgb) / calc(0.2 * var(--tn-glow-k))), 0 0 7px rgb(var(--tn-glow-rgb) / calc(0.15 * var(--tn-glow-k))), 0 0 14px rgb(var(--tn-glow-2-rgb) / calc(0.1 * var(--tn-glow-k))); }
 
         .btn-confirm-mint:disabled {
             opacity: 0.4;
@@ -782,60 +821,61 @@
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.06);
-            border: 2px solid rgba(255, 255, 255, 0.15);
+            background: rgb(var(--tn-tint-rgb) / 0.06);
+            border: 2px solid rgb(var(--tn-tint-rgb) / 0.15);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.8rem;
             transition: all 0.4s ease;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgb(var(--tn-tint-rgb) / max(0.3, var(--tn-alpha-floor)));
         }
 
         .ibc-step.active .ibc-step-circle {
-            border-color: #98e8c1;
-            background: rgba(152, 232, 193, 0.15);
-            color: #98e8c1;
-            box-shadow: 0 0 10px rgba(152, 232, 193, 0.2);
+            border-color: var(--tn-teal);
+            background: rgb(var(--tn-teal-rgb) / 0.15);
+            color: var(--tn-teal);
+            box-shadow: 0 0 10px rgb(var(--tn-halo-rgb) / calc(0.2 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .ibc-step.active .ibc-step-circle { box-shadow: 0 0 2.2px rgb(var(--tn-glow-rgb) / calc(0.26 * var(--tn-glow-k))), 0 0 5px rgb(var(--tn-glow-rgb) / calc(0.2 * var(--tn-glow-k))), 0 0 10px rgb(var(--tn-glow-2-rgb) / calc(0.14 * var(--tn-glow-k))); }
 
         .ibc-step.done .ibc-step-circle {
-            border-color: #55efc4;
-            background: rgba(85, 239, 196, 0.15);
-            color: #55efc4;
+            border-color: var(--tn-success);
+            background: rgb(var(--tn-success-rgb) / 0.15);
+            color: var(--tn-success);
         }
 
         .ibc-step.failed .ibc-step-circle {
-            border-color: #fe7d7d;
-            background: rgba(254, 125, 125, 0.15);
-            color: #fe7d7d;
+            border-color: var(--tn-coral);
+            background: rgb(var(--tn-coral-rgb) / 0.15);
+            color: var(--tn-coral);
         }
 
         .ibc-step-label {
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.35);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-tint-rgb) / max(0.35, var(--tn-alpha-floor)));
             font-family: var(--tn-font);
             white-space: nowrap;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .ibc-step.active .ibc-step-label {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .ibc-step.done .ibc-step-label {
-            color: rgba(85, 239, 196, 0.7);
+            color: rgb(var(--tn-success-rgb) / max(0.7, var(--tn-alpha-floor)));
         }
 
         .ibc-step.failed .ibc-step-label {
-            color: #fe7d7d;
+            color: var(--tn-coral);
         }
 
         .ibc-connector {
             flex: 1 0 40px;
             height: 2px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgb(var(--tn-tint-rgb) / 0.08);
             max-width: 60px;
             position: relative;
             z-index: 1;
@@ -843,17 +883,17 @@
         }
 
         .ibc-connector.done {
-            background: rgba(85, 239, 196, 0.4);
+            background: rgb(var(--tn-success-rgb) / 0.4);
         }
 
         .ibc-connector.active {
-            background: rgba(152, 232, 193, 0.25);
+            background: rgb(var(--tn-teal-rgb) / 0.25);
         }
 
         #ibc-step-status-text {
             text-align: center;
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgb(var(--tn-tint-rgb) / max(0.5, var(--tn-alpha-floor)));
             margin-top: 0.5rem;
             font-family: var(--tn-font);
         }
@@ -868,22 +908,22 @@
             align-items: center;
             gap: 0.3rem;
             padding: 0.2rem 0.7rem;
-            border-radius: 999px;
+            border-radius: var(--tn-radius-ctl);
             font-size: 0.72rem;
             font-weight: 600;
             letter-spacing: 0.04em;
         }
 
         .wl-eligible {
-            background: rgba(152, 232, 193, 0.12);
-            color: rgb(152, 232, 193);
-            border: 1px solid rgba(152, 232, 193, 0.3);
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            color: rgb(var(--tn-teal-rgb) / 1);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.3);
         }
 
         .wl-ineligible {
-            background: rgba(255, 184, 108, 0.10);
-            color: rgb(255, 184, 108);
-            border: 1px solid rgba(255, 184, 108, 0.25);
+            background: rgb(var(--tn-amber-rgb) / 0.10);
+            color: rgb(var(--tn-amber-rgb) / 1);
+            border: 1px solid rgb(var(--tn-amber-rgb) / 0.25);
         }
 
         /* ─── Filter Tabs ─── */
@@ -896,9 +936,9 @@
         }
 
         .demo-notice.orange {
-            background: rgba(255, 184, 108, 0.1);
-            border: 1px solid rgba(255, 184, 108, 0.3);
-            color: #ffb86c;
+            background: rgb(var(--tn-amber-rgb) / 0.1);
+            border: 1px solid rgb(var(--tn-amber-rgb) / 0.3);
+            color: var(--tn-amber);
         }
 
         .filter-tabs {
@@ -907,9 +947,9 @@
         }
 
         .filter-btn {
-            background: rgba(152, 232, 193, 0.04);
-            border: 1px solid rgba(152, 232, 193, 0.12);
-            color: #d2d3d8;
+            background: rgb(var(--tn-teal-rgb) / 0.04);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.12);
+            color: var(--tn-text);
             padding: 0.4rem 0.9rem;
             font-family: var(--tn-font);
             font-size: 0.8rem;
@@ -919,19 +959,19 @@
         }
 
         .filter-btn:hover {
-            border-color: rgba(152, 232, 193, 0.28);
-            color: #f8f8f2;
+            border-color: rgb(var(--tn-teal-rgb) / 0.28);
+            color: var(--tn-text-bright);
         }
 
         .filter-btn.active {
-            background: rgba(152, 232, 193, 0.12);
-            border-color: rgba(152, 232, 193, 0.4);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            border-color: rgb(var(--tn-teal-rgb) / 0.4);
+            color: var(--tn-teal);
         }
 
         .token-count-label {
             font-size: 0.75rem;
-            color: rgba(207, 255, 207, 0.45);
+            color: rgb(var(--tn-mint-rgb) / max(0.45, var(--tn-alpha-floor)));
         }
 
         /* ─── Token Grid ─── */
@@ -943,20 +983,21 @@
         }
 
         .token-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(152, 232, 193, 0.1);
+            background: rgb(var(--tn-shade-rgb) / 0.3);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
             border-radius: 8px;
             overflow: hidden;
             transition: all 0.2s ease;
         }
 
         .token-card:hover {
-            border-color: rgba(152, 232, 193, 0.3);
-            box-shadow: 0 0 20px rgba(152, 232, 193, 0.05);
+            border-color: rgb(var(--tn-teal-rgb) / 0.3);
+            box-shadow: 0 0 20px rgb(var(--tn-halo-rgb) / calc(0.05 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .token-card:hover { box-shadow: 0 0 4.4px rgb(var(--tn-glow-rgb) / calc(0.07 * var(--tn-glow-k))), 0 0 10px rgb(var(--tn-glow-rgb) / calc(0.05 * var(--tn-glow-k))), 0 0 20px rgb(var(--tn-glow-2-rgb) / calc(0.03 * var(--tn-glow-k))); }
 
         .token-card.owned {
-            border-color: rgba(152, 232, 193, 0.25);
+            border-color: rgb(var(--tn-teal-rgb) / 0.25);
         }
 
         .token-card.owned::after {
@@ -964,14 +1005,14 @@
             position: absolute;
             top: 0.4rem;
             right: 0.4rem;
-            font-size: 0.6rem;
-            background: rgba(152, 232, 193, 0.18);
-            border: 1px solid rgba(152, 232, 193, 0.35);
-            color: #98e8c1;
+            font-size: var(--tn-size-label);
+            background: rgb(var(--tn-teal-rgb) / 0.18);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.35);
+            color: var(--tn-teal);
             padding: 0.1rem 0.35rem;
             border-radius: 2px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .token-card {
@@ -981,7 +1022,7 @@
         .token-svg-wrap {
             aspect-ratio: 1;
             overflow: hidden;
-            background: #050508;
+            background: var(--tn-bg-deep);
         }
 
         .token-svg-wrap svg {
@@ -998,15 +1039,15 @@
         }
 
         .token-collection-name {
-            font-size: 0.6rem;
-            color: rgba(207, 255, 207, 0.45);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.45, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .token-id {
             font-size: 0.9rem;
-            color: #f8f8f2;
+            color: var(--tn-text-bright);
             font-weight: 500;
         }
 
@@ -1019,9 +1060,9 @@
         }
 
         .btn-load-more {
-            background: rgba(152, 232, 193, 0.06);
-            border: 1px solid rgba(152, 232, 193, 0.2);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.06);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.2);
+            color: var(--tn-teal);
             padding: 0.6rem 1.5rem;
             font-family: var(--tn-font);
             font-size: 0.85rem;
@@ -1031,8 +1072,8 @@
         }
 
         .btn-load-more:hover {
-            background: rgba(152, 232, 193, 0.12);
-            border-color: rgba(152, 232, 193, 0.35);
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            border-color: rgb(var(--tn-teal-rgb) / 0.35);
         }
 
         /* Empty state */
@@ -1040,7 +1081,7 @@
             width: 100%;
             text-align: center;
             padding: 3rem 1rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
         }
 
         .empty-state p {
@@ -1060,7 +1101,7 @@
         .modal-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgb(var(--tn-shade-rgb) / 0.75);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
@@ -1068,15 +1109,15 @@
         .modal-content {
             position: relative;
             z-index: 1;
-            background: rgba(10, 10, 15, 0.95);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-shade-rgb) / 0.95);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 12px;
             width: 90vw;
             max-width: 900px;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 60px rgb(var(--tn-shadow-rgb) / calc(0.5 * var(--tn-shadow-k)));
         }
 
         .modal-header {
@@ -1084,19 +1125,19 @@
             align-items: center;
             justify-content: space-between;
             padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid rgba(152, 232, 193, 0.1);
+            border-bottom: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
         }
 
         .modal-header h2 {
             font-size: 1.2rem;
             font-weight: 500;
-            color: #cfffcf;
+            color: var(--tn-mint);
         }
 
         .modal-close {
             background: none;
             border: none;
-            color: #d2d3d8;
+            color: var(--tn-text);
             font-size: 1.5rem;
             cursor: pointer;
             padding: 0.25rem;
@@ -1104,7 +1145,7 @@
         }
 
         .modal-close:hover {
-            color: #f8f8f2;
+            color: var(--tn-text-bright);
         }
 
         .modal-body {
@@ -1116,7 +1157,7 @@
         .modal-empty {
             text-align: center;
             padding: 3rem 1rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
         }
 
         .modal-empty p {
@@ -1131,22 +1172,23 @@
         }
 
         .nft-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(152, 232, 193, 0.1);
+            background: rgb(var(--tn-shade-rgb) / 0.3);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
             border-radius: 8px;
             overflow: hidden;
             transition: all 0.2s ease;
         }
 
         .nft-card:hover {
-            border-color: rgba(152, 232, 193, 0.3);
-            box-shadow: 0 0 20px rgba(152, 232, 193, 0.05);
+            border-color: rgb(var(--tn-teal-rgb) / 0.3);
+            box-shadow: 0 0 20px rgb(var(--tn-halo-rgb) / calc(0.05 * var(--tn-halo-k)));
         }
+        html[data-theme="permissionless"] .nft-card:hover { box-shadow: 0 0 4.4px rgb(var(--tn-glow-rgb) / calc(0.07 * var(--tn-glow-k))), 0 0 10px rgb(var(--tn-glow-rgb) / calc(0.05 * var(--tn-glow-k))), 0 0 20px rgb(var(--tn-glow-2-rgb) / calc(0.03 * var(--tn-glow-k))); }
 
         .nft-svg-wrap {
             aspect-ratio: 1;
             overflow: hidden;
-            background: #050508;
+            background: var(--tn-bg-deep);
         }
 
         .nft-svg-wrap svg {
@@ -1163,15 +1205,15 @@
         }
 
         .nft-collection-name {
-            font-size: 0.65rem;
-            color: rgba(207, 255, 207, 0.5);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: var(--tn-track-label);
         }
 
         .nft-token-id {
             font-size: 0.95rem;
-            color: #f8f8f2;
+            color: var(--tn-text-bright);
             font-weight: 500;
         }
 
@@ -1198,21 +1240,21 @@
         }
 
         .toast.success {
-            background: rgba(152, 232, 193, 0.1);
-            border-color: rgba(152, 232, 193, 0.3);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.1);
+            border-color: rgb(var(--tn-teal-rgb) / 0.3);
+            color: var(--tn-teal);
         }
 
         .toast.error {
-            background: rgba(254, 125, 125, 0.1);
-            border-color: rgba(254, 125, 125, 0.3);
-            color: #fe7d7d;
+            background: rgb(var(--tn-coral-rgb) / 0.1);
+            border-color: rgb(var(--tn-coral-rgb) / 0.3);
+            color: var(--tn-coral);
         }
 
         .toast.info {
-            background: rgba(189, 147, 249, 0.1);
-            border-color: rgba(189, 147, 249, 0.3);
-            color: #bd93f9;
+            background: rgb(var(--tn-purple-rgb) / 0.1);
+            border-color: rgb(var(--tn-purple-rgb) / 0.3);
+            color: var(--tn-purple);
         }
 
         .toast.removing {
@@ -1256,7 +1298,7 @@
         .tx-modal-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgb(var(--tn-shade-rgb) / 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
@@ -1264,13 +1306,13 @@
         .tx-modal-card {
             position: relative;
             z-index: 1;
-            background: rgba(10, 10, 15, 0.95);
-            border: 1px solid rgba(152, 232, 193, 0.15);
+            background: rgb(var(--tn-shade-rgb) / 0.95);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.15);
             border-radius: 12px;
             width: 90vw;
             max-width: 480px;
             padding: 2rem;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 60px rgb(var(--tn-shadow-rgb) / calc(0.5 * var(--tn-shadow-k)));
             text-align: center;
             animation: tx-modal-in 0.3s ease forwards;
         }
@@ -1288,11 +1330,11 @@
         }
 
         .tx-modal-card.success {
-            border-color: rgba(152, 232, 193, 0.3);
+            border-color: rgb(var(--tn-teal-rgb) / 0.3);
         }
 
         .tx-modal-card.error {
-            border-color: rgba(254, 125, 125, 0.3);
+            border-color: rgb(var(--tn-coral-rgb) / 0.3);
         }
 
         .tx-modal-icon {
@@ -1308,31 +1350,31 @@
         }
 
         .tx-modal-card.success .tx-modal-title {
-            color: #98e8c1;
+            color: var(--tn-teal);
         }
 
         .tx-modal-card.error .tx-modal-title {
-            color: #fe7d7d;
+            color: var(--tn-coral);
         }
 
         .tx-modal-message {
             font-size: 0.85rem;
-            color: #d2d3d8;
+            color: var(--tn-text);
             line-height: 1.5;
             margin-bottom: 1.2rem;
         }
 
         .tx-modal-hash-label {
-            font-size: 0.65rem;
-            color: rgba(207, 255, 207, 0.5);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-mint-rgb) / max(0.5, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
             margin-bottom: 0.3rem;
         }
 
         .tx-modal-hash-box {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(152, 232, 193, 0.1);
+            background: rgb(var(--tn-shade-rgb) / 0.4);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.1);
             border-radius: 6px;
             padding: 0.6rem 0.8rem;
             margin-bottom: 1rem;
@@ -1345,7 +1387,7 @@
         .tx-modal-hash {
             font-family: var(--tn-font-mono);
             font-size: 0.7rem;
-            color: #98e8c1;
+            color: var(--tn-teal);
             word-break: break-all;
             text-align: left;
             flex: 1;
@@ -1354,7 +1396,7 @@
         .tx-modal-copy {
             background: none;
             border: none;
-            color: rgba(152, 232, 193, 0.6);
+            color: rgb(var(--tn-teal-rgb) / max(0.6, var(--tn-alpha-floor)));
             cursor: pointer;
             font-size: 0.75rem;
             padding: 0.2rem 0.4rem;
@@ -1365,13 +1407,13 @@
         }
 
         .tx-modal-copy:hover {
-            color: #98e8c1;
-            background: rgba(152, 232, 193, 0.1);
+            color: var(--tn-teal);
+            background: rgb(var(--tn-teal-rgb) / 0.1);
         }
 
         .tx-modal-error-detail {
-            background: rgba(254, 125, 125, 0.06);
-            border: 1px solid rgba(254, 125, 125, 0.15);
+            background: rgb(var(--tn-coral-rgb) / 0.06);
+            border: 1px solid rgb(var(--tn-coral-rgb) / 0.15);
             border-radius: 6px;
             padding: 0.6rem 0.8rem;
             margin-bottom: 1rem;
@@ -1379,17 +1421,17 @@
         }
 
         .tx-modal-error-label {
-            font-size: 0.65rem;
-            color: rgba(254, 125, 125, 0.6);
+            font-size: var(--tn-size-label);
+            color: rgb(var(--tn-coral-rgb) / max(0.6, var(--tn-alpha-floor)));
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: var(--tn-track-label);
             margin-bottom: 0.3rem;
         }
 
         .tx-modal-error-text {
             font-family: var(--tn-font-mono);
             font-size: 0.7rem;
-            color: #fe7d7d;
+            color: var(--tn-coral);
             word-break: break-all;
             line-height: 1.4;
             max-height: 120px;
@@ -1417,40 +1459,40 @@
         }
 
         .tx-modal-btn-primary {
-            background: rgba(152, 232, 193, 0.12);
-            border: 1px solid rgba(152, 232, 193, 0.35);
-            color: #98e8c1;
+            background: rgb(var(--tn-teal-rgb) / 0.12);
+            border: 1px solid rgb(var(--tn-teal-rgb) / 0.35);
+            color: var(--tn-teal);
         }
 
         .tx-modal-btn-primary:hover {
-            background: rgba(152, 232, 193, 0.2);
-            border-color: rgba(152, 232, 193, 0.5);
-            color: #cfffcf;
+            background: rgb(var(--tn-teal-rgb) / 0.2);
+            border-color: rgb(var(--tn-teal-rgb) / 0.5);
+            color: var(--tn-mint);
             opacity: 1;
         }
 
         .tx-modal-btn-secondary {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #d2d3d8;
+            background: rgb(var(--tn-tint-rgb) / 0.04);
+            border: 1px solid rgb(var(--tn-tint-rgb) / 0.12);
+            color: var(--tn-text);
         }
 
         .tx-modal-btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            color: #f8f8f2;
+            background: rgb(var(--tn-tint-rgb) / 0.08);
+            border-color: rgb(var(--tn-tint-rgb) / 0.2);
+            color: var(--tn-text-bright);
             opacity: 1;
         }
 
         .tx-modal-btn-error {
-            background: rgba(254, 125, 125, 0.1);
-            border: 1px solid rgba(254, 125, 125, 0.3);
-            color: #fe7d7d;
+            background: rgb(var(--tn-coral-rgb) / 0.1);
+            border: 1px solid rgb(var(--tn-coral-rgb) / 0.3);
+            color: var(--tn-coral);
         }
 
         .tx-modal-btn-error:hover {
-            background: rgba(254, 125, 125, 0.18);
-            border-color: rgba(254, 125, 125, 0.45);
+            background: rgb(var(--tn-coral-rgb) / 0.18);
+            border-color: rgb(var(--tn-coral-rgb) / 0.45);
             opacity: 1;
         }
 
@@ -1498,7 +1540,9 @@
 
         @media (max-width: 768px) {
             .page-title {
-                font-size: 1.6rem;
+                font-size: var(--tn-size-display);
+                letter-spacing: var(--tn-track-display);
+                font-family: var(--tn-font-display);
             }
 
             .page-subtitle {
@@ -1556,36 +1600,31 @@
             .col-detail-name {
                 font-size: 1.4rem;
             }
-        } </style> <script>window.__TN_ASSET_V="edd0d8634c";</script></head> <body> <canvas id="main-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;"></canvas> <main class="main"> <script type="module" src="/lib/faucet.js?v=dad9a1f908"></script> <script src="/lib/fab.js?v=5563b3ec05"></script> <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;"> <h1 class="page-title" style="margin-bottom:0;">CW-SVG</h1> <button class="btn-docs" onclick="openDocModal()" aria-label="Documentation" title="Documentation">?</button> </div> <div class="page-subtitle">Generative On-Chain Art</div> <!-- ── Documentation Modal ── --> <div id="modal-docs" style="display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;"> <div style="position:absolute;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);" onclick="closeDocModal()"></div> <div style="position:relative;z-index:1;background:rgba(10,10,15,0.95);border:1px solid rgba(152,232,193,0.15);border-radius:12px;width:90vw;max-width:580px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,0,0,0.5);"> <div style="display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid rgba(152,232,193,0.1);"> <h2 style="font-size:1.1rem;font-weight:500;color:#cfffcf;">Documentation</h2> <button onclick="closeDocModal()" style="background:none;border:1px solid rgba(152,232,193,0.12);color:#d2d3d8;width:32px;height:32px;border-radius:4px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease;">×</button> </div> <div style="padding:1.5rem;overflow-y:auto;flex:1;"> <!-- CWSVG Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:#98e8c1;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> What are cwSVGs?</h3> <p style="font-size:0.85rem;color:#d2d3d8;line-height:1.65;margin-bottom:0.75rem;"> cwSVGs are on-chain SVGs with parameterized variables. Rather than storing a static image, the contract holds an SVG template with variable slots — colors, shapes, patterns, positions — that are generated on-chain during minting. </p> <p style="font-size:0.85rem;color:#d2d3d8;line-height:1.65;margin-bottom:0.75rem;"> Each token receives a unique combination of these variables, derived from on-chain entropy at the time of mint. The result: every token renders a one-of-a-kind SVG, fully client-side, with no off-chain metadata or IPFS dependency. </p> <p style="font-size:0.85rem;color:#d2d3d8;line-height:1.65;"> Because the SVG template and all parameters live on-chain, the art is permanent and self-verifying. Any client can reconstruct the exact visual from the contract state alone. </p> </div> <!-- Shitstraps Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:#98e8c1;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Payment via Shitstraps</h3> <p style="font-size:0.85rem;color:#d2d3d8;line-height:1.65;margin-bottom:0.75rem;"> Collections may price mints in a specific denom (e.g. <code style="font-family: var(--tn-font-mono);font-size:0.8rem;background:rgba(152,232,193,0.06);border:1px solid rgba(152,232,193,0.15);border-radius:3px;padding:0.1rem 0.4rem;color:#98e8c1;">uterp</code>). If your wallet holds a different asset, the mint flow can use a <strong style="color:#bd93f9;">shitstrap</strong> — an automated swap path that converts your available tokens into the required denom at mint time. </p> <p style="font-size:0.85rem;color:#d2d3d8;line-height:1.65;margin-bottom:0.75rem;"> When you connect your wallet, the payment section shows all available options: </p> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">→</span> Direct payment if you already hold the required denom </li> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">→</span> Shitstrap swap paths from other assets you hold </li> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">→</span> Insufficient balance warnings if no path covers the cost </li> </ul> <p style="font-size:0.85rem;color:#d2d3d8;line-height:1.65;margin-top:0.75rem;"> The swap is executed as part of the mint transaction — you don't need to manually swap beforehand. Select your preferred payment method and confirm. </p> <p style="font-size:0.85rem;color:#d2d3d8;line-height:1.65;margin-top:0.75rem;"> <strong style="color:#bd93f9;">IBC-aware shitstraps:</strong> you can source slop from counterparty chains via IBC transfer memos (ADR-8 style callbacks) so mints complete without pre-swapping on Terp. Cap participation to remaining strap capacity (<code style="font-family: var(--tn-font-mono);font-size:0.75rem;color:#98e8c1;">to_shit</code>) to avoid lockout from over-sending past the cutoff. </p> </div> <!-- Minting Process --> <div> <h3 style="font-size:0.9rem;font-weight:500;color:#98e8c1;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Minting Process</h3> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">1.</span> Browse collections and select one </li> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">2.</span> Set your quantity and review the total cost </li> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">3.</span> Choose a payment method (direct or shitstrap) </li> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">4.</span> Confirm the transaction preview and sign </li> <li style="font-size:0.85rem;color:#d2d3d8;line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgba(152,232,193,0.4);font-size:0.75rem;">5.</span> Your unique SVG is generated on-chain — refresh to see it </li> </ul> </div> </div> </div> </div> <!-- ── List View ── --> <div id="view-list" style="width:100%;"> <!-- ── Loading Spinner ── --> <div id="loading" style="display:flex;justify-content:center;align-items:center;padding:4rem 1rem;"> <div style="width:32px;height:32px;border:3px solid rgba(152,232,193,0.2);border-top-color:#98e8c1;border-radius:50%;animation:spin 0.8s linear infinite;"> </div> <span style="margin-left:1rem;color:#98e8c1;font-family: var(--tn-font);font-size:0.9rem;">Loading collections...</span> </div> <style> @keyframes spin {
+        } </style> </head> <body> <main class="main"> <script type="module" src="/lib/faucet.js"></script> <script src="/lib/fab.js"></script> <div data-tn-head style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;"> <h1 class="page-title" style="margin-bottom:0;">CW-SVG</h1> <button class="btn-docs" onclick="openDocModal()" aria-label="Documentation" title="Documentation">?</button> </div> <div class="page-subtitle">Generative On-Chain Art</div> <!-- ── Documentation Modal ── --> <div id="modal-docs" class="modal" style="display:none"> <div class="modal-backdrop" onclick="closeDocModal()"></div> <div class="modal-content" style="max-width:580px;"> <div class="modal-header"> <h2 style="font-size:1.1rem;font-weight:500;color:var(--tn-mint);">Documentation</h2> <button class="modal-close" onclick="closeDocModal()" aria-label="Close">×</button> </div> <div class="modal-body"> <!-- CWSVG Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> What are cwSVGs?</h3> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> cwSVGs are on-chain SVGs with parameterized variables. Rather than storing a static image, the contract holds an SVG template with variable slots — colors, shapes, patterns, positions — that are generated on-chain during minting. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> Each token receives a unique combination of these variables, derived from on-chain entropy at the time of mint. The result: every token renders a one-of-a-kind SVG, fully client-side, with no off-chain metadata or IPFS dependency. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;"> Because the SVG template and all parameters live on-chain, the art is permanent and self-verifying. Any client can reconstruct the exact visual from the contract state alone. </p> </div> <!-- Shitstraps Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Payment via Shitstraps</h3> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> Collections may price mints in a specific denom (e.g. <code style="font-family: var(--tn-font-mono);font-size:0.8rem;background:rgb(var(--tn-teal-rgb) / 0.06);border:1px solid rgb(var(--tn-teal-rgb) / 0.15);border-radius:3px;padding:0.1rem 0.4rem;color:var(--tn-teal);">uterp</code>). If your wallet holds a different asset, the mint flow can use a <strong style="color:var(--tn-purple);">shitstrap</strong> — an automated swap path that converts your available tokens into the required denom at mint time. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> When you connect your wallet, the payment section shows all available options: </p> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Direct payment if you already hold the required denom </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Shitstrap swap paths from other assets you hold </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Insufficient balance warnings if no path covers the cost </li> </ul> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-top:0.75rem;"> The swap is executed as part of the mint transaction — you don't need to manually swap beforehand. Select your preferred payment method and confirm. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-top:0.75rem;"> <strong style="color:var(--tn-purple);">IBC-aware shitstraps:</strong> you can source slop from counterparty chains via IBC transfer memos (ADR-8 style callbacks) so mints complete without pre-swapping on Terp. Cap participation to remaining strap capacity (<code style="font-family: var(--tn-font-mono);font-size:0.75rem;color:var(--tn-teal);">to_shit</code>) to avoid lockout from over-sending past the cutoff. </p> </div> <!-- Minting Process --> <div> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Minting Process</h3> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">1.</span> Browse collections and select one </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">2.</span> Set your quantity and review the total cost </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">3.</span> Choose a payment method (direct or shitstrap) </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">4.</span> Confirm the transaction preview and sign </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">5.</span> Your unique SVG is generated on-chain — refresh to see it </li> </ul> </div> </div> </div> </div> <!-- ── List View ── --> <div id="view-list" style="width:100%;"> <!-- ── Loading Spinner ── --> <div id="loading" style="display:flex;justify-content:center;align-items:center;padding:4rem 1rem;"> <div style="width:32px;height:32px;border:3px solid rgb(var(--tn-teal-rgb) / 0.2);border-top-color:var(--tn-teal);border-radius:50%;animation:spin 0.8s linear infinite;"> </div> <span style="margin-left:1rem;color:var(--tn-teal);font-family: var(--tn-font);font-size:0.9rem;">Loading collections...</span> </div> <style> @keyframes spin {
                     to {
                         transform: rotate(360deg)
                     }
-                } </style> <!-- ── Demo Mode Notice ── --> <div id="demo-notice" class="demo-notice" style="display:none;"> Demo mode Showing sample collections.</div> <!-- ── Collection Grid ── --> <div id="collection-grid" class="collection-grid" style="display:none;"></div> </div><!-- end view-list --> <!-- ── Collection Detail View ── --> <div id="view-collection" class="view" style="align-items:flex-start;"> <button class="btn-back" onclick="showListView()">&#8592; Back to Collections</button> <div class="col-detail-header" id="col-detail-header"></div> <div class="mint-panel" id="mint-panel" style="display:none"> <div class="mint-panel-price"> <span class="mint-panel-price-label">Price per Token</span> <span class="mint-panel-price-value" id="mint-price">--</span> </div> <div class="qty-row"> <button class="qty-btn" id="qty-dec" onclick="changeQuantity(-1)">-</button> <span class="qty-display" id="qty-display">1</span> <button class="qty-btn" id="qty-inc" onclick="changeQuantity(1)">+</button> </div> <div class="mint-total"> <span class="mint-total-label">Total</span> <span class="mint-total-value" id="mint-total">--</span> </div> <!-- Whitelist eligibility — shown when merkleServerUrl is configured --> <div id="whitelist-badge" style="display:none"></div> <button class="btn-mint" id="btn-mint" onclick="handleMint()">Review</button> <!-- Payment options (shitstrap) — shown when wallet connected --> <div class="payment-section" id="payment-section" style="display:none"> <div class="payment-section-label">Payment</div> <div class="payment-row" id="payment-options"></div> </div> <!-- Fund shitstraps up to remaining capacity (prevent lockout) --> <div class="payment-section" id="shitstrap-fund-desk" style="display:none;margin-top:0.75rem;"> <div class="payment-section-label" style="display:flex;justify-content:space-between;align-items:center;"> <span>Shitstrap capacity</span> <button type="button" class="btn-collection" style="padding:0.25rem 0.55rem;font-size:0.7rem;" id="btn-open-fund-ss" onclick="openShitstrapFundModal()">Fund strap…</button> </div> <div id="shitstrap-capacity-list" style="font-size:0.72rem;color:#d2d3d8;line-height:1.5;"></div> <p style="font-size:0.68rem;color:#6272a4;margin-top:0.4rem;line-height:1.4;"> Funding is capped to remaining capacity so you cannot overshoot the cutoff and lock funds. IBC memos can source slop from counterparty chains before mint. </p> </div> <!-- Two-step confirmation panel --> <div class="confirm-panel" id="confirm-panel" style="display:none"> <div class="confirm-title">Transaction Preview</div> <div id="ibc-step-bar"> <div class="ibc-step-container"> <div class="ibc-step" id="ibc-step-approve"> <div class="ibc-step-circle">1</div> <div class="ibc-step-label">Approve</div> </div> <div class="ibc-connector" id="ibc-conn-1"></div> <div class="ibc-step" id="ibc-step-ibc-xfer"> <div class="ibc-step-circle">↗</div> <div class="ibc-step-label">IBC Xfer</div> </div> <div class="ibc-connector" id="ibc-conn-2"></div> <div class="ibc-step" id="ibc-step-swap"> <div class="ibc-step-circle">⇄</div> <div class="ibc-step-label">Swap</div> </div> <div class="ibc-connector" id="ibc-conn-3"></div> <div class="ibc-step" id="ibc-step-mint"> <div class="ibc-step-circle">✦</div> <div class="ibc-step-label">Mint</div> </div> </div> <div id="ibc-step-status-text"></div> </div> <div id="confirm-steps"></div> <div class="confirm-actions"> <button class="btn-cancel-confirm" onclick="cancelMintConfirm()">Cancel</button> <button class="btn-confirm-mint" id="btn-confirm-mint" onclick="executeMintTx()">Confirm Mint</button> </div> </div> </div> <div class="filter-row" id="filter-row" style="display:none"> <span class="token-count-label" id="token-count-label"></span> <div class="filter-tabs"> <button class="filter-btn active" id="filter-all" onclick="setTokenFilter('all')">All Tokens</button> <button class="filter-btn" id="filter-mine" onclick="setTokenFilter('mine')" style="display:none"> My Tokens (<span id="my-token-count">0</span>) </button> <button class="filter-btn" id="filter-collection" onclick="openMyCollectionModal()">My Collection</button> </div> </div> <div class="loading" id="loading-tokens" style="display:none"> <div class="spinner"></div> <p>Loading tokens...</p> </div> <div class="token-grid" id="token-grid"></div> <div class="load-more-row" id="load-more-row" style="display:none"> <button class="btn-load-more" onclick="loadMoreTokens()">Load More</button> </div> </div> </main> <!-- My Collection Modal (cross-collection wallet view) --> <div class="modal" id="modal-collection" style="display:none"> <div class="modal-backdrop" onclick="closeMyCollectionModal()"></div> <div class="modal-content"> <div class="modal-header"> <h2>My Collection</h2> <button class="modal-close" onclick="closeMyCollectionModal()">&times;</button> </div> <div class="modal-body" id="modal-body"></div> </div> </div> <div class="tx-modal" id="modal-tx" style="display:none"> <div class="tx-modal-backdrop" onclick="closeTxModal()"></div> <div class="tx-modal-card" id="tx-modal-card"></div> </div> <!-- Fund shitstrap modal (cap to remaining capacity) --> <div class="modal" id="modal-fund-ss" style="display:none"> <div class="modal-backdrop" onclick="closeShitstrapFundModal()"></div> <div class="modal-content" style="max-width:420px;"> <div class="modal-header"> <h2>Fund shitstrap</h2> <button class="modal-close" onclick="closeShitstrapFundModal()">&times;</button> </div> <div class="modal-body"> <p style="font-size:0.82rem;color:#d2d3d8;line-height:1.55;margin-bottom:0.85rem;"> Participate with an accepted slop denom. Amount is hard-capped to remaining capacity so excess cannot lock past the cutoff. </p> <label style="font-size:0.7rem;color:rgba(207,255,207,0.55);text-transform:uppercase;letter-spacing:0.06em;">Strap</label> <select id="fund-ss-select" style="width:100%;margin:0.3rem 0 0.75rem;padding:0.5rem;background:rgba(0,0,0,0.4);border:1px solid rgba(152,232,193,0.25);border-radius:6px;color:#f8f8f2;font-size:0.8rem;"></select> <label style="font-size:0.7rem;color:rgba(207,255,207,0.55);text-transform:uppercase;letter-spacing:0.06em;">Slop denom</label> <select id="fund-ss-denom" style="width:100%;margin:0.3rem 0 0.75rem;padding:0.5rem;background:rgba(0,0,0,0.4);border:1px solid rgba(152,232,193,0.25);border-radius:6px;color:#f8f8f2;font-size:0.8rem;"></select> <label style="font-size:0.7rem;color:rgba(207,255,207,0.55);text-transform:uppercase;letter-spacing:0.06em;">Amount (base units)</label> <input id="fund-ss-amount" type="text" inputmode="numeric" placeholder="0" style="width:100%;margin:0.3rem 0 0.35rem;padding:0.5rem;background:rgba(0,0,0,0.4);border:1px solid rgba(152,232,193,0.25);border-radius:6px;color:#f8f8f2;font-size:0.85rem;font-family: var(--tn-font-mono);"> <p id="fund-ss-cap-hint" style="font-size:0.72rem;color:#98e8c1;margin-bottom:0.85rem;"></p> <button type="button" class="btn-mint" id="btn-fund-ss-submit" onclick="submitShitstrapFund()" style="width:100%;"> Sign fund tx </button> </div> </div> </div> <div class="toast-container" id="toasts"></div> <canvas id="confetti-canvas" style="display:none"></canvas> <script type="importmap"> {
-        "imports": {
-            "interchainjs/cosmwasm/wasm/v1/tx": "https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx",
-            "@interchainjs/encoding": "https://esm.sh/@interchainjs/encoding@1.11.1"
-        }
-    } </script> <!-- ── Add to your <script> block (or as window-scoped) ── --> <script> window.openDocModal = function () {
+                } </style> <!-- ── Load status ── --> <div id="demo-notice" class="demo-notice" role="status" style="display:none;"></div> <!-- ── Collection Grid ── --> <div id="collection-grid" class="collection-grid" style="display:none;"></div> </div><!-- end view-list --> <!-- ── Collection Detail View ── --> <div id="view-collection" class="view" style="align-items:flex-start;"> <button class="btn-back" onclick="showListView()">&#8592; Back to Collections</button> <div class="col-detail-header" id="col-detail-header"></div> <div class="mint-panel" id="mint-panel" style="display:none"> <div class="mint-panel-price"> <span class="mint-panel-price-label">Price per Token</span> <span class="mint-panel-price-value" id="mint-price">--</span> </div> <div class="qty-row"> <button class="qty-btn" id="qty-dec" onclick="changeQuantity(-1)">-</button> <span class="qty-display" id="qty-display">1</span> <button class="qty-btn" id="qty-inc" onclick="changeQuantity(1)">+</button> </div> <div class="mint-total"> <span class="mint-total-label">Total</span> <span class="mint-total-value" id="mint-total">--</span> </div> <!-- Whitelist eligibility — shown when merkleServerUrl is configured --> <div id="whitelist-badge" style="display:none"></div> <p class="mint-notice" id="mint-notice" role="status" style="display:none"></p> <button class="btn-mint" id="btn-mint" onclick="handleMint()">Review</button> <!-- Payment options (shitstrap) — shown when wallet connected --> <div class="payment-section" id="payment-section" style="display:none"> <div class="payment-section-label">Payment</div> <div class="payment-row" id="payment-options"></div> </div> <!-- Fund shitstraps up to remaining capacity (prevent lockout) --> <div class="payment-section" id="shitstrap-fund-desk" style="display:none;margin-top:0.75rem;"> <div class="payment-section-label" style="display:flex;justify-content:space-between;align-items:center;"> <span>Shitstrap capacity</span> <button type="button" class="btn-collection" style="padding:0.25rem 0.55rem;font-size:0.7rem;" id="btn-open-fund-ss" onclick="openShitstrapFundModal()">Fund strap…</button> </div> <div id="shitstrap-capacity-list" style="font-size:0.72rem;color:var(--tn-text);line-height:1.5;"></div> <p style="font-size:0.68rem;color:var(--tn-text-dim);margin-top:0.4rem;line-height:1.4;"> Funding is capped to remaining capacity so you cannot overshoot the cutoff and lock funds. IBC memos can source slop from counterparty chains before mint. </p> </div> <!-- Two-step confirmation panel --> <div class="confirm-panel" id="confirm-panel" style="display:none"> <div class="confirm-title">Transaction Preview</div> <div id="ibc-step-bar"> <div class="ibc-step-container"> <div class="ibc-step" id="ibc-step-approve"> <div class="ibc-step-circle">1</div> <div class="ibc-step-label">Approve</div> </div> <div class="ibc-connector" id="ibc-conn-1"></div> <div class="ibc-step" id="ibc-step-ibc-xfer"> <div class="ibc-step-circle">↗</div> <div class="ibc-step-label">IBC Xfer</div> </div> <div class="ibc-connector" id="ibc-conn-2"></div> <div class="ibc-step" id="ibc-step-swap"> <div class="ibc-step-circle">⇄</div> <div class="ibc-step-label">Swap</div> </div> <div class="ibc-connector" id="ibc-conn-3"></div> <div class="ibc-step" id="ibc-step-mint"> <div class="ibc-step-circle">✦</div> <div class="ibc-step-label">Mint</div> </div> </div> <div id="ibc-step-status-text"></div> </div> <div id="confirm-steps"></div> <div class="confirm-actions"> <button class="btn-cancel-confirm" onclick="cancelMintConfirm()">Cancel</button> <button class="btn-confirm-mint" id="btn-confirm-mint" onclick="executeMintTx()">Confirm Mint</button> </div> </div> </div> <div class="filter-row" id="filter-row" style="display:none"> <span class="token-count-label" id="token-count-label"></span> <div class="filter-tabs"> <button class="filter-btn active" id="filter-all" onclick="setTokenFilter('all')">All Tokens</button> <button class="filter-btn" id="filter-mine" onclick="setTokenFilter('mine')" style="display:none"> My Tokens (<span id="my-token-count">0</span>) </button> <button class="filter-btn" id="filter-collection" onclick="openMyCollectionModal()">My Collection</button> </div> </div> <div class="loading" id="loading-tokens" style="display:none"> <div class="spinner"></div> <p>Loading tokens...</p> </div> <div class="token-grid" id="token-grid"></div> <div class="load-more-row" id="load-more-row" style="display:none"> <button class="btn-load-more" onclick="loadMoreTokens()">Load More</button> </div> </div> </main> <!-- My Collection Modal (cross-collection wallet view) --> <div class="modal" id="modal-collection" style="display:none"> <div class="modal-backdrop" onclick="closeMyCollectionModal()"></div> <div class="modal-content"> <div class="modal-header"> <h2>My Collection</h2> <button class="modal-close" onclick="closeMyCollectionModal()">&times;</button> </div> <div class="modal-body" id="modal-body"></div> </div> </div> <div class="tx-modal" id="modal-tx" style="display:none"> <div class="tx-modal-backdrop" onclick="closeTxModal()"></div> <div class="tx-modal-card" id="tx-modal-card"></div> </div> <!-- Fund shitstrap modal (cap to remaining capacity) --> <div class="modal" id="modal-fund-ss" style="display:none"> <div class="modal-backdrop" onclick="closeShitstrapFundModal()"></div> <div class="modal-content" style="max-width:420px;"> <div class="modal-header"> <h2>Fund shitstrap</h2> <button class="modal-close" onclick="closeShitstrapFundModal()">&times;</button> </div> <div class="modal-body"> <p style="font-size:0.82rem;color:var(--tn-text);line-height:1.55;margin-bottom:0.85rem;"> Participate with an accepted slop denom. Amount is hard-capped to remaining capacity so excess cannot lock past the cutoff. </p> <label style="font-size:0.7rem;color:rgb(var(--tn-mint-rgb) / max(0.55, var(--tn-alpha-floor)));text-transform:uppercase;letter-spacing:0.06em;">Strap</label> <select id="fund-ss-select" style="width:100%;margin:0.3rem 0 0.75rem;padding:0.5rem;background:rgb(var(--tn-shade-rgb) / 0.4);border:1px solid rgb(var(--tn-teal-rgb) / 0.25);border-radius:6px;color:var(--tn-text-bright);font-size:0.8rem;"></select> <label style="font-size:0.7rem;color:rgb(var(--tn-mint-rgb) / max(0.55, var(--tn-alpha-floor)));text-transform:uppercase;letter-spacing:0.06em;">Slop denom</label> <select id="fund-ss-denom" style="width:100%;margin:0.3rem 0 0.75rem;padding:0.5rem;background:rgb(var(--tn-shade-rgb) / 0.4);border:1px solid rgb(var(--tn-teal-rgb) / 0.25);border-radius:6px;color:var(--tn-text-bright);font-size:0.8rem;"></select> <label style="font-size:0.7rem;color:rgb(var(--tn-mint-rgb) / max(0.55, var(--tn-alpha-floor)));text-transform:uppercase;letter-spacing:0.06em;">Amount (base units)</label> <input id="fund-ss-amount" type="text" inputmode="numeric" placeholder="0" style="width:100%;margin:0.3rem 0 0.35rem;padding:0.5rem;background:rgb(var(--tn-shade-rgb) / 0.4);border:1px solid rgb(var(--tn-teal-rgb) / 0.25);border-radius:6px;color:var(--tn-text-bright);font-size:0.85rem;font-family: var(--tn-font-mono);"> <p id="fund-ss-cap-hint" style="font-size:0.72rem;color:var(--tn-teal);margin-bottom:0.85rem;"></p> <button type="button" class="btn-mint" id="btn-fund-ss-submit" onclick="submitShitstrapFund()" style="width:100%;"> Sign fund tx </button> </div> </div> </div> <div class="toast-container" id="toasts"></div> <canvas id="confetti-canvas" style="display:none"></canvas>  <!-- ── Add to your <script> block (or as window-scoped) ── --> <script> window.openDocModal = function () {
             document.getElementById('modal-docs').style.display = 'flex';
         };
         window.closeDocModal = function () {
             document.getElementById('modal-docs').style.display = 'none';
-        }; </script> <script type="module"> import { loadSiteConfig, missingContracts, useBrowserSafeChainEndpoints } from '/lib/config.js?v=a4f965a800';
-        import { applyNavGuard } from '/lib/nav-guard.js?v=cbd8297684';
+        }; </script> <script type="module"> import { loadSiteConfig, missingContracts, useBrowserSafeChainEndpoints } from '/lib/config.js';
+        import { applyNavGuard } from '/lib/nav-guard.js';
         // Cache-bust wallet module so ensureWallet / reconnect fixes always load
-        import * as TerpWallet from '/lib/wallet.js?v=5fd5abe920';
-        import { installPmoneyEgg } from '/lib/pmoney-egg.js?v=5a84e5e413';
+        import * as TerpWallet from '/lib/wallet.js';
+        import { installPmoneyEgg } from '/lib/pmoney-egg.js';
         import {
             fetchMemberProof,
             merkleServerUrl,
             whitelistTreeId,
-        } from '/lib/merkle-server.js?v=2365ab0062';
+        } from '/lib/merkle-server.js';
         import {
             loadAssetRegistry,
             denomLabel,
             formatCoin,
             shortAddr as shortAssetAddr,
-        } from '/lib/assets-registry.js?v=7c7e5a8535';
+        } from '/lib/assets-registry.js';
         applyNavGuard();
         // ═══════════════════════════════════════════════════════════════
         // CONFIGURATION (static config.json — no hardcoded mainnet addresses)
@@ -1674,30 +1713,6 @@
         // DEMO DATA
         // ═══════════════════════════════════════════════════════════════
 
-        const DEMO_COLLECTIONS = [
-            {
-                addr: "terp1demo_genesis_addr",
-                contractInfo: { name: "Terp Genesis", symbol: "TGEN" },
-                config: { unit_price: { denom: "uthiol", amount: "5000000" }, max_token_supply: 512 },
-                minted: 187,
-                demoParams: { background_style: "nebula", core_color: "purple", ring_count: 5, particle_density: 0.7, glyph_set: "ancient", seed: 42 },
-            },
-            {
-                addr: "terp1demo_carbon_addr",
-                contractInfo: { name: "Carbon Lattice", symbol: "CARB" },
-                config: { unit_price: { denom: "uthiol", amount: "10000000" }, max_token_supply: 256 },
-                minted: 64,
-                demoParams: { background_style: "void", core_color: "teal", ring_count: 3, particle_density: 0.5, glyph_set: "carbon", seed: 137 },
-            },
-            {
-                addr: "terp1demo_solar_addr",
-                contractInfo: { name: "Solar Whisper", symbol: "SOLW" },
-                config: { unit_price: { denom: "uthiol", amount: "25000000" }, max_token_supply: 128 },
-                minted: 12,
-                demoParams: { background_style: "aurora", core_color: "gold", ring_count: 7, particle_density: 0.3, glyph_set: "runes", seed: 2187 },
-            },
-        ];
-
         // ═══════════════════════════════════════════════════════════════
         // CONFIG HELPERS  (work with both live MintConfig and demo shapes)
         // ═══════════════════════════════════════════════════════════════
@@ -1715,6 +1730,17 @@
             }
             if (mintConfig.unit_price) return mintConfig.unit_price; // demo fallback
             return { amount: "0", denom: CONFIG.denom };
+        }
+
+        // Tokens left at the current price (a batch never spans two tiers).
+        function remainingAtPrice(summary, fallback) {
+            const cfg = summary?.config;
+            const minted = summary?.minted || 0;
+            const cap = getMaxSupply(cfg);
+            if (!cfg) return fallback;
+            const tier = (cfg.price_tiers || []).find(t => minted < t.until_count);
+            const end = Math.min(tier ? tier.until_count : (cap || Infinity), cap || Infinity);
+            return Number.isFinite(end) ? Math.max(0, end - minted) : fallback;
         }
 
         // Returns the total token supply cap (0 = unlimited).
@@ -1852,10 +1878,29 @@
         // ═══════════════════════════════════════════════════════════════
 
         let KeplrController, WalletType, queryContract, MsgExecuteContract;
-        let CwSvgMinterQueryClient, Cw721SvgQueryClient;
         let CwShitstrapFactoryQueryClient, CwShitstrapQueryClient;
+        // One lazy bundle per contract (built from lib/contracts/src by build.js).
+        // Reads need no wallet code; signing libraries load on connect intent.
+        let SvgMinter = null, SvgCollection = null;
+
+        async function loadContractBundles() {
+            if (SvgMinter && SvgCollection) return true;
+            const [m, c] = await Promise.all([
+                import("/lib/contracts/cw-svg-minter.js"),
+                import("/lib/contracts/cw721-svg.js"),
+            ]);
+            SvgMinter = m;
+            SvgCollection = c;
+            return true;
+        }
 
         async function loadLibs() {
+            try {
+                await loadContractBundles();
+            } catch (err) {
+                console.error("[svg] contract bundles", err);
+                return false;
+            }
             try {
                 const ok = await TerpWallet.ensureLibs(CONFIG, { pageId: "svg" });
                 if (!ok) throw new Error("cosmes load failed");
@@ -1863,26 +1908,21 @@
                 KeplrController = ws.KeplrController;
                 WalletType = ws.WalletType;
                 queryContract = ws.queryContract;
-                MsgExecuteContract = ws.MsgExecuteContract;
+                // cosmes loads on connect intent; the wallet.js wrapper builds the msg once it has.
+                MsgExecuteContract = ws.MsgExecuteContract || TerpWallet.MsgExecuteContract;
 
-                const minterMod = await import("/lib/cw-svg-minter.js?v=d5fd8bb9c6");
-                CwSvgMinterQueryClient = minterMod.CwSvgMinterQueryClient;
-
-                const svgMod = await import("/lib/cw721-svg.js?v=2d83752b47");
-                Cw721SvgQueryClient = svgMod.Cw721SvgQueryClient;
-
-                const ssfMod = await import("/lib/cw-shitstrap-factory.js?v=415aabd658");
+                const ssfMod = await import("/lib/cw-shitstrap-factory.js");
                 CwShitstrapFactoryQueryClient = ssfMod.CwShitstrapFactoryQueryClient;
 
-                const ssMod = await import("/lib/cw-shitstrap.js?v=b375c9f897");
+                const ssMod = await import("/lib/cw-shitstrap.js");
                 CwShitstrapQueryClient = ssMod.CwShitstrapQueryClient;
 
                 state.libsLoaded = true;
                 return true;
             } catch (err) {
-                console.error("Failed to load libraries:", err);
-                showToast("Failed to load libraries. Using demo mode.", "error");
-                return false;
+                // Collections still load; only wallet features wait for a retry.
+                console.error("Failed to load wallet libraries:", err);
+                return true;
             }
         }
 
@@ -2202,15 +2242,12 @@
         /** Build CosmWasm mint execute payload with optional merkle proof. */
         function buildMintExecuteMsg(collectionAddr, quantity) {
             const proof = getWhitelistProof(collectionAddr);
-            const proof_hashes = proof?.proof_hashes || [];
-            // Match contract ExecuteMsg::Mint { amount, allocation, proof_hashes }
-            return {
-                mint: {
-                    amount: quantity,
-                    allocation: proof?.allocation != null ? Number(proof.allocation) : null,
-                    proof_hashes,
-                },
-            };
+            // Public mint on the collection: update_extension → mint { amnt, proof_hashes, alloc, ext }
+            return SvgCollection.mintMsg({
+                amount: quantity,
+                proofHashes: proof?.proof_hashes || [],
+                alloc: proof?.allocation != null ? Number(proof.allocation) : 0,
+            });
         }
 
         function findCrossChainCoverage(neededAmount, neededDenom, multiChainBalances) {
@@ -2282,7 +2319,6 @@
         //   undefined                      — not yet checked
         async function fetchMerkleProof(collectionAddr) {
             if (!CONFIG.merkleServerUrl || !state.address) return;
-            if (collectionAddr.startsWith("terp1demo")) return;
             const treeId = whitelistTreeId(CONFIG) || collectionAddr;
             const key = collectionAddr;
             try {
@@ -2475,7 +2511,7 @@
                         steps.push(`<div class="confirm-step">
                             <span class="confirm-step-icon">⇄</span>
                             <span class="confirm-step-desc">Swap ${step.slopAmount} ${step.slopDenom} via shitstrap</span>
-                            <span class="confirm-step-amount">→ ${formatPrice(step.uthiolOut)} ${CONFIG.denomDisplay}</span>
+                            <span class="confirm-step-amount">→ ${formatPrice(step.uthiolOut)}</span>
                         </div>`);
                     }
                     break;
@@ -2485,7 +2521,7 @@
             const collectionName = summary?.contractInfo?.name || "Collection";
             const priceLabel = plan.feeWaived
                 ? "FREE (whitelist)"
-                : `${formatPrice(plan.totalUthiol)} ${CONFIG.denomDisplay}`;
+                : `${formatPrice(plan.totalUthiol)}`;
             steps.push(`<div class="confirm-step confirm-step-mint">
                 <span class="confirm-step-icon">✦</span>
                 <span class="confirm-step-desc">Mint ${state.quantity}× ${escapeHtml(collectionName)}</span>
@@ -2586,7 +2622,9 @@
                 if (hashMatch) txHash = hashMatch[0].toUpperCase();
                 let title = "Transaction Failed";
                 let message = errStr;
-                if (errLower.includes("insufficient")) {
+                if (err?.code === "MINT_NOT_OPEN") {
+                    title = "Minting isn't open yet";
+                } else if (errLower.includes("insufficient")) {
                     title = "Insufficient Funds";
                     message = "Not enough funds for mint price and gas.";
                 } else if (errLower.includes("reject")) {
@@ -2615,15 +2653,16 @@
                 throw new Error("Whitelist proof missing — reconnect wallet or try again");
             }
 
-            const mintContract = CONFIG.minterContract || collectionAddr;
+            const mintContract = collectionAddr;
             const mintMsg = buildMintExecuteMsg(collectionAddr, state.quantity);
             // Ensure non-empty proof_hashes when server provided them
-            mintMsg.mint.proof_hashes = proof.proof_hashes || plan.proof_hashes || [];
+            mintMsg.update_extension.msg.mint.proof_hashes = proof.proof_hashes || plan.proof_hashes || [];
 
-            const sender = state.address || state.wallet.address;
+            const pre = await preflightMint(collectionAddr, null, mintMsg);
             const result = await TerpWallet.executeContract(mintContract, mintMsg, {
                 funds: [],
                 memo: 'whitelist-mint',
+                gas: Math.ceil(pre.gasUsed * 1.4),
             });
             const txHash = result?.hash || result?.transactionHash || result || "";
             const summary = state.collectionCache[collectionAddr] || state.collections.find(c => c.addr === collectionAddr);
@@ -2810,12 +2849,11 @@
             while (Date.now() - start < timeoutMs) {
                 attempts++;
                 try {
-                    const adapter = createQueryAdapter(CONFIG.rpc);
-                    const cw721 = new Cw721SvgQueryClient(adapter, collectionAddr);
+                    await loadContractBundles();
                     const userTokens = state.address
-                        ? await cw721.tokens({ owner: state.address, limit: 1 }).catch(() => null)
-                        : null;
-                    if (userTokens?.tokens?.length > 0) return true;
+                        ? await SvgCollection.tokens(CONFIG.rest, collectionAddr, { owner: state.address, limit: 1, max: 1 }).catch(() => [])
+                        : [];
+                    if (userTokens.length > 0) return true;
                 } catch (e) {
                     console.warn("Mint poll attempt", attempts, e.message);
                 }
@@ -2823,6 +2861,35 @@
             }
             console.warn("waitForMintConfirmation timed out after", attempts, "attempts");
             return false;
+        }
+
+        // Simulate the mint (unsigned, never broadcast). Rejects with a
+        // readable reason before the wallet is asked to sign anything.
+        async function preflightMint(collectionAddr, price, mintMsg) {
+            let pubkey = "";
+            try {
+                const signer = window.keplr?.getOfflineSigner?.(CONFIG.chainId);
+                const [acc] = signer ? await signer.getAccounts() : [];
+                if (acc?.pubkey) pubkey = btoa(String.fromCharCode(...acc.pubkey));
+            } catch { /* simulate without a key */ }
+            const amnt = mintMsg?.update_extension?.msg?.mint?.amnt || state.quantity;
+            try {
+                return await SvgCollection.simulateMint(CONFIG.rest, collectionAddr, {
+                    sender: state.address,
+                    pubkey,
+                    amount: amnt,
+                    price,
+                    proofHashes: mintMsg?.update_extension?.msg?.mint?.proof_hashes || [],
+                    alloc: mintMsg?.update_extension?.msg?.mint?.alloc || 0,
+                });
+            } catch (err) {
+                if (err?.prefixScan || SvgCollection.isPrefixScanError(err)) {
+                    const e = new Error("Minting opens once the network finishes its terpd 6.2.1 upgrade. Nothing was signed.");
+                    e.code = "MINT_NOT_OPEN";
+                    throw e;
+                }
+                throw err;
+            }
         }
 
         // ── PATH 3: Legacy multi-message flow ──
@@ -2851,19 +2918,23 @@
 
             await fetchMerkleProof(collectionAddr);
             const mintMsg = buildMintExecuteMsg(collectionAddr, state.quantity);
-            const totalFunds = BigInt(plan.totalUthiol);
-            const mintContract = CONFIG.minterContract || collectionAddr;
-            instructions.push({
-                contract: mintContract,
-                msg: mintMsg,
-                funds: totalFunds > 0n
-                    ? [{ denom: CONFIG.denom, amount: plan.totalUthiol }]
-                    : [],
-            });
+            const summaryNow = state.collectionCache[collectionAddr];
+            const price = getCurrentPrice(summaryNow?.config);
+            const funds = SvgCollection.mintFunds(price, state.quantity);
+            instructions.push({ contract: collectionAddr, msg: mintMsg, funds });
 
-            const result = await TerpWallet.executeContract(mintContract, mintMsg, {
+            // Dry run the mint alone before asking for a signature.
+            let gas;
+            if (instructions.length === 1) {
+                const pre = await preflightMint(collectionAddr, price, mintMsg);
+                gas = Math.ceil(pre.gasUsed * 1.4);
+            }
+
+            const result = await TerpWallet.executeContract(collectionAddr, mintMsg, {
                 instructions,
+                funds,
                 memo: 'svg-mint',
+                gas,
             });
             const txHash = result?.hash || result?.transactionHash || result || "";
             const summary = state.collectionCache[collectionAddr] || state.collections.find(c => c.addr === collectionAddr);
@@ -2888,7 +2959,11 @@
 
         async function onWalletLive(snap) {
             syncWalletFromShared(snap);
-            if (!snap.address || !snap.wallet) return;
+            if (!snap.address || !snap.wallet) {
+                const sum = state.currentAddr && state.collectionCache[state.currentAddr];
+                if (sum) renderMintPanel(sum);
+                return;
+            }
             try {
                 await queryWalletBalances();
                 await loadShistraps();
@@ -2899,7 +2974,7 @@
                     ]);
                     const sum = state.collectionCache[state.currentAddr];
                     if (sum) {
-                        renderPaymentSection(sum);
+                        renderMintPanel(sum);
                         renderWhitelistBadge(state.currentAddr);
                         refreshShitstrapCapacityUi?.();
                     }
@@ -2924,7 +2999,9 @@
             const colBtn = document.getElementById("btn-collection");
             if (!btn) return;
             if (state.address) {
-                btn.textContent = state.address.slice(0, 8) + "..." + state.address.slice(-4);
+                const nm = TerpWallet.getSnapshot().name;
+                btn.textContent = nm || state.address.slice(0, 8) + "..." + state.address.slice(-4);
+                btn.title = nm ? nm + " · " + state.address : state.address;
                 btn.classList.add("connected");
                 if (colBtn) colBtn.style.display = "inline-flex";
             } else {
@@ -2944,147 +3021,64 @@
         // ═══════════════════════════════════════════════════════════════
 
         async function fetchCollections() {
-            if (!state.libsLoaded) {
-                state.demoMode = true;
-                return DEMO_COLLECTIONS;
+            await loadContractBundles();
+            let rows = [];
+            if (CONFIG.minterContract) {
+                // Smart list first; storage read when the node cannot walk the list.
+                const r = await SvgMinter.listCollections(CONFIG.rest, CONFIG.minterContract);
+                rows = r.collections || [];
+                state.listSource = r.source;
+            } else if (CONFIG.staticCollections?.length) {
+                rows = CONFIG.staticCollections.map(contract => ({ contract }));
             }
-
-            // If no minter contract but staticCollections are configured, use those directly
-            if (!CONFIG.minterContract && CONFIG.staticCollections?.length) {
-                try {
-                    const collections = await Promise.all(
-                        CONFIG.staticCollections.map(addr => fetchCollectionSummary(addr))
-                    );
-                    const valid = collections.filter(Boolean);
-                    if (valid.length > 0) {
-                        state.demoMode = false;
-                        return valid;
-                    }
-                } catch (err) {
-                    console.error("Failed to fetch static collections:", err);
-                }
-                state.demoMode = true;
-                return DEMO_COLLECTIONS;
-            }
-
-            if (!CONFIG.minterContract) {
-                state.demoMode = true;
-                return DEMO_COLLECTIONS;
-            }
-
-            try {
-                const adapter = createQueryAdapter(CONFIG.rpc);
-                const minter = new CwSvgMinterQueryClient(adapter, CONFIG.minterContract);
-
-                // Paginate all collections newest-first via listSvgCollectionsReverse.
-                // Response: SvgCollection[] = [{ contract, creator, name, symbol }, ...]
-                let allItems = [];
-                let startBefore = null;
-                while (true) {
-                    const batch = await minter.listSvgCollectionsReverse({ limit: 30, startBefore });
-                    console.log(batch)
-                    if (!Array.isArray(batch) || batch.length === 0) break;
-                    allItems = [...allItems, ...batch];
-                    if (batch.length < 30) break;
-                    startBefore = batch[batch.length - 1].contract;
-                }
-
-                if (allItems.length === 0) {
-                    state.demoMode = true;
-                    return DEMO_COLLECTIONS;
-                }
-
-                // Fetch summary for each collection in parallel, passing minter metadata
-                // so fetchCollectionSummary can skip the contractInfo() RPC call.
-                const collections = await Promise.all(
-                    allItems.map(item => fetchCollectionSummary(item.contract, item))
-                );
-
-                state.demoMode = false;
-                return collections.filter(Boolean);
-            } catch (err) {
-                console.error("Failed to fetch collections:", err);
-                state.demoMode = true;
-                showToast("Minter query failed. Using demo data.", "error");
-                return DEMO_COLLECTIONS;
-            }
+            const summaries = await Promise.all(rows.map(row => fetchCollectionSummary(row.contract, row)));
+            const valid = summaries.filter(Boolean);
+            if (rows.length && !valid.length) throw new Error("Collections could not be read from the chain");
+            return valid;
         }
 
-        // svgCollection is an optional SvgCollection object from the minter:
-        // { contract, creator, name, symbol } — skips the contractInfo() RPC call.
-        async function fetchCollectionSummary(addr, svgCollection = null) {
+        // row is the minter's entry { contract, creator, name, symbol } when known.
+        async function fetchCollectionSummary(addr, row = null) {
             try {
-                const { fetchCollectionArt, fetchCurrentPriceTier, querySmart } =
-                    await import("/lib/svg-render.js?v=cd0a26ba74");
-
-                // Always pass cosmes RPC adapter — LCD may miss CORS in some environments
-                let queryContractSmart = null;
+                await loadContractBundles();
+                const s = await SvgCollection.summary(CONFIG.rest, addr);
+                let placeholder = null;
                 try {
-                    const adapter = createQueryAdapter(CONFIG.rpc);
-                    queryContractSmart = (c, q) => adapter.queryContractSmart(c, q);
+                    placeholder = await SvgCollection.placeholder(CONFIG.rest, addr, addr);
                 } catch (e) {
-                    console.warn("[svg] query adapter", e);
+                    console.warn("[svg] placeholder", addr, e);
                 }
-
-                const qopts = { queryContractSmart };
-
-                const [art, numTokens, priceTier] = await Promise.all([
-                    fetchCollectionArt(CONFIG.rest, addr, { seed: addr, queryContractSmart }),
-                    querySmart({ rest: CONFIG.rest, queryContractSmart }, addr, { num_tokens: {} })
-                        .catch(() => ({ count: 0 })),
-                    fetchCurrentPriceTier(CONFIG.rest, addr, qopts),
-                ]);
-
-                const contractInfo = svgCollection
-                    ? { name: svgCollection.name, symbol: svgCollection.symbol }
-                    : art.contractInfo || { name: addr.slice(0, 16) + "...", symbol: "NFT" };
-
-                let mintConfig = null;
-                if (priceTier) {
-                    mintConfig = {
-                        unit_price: priceTier,
-                        max_token_supply: 0,
-                    };
-                }
-
-                try {
-                    const cfg = await querySmart(
-                        { rest: CONFIG.rest, queryContractSmart },
-                        addr,
-                        { get_config: {} },
-                    );
-                    if (cfg && typeof cfg === "object") {
-                        mintConfig = {
-                            ...(mintConfig || {}),
-                            ...cfg,
-                            unit_price: priceTier || mintConfig?.unit_price,
-                        };
-                    }
-                } catch { /* older shapes */ }
-
-                const placeholder = art.placeholder || null;
-                if (!placeholder) {
-                    console.warn("[svg] no on-chain art for", addr, "source", art.source);
-                }
-
+                const cfg = s.config;
+                const config = cfg ? {
+                    price_tiers: cfg.priceTiers.map(t => ({ until_count: t.untilCount, price: t.price })),
+                    total: cfg.total || 0,
+                    mint_count: s.minted,
+                    whitelist: cfg.whitelist,
+                } : null;
+                const prev = row || state.collectionCache[addr] || {};
                 const summary = {
                     addr,
-                    creator: svgCollection?.creator || null,
-                    contractInfo,
-                    config: mintConfig,
-                    minted: numTokens?.count ?? numTokens?.num_tokens ?? 0,
+                    creator: row?.creator || prev.creator || null,
+                    contractInfo: {
+                        name: row?.name || s.name || prev.contractInfo?.name || "Collection",
+                        symbol: row?.symbol || s.symbol || prev.contractInfo?.symbol || "",
+                    },
+                    config,
+                    minted: s.minted,
+                    status: s.status,
+                    mintStart: s.mintStart,
+                    mintEnd: s.mintEnd,
+                    chainCanMint: s.chainCanMint,
+                    codeId: s.codeId,
                     placeholder,
-                    artSource: art.source || "none",
-                    extension: art.extension || null,
+                    artSource: placeholder ? "chain" : "none",
                 };
-
                 state.collectionCache[addr] = {
                     ...summary,
-                    template: art.template || art.extension?.svg_template || null,
-                    allTokenIds: null,
+                    template: cfg?.template || null,
+                    allTokenIds: state.collectionCache[addr]?.allTokenIds || null,
                     loaded: true,
                 };
-
                 return summary;
             } catch (err) {
                 console.warn(`Failed to fetch summary for ${addr}:`, err);
@@ -3093,43 +3087,15 @@
         }
 
         async function fetchCollectionTemplate(addr) {
-            if (state.collectionCache[addr]?.template) {
-                return state.collectionCache[addr].template;
-            }
-            try {
-                const { querySmartLcd } = await import("/lib/svg-render.js?v=cd0a26ba74");
-                const result = await querySmartLcd(CONFIG.rest, addr, {
-                    extension: { msg: { svg_template: {} } },
-                });
-                const template = result?.template || (typeof result === "string" ? result : null);
-                if (state.collectionCache[addr]) {
-                    state.collectionCache[addr].template = template;
-                }
-                return template;
-            } catch (err) {
-                console.warn(`Failed to fetch template for ${addr}:`, err);
-                return null;
-            }
+            return state.collectionCache[addr]?.template || null;
         }
 
         async function fetchAllTokenIds(addr) {
             if (state.collectionCache[addr]?.allTokenIds) {
                 return state.collectionCache[addr].allTokenIds;
             }
-
-            const adapter = createQueryAdapter(CONFIG.rpc);
-            const cw721 = new Cw721SvgQueryClient(adapter, addr);
-
-            let all = [];
-            let startAfter = null;
-            while (all.length < 2000) {
-                const r = await cw721.allTokens({ limit: 30, startAfter }).catch(() => ({ tokens: [] }));
-                const tokens = r?.tokens || [];
-                all = [...all, ...tokens];
-                if (tokens.length < 30) break;
-                startAfter = tokens[tokens.length - 1];
-            }
-
+            await loadContractBundles();
+            const all = await SvgCollection.tokens(CONFIG.rest, addr, { max: 2000 });
             if (state.collectionCache[addr]) {
                 state.collectionCache[addr].allTokenIds = all;
             }
@@ -3138,31 +3104,24 @@
 
         async function fetchUserTokenIds(addr) {
             if (!state.address) return [];
-            const adapter = createQueryAdapter(CONFIG.rpc);
-            const cw721 = new Cw721SvgQueryClient(adapter, addr);
-            let all = [];
-            let startAfter = null;
-            while (all.length < 2000) {
-                const r = await cw721.tokens({ owner: state.address, limit: 30, startAfter }).catch(() => ({ tokens: [] }));
-                const tokens = r?.tokens || [];
-                all = [...all, ...tokens];
-                if (tokens.length < 30) break;
-                startAfter = tokens[tokens.length - 1];
-            }
-            return all;
+            await loadContractBundles();
+            return SvgCollection.tokens(CONFIG.rest, addr, { owner: state.address, max: 2000 });
         }
 
         async function fetchTokenParamsPage(addr, tokenIds) {
             const toFetch = tokenIds.filter(id => !state.tokenParams[id]);
             if (!toFetch.length) return;
 
-            const adapter = createQueryAdapter(CONFIG.rpc);
-            const cw721 = new Cw721SvgQueryClient(adapter, addr);
-
+            await loadContractBundles();
+            state.tokenArt = state.tokenArt || {};
             for (const tokenId of toFetch) {
                 try {
-                    const info = await cw721.nftInfo({ tokenId });
+                    const [info, art] = await Promise.all([
+                        SvgCollection.nftInfo(CONFIG.rest, addr, tokenId),
+                        SvgCollection.tokenSvg(CONFIG.rest, addr, tokenId).catch(() => ""),
+                    ]);
                     state.tokenParams[tokenId] = info?.extension || {};
+                    if (typeof art === "string" && art.includes("<svg")) state.tokenArt[addr + ":" + tokenId] = art;
                 } catch (err) {
                     console.warn(`Failed to fetch params for token ${tokenId}:`, err);
                     state.tokenParams[tokenId] = {};
@@ -3345,23 +3304,39 @@
                 ? "FREE (whitelist)"
                 : formatPrice(price.amount);
 
-            if (summary.addr.startsWith("terp1demo")) {
-                document.getElementById("btn-mint").disabled = true;
-                document.getElementById("btn-mint").textContent = "Demo Mode";
-                updateMintTotal(summary);
-                return;
-            }
-
             const maxSupply = getMaxSupply(summary.config);
             const remaining = maxSupply > 0 ? maxSupply - (summary.minted || 0) : 100;
             const soldOut = remaining <= 0;
-            document.getElementById("btn-mint").disabled = soldOut;
-            document.getElementById("btn-mint").textContent = soldOut
-                ? "Sold Out"
+            const btn = document.getElementById("btn-mint");
+            const note = mintNoteFor(summary, soldOut);
+            const notice = document.getElementById("mint-notice");
+            if (notice) {
+                notice.textContent = note || "";
+                notice.style.display = note ? "block" : "none";
+            }
+            const blocked = soldOut || summary.status === "closed" || summary.status === "upcoming" || summary.chainCanMint === false;
+            btn.disabled = blocked;
+            btn.textContent = soldOut ? "Sold out"
+                : summary.status === "closed" ? "Mint closed"
+                : summary.status === "upcoming" ? "Not open yet"
+                : summary.chainCanMint === false ? "Opens after upgrade"
+                : !state.address ? "Connect wallet to mint"
                 : (waived ? "Review free mint" : "Review");
             updateMintTotal(summary);
             renderWhitelistBadge(summary.addr);
             renderPaymentSection(summary);
+        }
+
+        function mintNoteFor(summary, soldOut) {
+            if (soldOut) return "";
+            if (summary.status === "upcoming" && summary.mintStart) {
+                return "Minting opens " + new Date(summary.mintStart).toLocaleString() + ".";
+            }
+            if (summary.status === "closed") return "This mint window has ended.";
+            if (summary.chainCanMint === false) {
+                return "Minting opens once the network finishes its terpd 6.2.1 upgrade. Prices and supply below are live.";
+            }
+            return "";
         }
 
         function updateFilterUI() {
@@ -3461,8 +3436,8 @@
 
         function buildTokenCard(tokenId, extension, collectionAddr, isOwned) {
             const cache = state.collectionCache[collectionAddr];
-            let svg = null;
-            if (!state.demoMode && cache?.template && extension && typeof extension === "object") {
+            let svg = state.tokenArt?.[collectionAddr + ":" + tokenId] || null;
+            if (!svg && !state.demoMode && cache?.template && extension && typeof extension === "object") {
                 const vars = {};
                 for (const [k, v] of Object.entries(extension)) {
                     if (v != null && typeof v !== "object") vars[k] = String(v);
@@ -3530,7 +3505,7 @@
 
                 const previewHtml = previewSvg
                     ? scopeSvgIds(previewSvg, "card-" + col.addr.slice(-8))
-                    : `<div style="min-height:8rem;display:flex;align-items:center;justify-content:center;color:rgba(210,211,216,0.35);font-size:0.75rem;">no preview</div>`;
+                    : `<div style="min-height:8rem;display:flex;align-items:center;justify-content:center;color:rgb(var(--tn-text-rgb) / max(0.35, var(--tn-alpha-floor)));font-size:0.75rem;">no preview</div>`;
 
                 const card = document.createElement("div");
                 card.className = "collection-card";
@@ -3569,10 +3544,7 @@
 
         window.handleMint = async function () {
             const addr = state.currentAddr;
-            if (!addr || addr.startsWith("terp1demo")) {
-                showToast("Demo mode — minting not available.", "info");
-                return;
-            }
+            if (!addr) return;
 
             // Hard double-submit prevention
             if (state.submittingTx) {
@@ -3649,7 +3621,7 @@
             const addr = state.currentAddr;
             const summary = addr ? (state.collectionCache[addr] || state.collections.find(c => c.addr === addr)) : null;
             const maxSupply = getMaxSupply(summary?.config);
-            const collectionRemaining = maxSupply > 0 ? maxSupply - (summary?.minted || 0) : 10;
+            const collectionRemaining = remainingAtPrice(summary, maxSupply > 0 ? maxSupply - (summary?.minted || 0) : 10);
             const price = summary ? getCurrentPrice(summary.config) : null;
             const max = (state.address && price)
                 ? computeMaxQuantity(price, collectionRemaining)
@@ -3680,7 +3652,7 @@
             document.getElementById("qty-dec").disabled = state.quantity <= 1;
 
             const maxSupply = getMaxSupply(summary?.config);
-            const collectionRemaining = maxSupply > 0 ? maxSupply - (summary?.minted || 0) : 100;
+            const collectionRemaining = remainingAtPrice(summary, maxSupply > 0 ? maxSupply - (summary?.minted || 0) : 100);
             const max = (state.address && price)
                 ? computeMaxQuantity(price, collectionRemaining)
                 : Math.min(collectionRemaining, 10);
@@ -3706,7 +3678,6 @@
             const collectionsToCheck = state.demoMode ? [] : state.collections;
 
             for (const col of collectionsToCheck) {
-                if (col.addr.startsWith("terp1demo")) continue;
                 try {
                     const ids = await fetchUserTokenIds(col.addr);
                     for (const tokenId of ids) {
@@ -3717,8 +3688,8 @@
 
             if (allUserNfts.length === 0) {
                 body.innerHTML = `<div class="modal-empty">
-                    <p>No NFTs found in your wallet${state.demoMode ? " (Demo Mode)" : ""}.</p>
-                    <p style="font-size:0.8rem;color:rgba(189,147,249,0.6)">Mint your first piece from a collection!</p>
+                    <p>No NFTs from these collections in your wallet yet.</p>
+                    <p style="font-size:0.8rem;color:rgb(var(--tn-purple-rgb) / max(0.6, var(--tn-alpha-floor)))">Mint your first piece from a collection!</p>
                 </div>`;
                 return;
             }
@@ -4324,13 +4295,13 @@
                             const d = s.token.native;
                             const bal = BigInt(state.walletBalances?.[d] || "0");
                             const youHave = bal > 0n;
-                            return `<span title="${d}" style="display:inline-block;margin:0.1rem 0.2rem 0.1rem 0;padding:0.12rem 0.4rem;border-radius:999px;border:1px solid ${youHave ? "rgba(152,232,193,0.45)" : "rgba(255,255,255,0.1)"};background:${youHave ? "rgba(152,232,193,0.12)" : "rgba(0,0,0,0.25)"};font-size:0.68rem;color:${youHave ? "#98e8c1" : "#d2d3d8"};">${denomLabel(d)}${youHave ? " · in wallet" : ""}</span>`;
+                            return `<span title="${d}" style="display:inline-block;margin:0.1rem 0.2rem 0.1rem 0;padding:0.12rem 0.4rem;border-radius: var(--tn-radius-ctl);border:1px solid ${youHave ? "rgba(152,232,193,0.45)" : "rgba(255,255,255,0.1)"};background:${youHave ? "rgba(152,232,193,0.12)" : "rgba(0,0,0,0.25)"};font-size:0.68rem;color:${youHave ? "#98e8c1" : "#d2d3d8"};">${denomLabel(d)}${youHave ? " · in wallet" : ""}</span>`;
                         })
                         .join("")
-                    : `<span style="color:#6272a4;font-size:0.68rem;">no native slop</span>`;
-                return `<div style="padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                    : `<span style="color:var(--tn-text-dim);font-size:0.68rem;">no native slop</span>`;
+                return `<div style="padding:0.45rem 0;border-bottom:1px solid rgb(var(--tn-tint-rgb) / 0.05);">
                     <div style="display:flex;justify-content:space-between;gap:0.5rem;align-items:baseline;">
-                        <span style="font-family:var(--tn-font-mono);color:#98e8c1;font-size:0.72rem;" title="${ss.contract}">${short}</span>
+                        <span style="font-family:var(--tn-font-mono);color:var(--tn-teal);font-size:0.72rem;" title="${ss.contract}">${short}</span>
                         <span style="color:${low ? "#ffb86c" : "#d2d3d8"};font-size:0.72rem;white-space:nowrap;">
                             capacity ${formatCoin(cap, ss.shit || CONFIG.denom)}${low ? " · low" : ""}
                         </span>
@@ -4498,8 +4469,12 @@
             await loadLibs();
             // Keep global config for FAB; ensure wallet module holds same CONFIG
             window.__TERP_CONFIG = CONFIG;
-            await TerpWallet.ensureLibs(CONFIG, { pageId: "svg" });
-            await tryReconnect();
+            const listReady = loadCollectionList();
+            try {
+                await tryReconnect();
+            } catch (e) {
+                console.warn("[svg] reconnect", e);
+            }
             // If FAB already connected on another page, pull live session
             syncWalletFromShared(TerpWallet.getSnapshot());
             if (state.address && state.wallet) {
@@ -4515,17 +4490,7 @@
                 onToast: (msg, type) => showToast(msg, type || "info"),
             });
 
-            const collections = await fetchCollections();
-            state.collections = collections;
-
-            document.getElementById("loading").style.display = "none";
-            document.getElementById("collection-grid").style.display = "grid";
-
-            if (state.demoMode) {
-                document.getElementById("demo-notice").style.display = "block";
-            }
-
-            buildCollectionGrid(collections);
+            await listReady;
 
             // Prefetch shitstraps for mint + fund desk when factory configured
             try {
@@ -4538,12 +4503,31 @@
             }
         }
 
+        // Collections load straight from chain storage; wallet setup never blocks them.
+        async function loadCollectionList() {
+            const loading = document.getElementById("loading");
+            const grid = document.getElementById("collection-grid");
+            const notice = document.getElementById("demo-notice");
+            loading.style.display = "flex";
+            grid.style.display = "none";
+            notice.style.display = "none";
+            try {
+                const collections = await fetchCollections();
+                state.collections = collections;
+                loading.style.display = "none";
+                grid.style.display = "grid";
+                buildCollectionGrid(collections);
+            } catch (err) {
+                console.error("[svg] collections", err);
+                loading.style.display = "none";
+                notice.innerHTML = 'Collections could not be loaded from the network. <button type="button" class="btn-retry" id="btn-retry-collections">Try again</button>';
+                notice.style.display = "block";
+                document.getElementById("btn-retry-collections")?.addEventListener("click", () => loadCollectionList());
+            }
+        }
+        window.loadCollectionList = loadCollectionList;
+
         init().catch(err => {
             console.error("Init failed:", err);
-            state.demoMode = true;
-            state.collections = DEMO_COLLECTIONS;
-            document.getElementById("loading").style.display = "none";
-            document.getElementById("collection-grid").style.display = "grid";
-            document.getElementById("demo-notice").style.display = "block";
-            buildCollectionGrid(DEMO_COLLECTIONS);
+            if (!state.collections.length) loadCollectionList();
         }); </script> </body> </html>
