@@ -1882,7 +1882,7 @@
             statusEl.style.display = "none";
 
             try {
-                const adapter = createQueryAdapter(CONFIG.rpc);
+                const adapter = createQueryAdapter(CONFIG.rpc, CONFIG.rest);
                 const minterQuery = new AccountMinterQueryClient(adapter, minter);
 
                 // Check if name has an existing ask (means it's minted)
@@ -2052,7 +2052,7 @@
             if (!minter || !AccountMinterQueryClient) return;
 
             try {
-                const adapter = createQueryAdapter(CONFIG.rpc);
+                const adapter = createQueryAdapter(CONFIG.rpc, CONFIG.rest);
                 const minterQuery = new AccountMinterQueryClient(adapter, minter);
                 state.sudoParams = await minterQuery.params();
 

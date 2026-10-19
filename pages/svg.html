@@ -2038,7 +2038,7 @@
             } catch (_) { }
 
             try {
-                const adapter = createQueryAdapter(CONFIG.rpc);
+                const adapter = createQueryAdapter(CONFIG.rpc, CONFIG.rest);
                 const factory = new CwShitstrapFactoryQueryClient(adapter, CONFIG.shitstrapFactory);
 
                 const all = [];
@@ -2061,7 +2061,7 @@
                 // Enrich each with remaining capacity; drop already-full ones.
                 const enriched = await Promise.all(all.map(async (ss) => {
                     const ssClient = new CwShitstrapQueryClient(
-                        createQueryAdapter(CONFIG.rpc), ss.contract
+                        createQueryAdapter(CONFIG.rpc, CONFIG.rest), ss.contract
                     );
                     const [fullOfShit, toShit] = await Promise.all([
                         ssClient.fullOfShit().catch(() => true),
