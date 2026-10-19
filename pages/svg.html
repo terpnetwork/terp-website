@@ -8,7 +8,8 @@
 <link rel="stylesheet" href="/public/world.css">
 <link rel="modulepreload" href="/lib/fractal/routes.js">
 <link rel="modulepreload" href="/lib/fractal/world.js">
-<script type="module" src="/lib/fractal/world.js"></script> <style> .btn-docs {
+<script type="module" src="/lib/fractal/world.js"></script>
+<script type="module" src="/lib/ui/select.js"></script> <style> .btn-docs {
             width: 28px;
             height: 28px;
             border-radius: 50%;
@@ -1025,6 +1026,17 @@
             background: var(--tn-bg-deep);
         }
 
+        /* trusted collections render inside a sandboxed frame (lib/svg-sanitize.js) */
+        .col-card-preview iframe.svg-trusted-frame,
+        .col-detail-preview iframe.svg-trusted-frame,
+        .token-svg-wrap iframe.svg-trusted-frame,
+        .nft-svg-wrap iframe.svg-trusted-frame {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1;
+            display: block;
+        }
+
         .token-svg-wrap svg {
             width: 100%;
             height: 100%;
@@ -1600,7 +1612,7 @@
             .col-detail-name {
                 font-size: 1.4rem;
             }
-        } </style> </head> <body> <main class="main"> <script type="module" src="/lib/faucet.js"></script> <script src="/lib/fab.js"></script> <div data-tn-head style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;"> <h1 class="page-title" style="margin-bottom:0;">CW-SVG</h1> <button class="btn-docs" onclick="openDocModal()" aria-label="Documentation" title="Documentation">?</button> </div> <div class="page-subtitle">Generative On-Chain Art</div> <!-- ── Documentation Modal ── --> <div id="modal-docs" class="modal" style="display:none"> <div class="modal-backdrop" onclick="closeDocModal()"></div> <div class="modal-content" style="max-width:580px;"> <div class="modal-header"> <h2 style="font-size:1.1rem;font-weight:500;color:var(--tn-mint);">Documentation</h2> <button class="modal-close" onclick="closeDocModal()" aria-label="Close">×</button> </div> <div class="modal-body"> <!-- CWSVG Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> What are cwSVGs?</h3> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> cwSVGs are on-chain SVGs with parameterized variables. Rather than storing a static image, the contract holds an SVG template with variable slots — colors, shapes, patterns, positions — that are generated on-chain during minting. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> Each token receives a unique combination of these variables, derived from on-chain entropy at the time of mint. The result: every token renders a one-of-a-kind SVG, fully client-side, with no off-chain metadata or IPFS dependency. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;"> Because the SVG template and all parameters live on-chain, the art is permanent and self-verifying. Any client can reconstruct the exact visual from the contract state alone. </p> </div> <!-- Shitstraps Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Payment via Shitstraps</h3> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> Collections may price mints in a specific denom (e.g. <code style="font-family: var(--tn-font-mono);font-size:0.8rem;background:rgb(var(--tn-teal-rgb) / 0.06);border:1px solid rgb(var(--tn-teal-rgb) / 0.15);border-radius:3px;padding:0.1rem 0.4rem;color:var(--tn-teal);">uterp</code>). If your wallet holds a different asset, the mint flow can use a <strong style="color:var(--tn-purple);">shitstrap</strong> — an automated swap path that converts your available tokens into the required denom at mint time. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> When you connect your wallet, the payment section shows all available options: </p> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Direct payment if you already hold the required denom </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Shitstrap swap paths from other assets you hold </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Insufficient balance warnings if no path covers the cost </li> </ul> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-top:0.75rem;"> The swap is executed as part of the mint transaction — you don't need to manually swap beforehand. Select your preferred payment method and confirm. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-top:0.75rem;"> <strong style="color:var(--tn-purple);">IBC-aware shitstraps:</strong> you can source slop from counterparty chains via IBC transfer memos (ADR-8 style callbacks) so mints complete without pre-swapping on Terp. Cap participation to remaining strap capacity (<code style="font-family: var(--tn-font-mono);font-size:0.75rem;color:var(--tn-teal);">to_shit</code>) to avoid lockout from over-sending past the cutoff. </p> </div> <!-- Minting Process --> <div> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Minting Process</h3> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">1.</span> Browse collections and select one </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">2.</span> Set your quantity and review the total cost </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">3.</span> Choose a payment method (direct or shitstrap) </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">4.</span> Confirm the transaction preview and sign </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">5.</span> Your unique SVG is generated on-chain — refresh to see it </li> </ul> </div> </div> </div> </div> <!-- ── List View ── --> <div id="view-list" style="width:100%;"> <!-- ── Loading Spinner ── --> <div id="loading" style="display:flex;justify-content:center;align-items:center;padding:4rem 1rem;"> <div style="width:32px;height:32px;border:3px solid rgb(var(--tn-teal-rgb) / 0.2);border-top-color:var(--tn-teal);border-radius:50%;animation:spin 0.8s linear infinite;"> </div> <span style="margin-left:1rem;color:var(--tn-teal);font-family: var(--tn-font);font-size:0.9rem;">Loading collections...</span> </div> <style> @keyframes spin {
+        } </style> </head> <body> <main class="main"> <script type="module" src="/lib/faucet.js"></script> <script src="/lib/fab.js"></script> <div data-tn-head style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;"> <h1 class="page-title" style="margin-bottom:0;">CW-SVG</h1> <button class="btn-docs" onclick="openDocModal()" aria-label="Documentation" title="Documentation">?</button> </div> <div class="page-subtitle">Generative On-Chain Art</div> <a class="btn-collection" href="/svg/create" style="text-decoration:none;margin:0 0 1.25rem;display:inline-block;">Create a collection →</a> <!-- ── Documentation Modal ── --> <div id="modal-docs" class="modal" style="display:none"> <div class="modal-backdrop" onclick="closeDocModal()"></div> <div class="modal-content" style="max-width:580px;"> <div class="modal-header"> <h2 style="font-size:1.1rem;font-weight:500;color:var(--tn-mint);">Documentation</h2> <button class="modal-close" onclick="closeDocModal()" aria-label="Close">×</button> </div> <div class="modal-body"> <!-- CWSVG Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> What are cwSVGs?</h3> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> cwSVGs are on-chain SVGs with parameterized variables. Rather than storing a static image, the contract holds an SVG template with variable slots — colors, shapes, patterns, positions — that are generated on-chain during minting. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> Each token receives a unique combination of these variables, derived from on-chain entropy at the time of mint. The result: every token renders a one-of-a-kind SVG, fully client-side, with no off-chain metadata or IPFS dependency. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;"> Because the SVG template and all parameters live on-chain, the art is permanent and self-verifying. Any client can reconstruct the exact visual from the contract state alone. </p> </div> <!-- Shitstraps Section --> <div style="margin-bottom:1.75rem;"> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Payment via Shitstraps</h3> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> Collections may price mints in a specific denom (e.g. <code style="font-family: var(--tn-font-mono);font-size:0.8rem;background:rgb(var(--tn-teal-rgb) / 0.06);border:1px solid rgb(var(--tn-teal-rgb) / 0.15);border-radius:3px;padding:0.1rem 0.4rem;color:var(--tn-teal);">uterp</code>). If your wallet holds a different asset, the mint flow can use a <strong style="color:var(--tn-purple);">shitstrap</strong> — an automated swap path that converts your available tokens into the required denom at mint time. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-bottom:0.75rem;"> When you connect your wallet, the payment section shows all available options: </p> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Direct payment if you already hold the required denom </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Shitstrap swap paths from other assets you hold </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">→</span> Insufficient balance warnings if no path covers the cost </li> </ul> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-top:0.75rem;"> The swap is executed as part of the mint transaction — you don't need to manually swap beforehand. Select your preferred payment method and confirm. </p> <p style="font-size:0.85rem;color:var(--tn-text);line-height:1.65;margin-top:0.75rem;"> <strong style="color:var(--tn-purple);">IBC-aware shitstraps:</strong> you can source slop from counterparty chains via IBC transfer memos (ADR-8 style callbacks) so mints complete without pre-swapping on Terp. Cap participation to remaining strap capacity (<code style="font-family: var(--tn-font-mono);font-size:0.75rem;color:var(--tn-teal);">to_shit</code>) to avoid lockout from over-sending past the cutoff. </p> </div> <!-- Minting Process --> <div> <h3 style="font-size:0.9rem;font-weight:500;color:var(--tn-teal);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;"> Minting Process</h3> <ul style="list-style:none;padding:0;"> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">1.</span> Browse collections and select one </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">2.</span> Set your quantity and review the total cost </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">3.</span> Choose a payment method (direct or shitstrap) </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">4.</span> Confirm the transaction preview and sign </li> <li style="font-size:0.85rem;color:var(--tn-text);line-height:1.6;padding:0.25rem 0 0.25rem 1.2rem;position:relative;"> <span style="position:absolute;left:0;color:rgb(var(--tn-teal-rgb) / max(0.4, var(--tn-alpha-floor)));font-size:0.75rem;">5.</span> Your unique SVG is generated on-chain — refresh to see it </li> </ul> </div> </div> </div> </div> <!-- ── List View ── --> <div id="view-list" style="width:100%;"> <!-- ── Loading Spinner ── --> <div id="loading" style="display:flex;justify-content:center;align-items:center;padding:4rem 1rem;"> <div style="width:32px;height:32px;border:3px solid rgb(var(--tn-teal-rgb) / 0.2);border-top-color:var(--tn-teal);border-radius:50%;animation:spin 0.8s linear infinite;"> </div> <span style="margin-left:1rem;color:var(--tn-teal);font-family: var(--tn-font);font-size:0.9rem;">Loading collections...</span> </div> <style> @keyframes spin {
                     to {
                         transform: rotate(360deg)
                     }
@@ -1610,6 +1622,7 @@
         window.closeDocModal = function () {
             document.getElementById('modal-docs').style.display = 'none';
         }; </script> <script type="module"> import { loadSiteConfig, missingContracts, useBrowserSafeChainEndpoints } from '/lib/config.js';
+        import { sanitizeSvg as filterSvg, svgPlaceholder, isSvgTrusted, createTrustToggle } from '/lib/svg-sanitize.js';
         import { applyNavGuard } from '/lib/nav-guard.js';
         // Cache-bust wallet module so ensureWallet / reconnect fixes always load
         import * as TerpWallet from '/lib/wallet.js';
@@ -3264,7 +3277,7 @@
                     : null);
 
             const previewHtml = previewSvg
-                ? scopeSvgIds(previewSvg, "detail-" + summary.addr.slice(-8))
+                ? scopeSvgIds(previewSvg, "detail-" + summary.addr.slice(-8), summary.addr)
                 : `<div class="loading-spinner"></div>`;
 
             document.getElementById("col-detail-header").innerHTML = `
@@ -3294,6 +3307,22 @@
                     </div>
                     ${renderPriceTiers(summary.config, minted)}
                 </div>`;
+
+            // "Show this collection unfiltered on this device" (off by default)
+            const info = document.querySelector("#col-detail-header .col-detail-info");
+            if (info && summary.addr && !state.demoMode) {
+                info.appendChild(createTrustToggle(summary.addr, {
+                    onChange: () => {
+                        if (state.currentAddr && state.currentAddr !== summary.addr) return;
+                        renderCollectionHeader(summary);
+                        if (state.currentAddr === summary.addr) {
+                            state.tokensPage = 0;
+                            void renderTokenGridPage(true);
+                        }
+                        if (state.collections?.length) buildCollectionGrid(state.collections);
+                    },
+                }));
+            }
         }
 
         function renderMintPanel(summary) {
@@ -3455,8 +3484,9 @@
                     : extractSvgParams(extension || {}, collectionAddr + tokenId);
                 svg = getCachedSVG(collectionAddr + tokenId, params);
             }
-            if (svg && !svg.includes("token-svg")) {
-                try { svg = scopeSvgIds(svg, "tok-" + String(tokenId).slice(-12)); } catch { /* keep raw */ }
+            if (svg) {
+                try { svg = scopeSvgIds(svg, "tok-" + String(tokenId).slice(-12), collectionAddr); }
+                catch { svg = svgPlaceholder("This SVG could not be filtered, so it is not shown."); }
             }
             const colName = cache?.contractInfo?.name
                 || state.collections.find(c => c.addr === collectionAddr)?.contractInfo?.name
@@ -3504,7 +3534,7 @@
                         : null);
 
                 const previewHtml = previewSvg
-                    ? scopeSvgIds(previewSvg, "card-" + col.addr.slice(-8))
+                    ? scopeSvgIds(previewSvg, "card-" + col.addr.slice(-8), col.addr)
                     : `<div style="min-height:8rem;display:flex;align-items:center;justify-content:center;color:rgb(var(--tn-text-rgb) / max(0.35, var(--tn-alpha-floor)));font-size:0.75rem;">no preview</div>`;
 
                 const card = document.createElement("div");
@@ -4055,29 +4085,13 @@
             return svg;
         }
 
-        // Sanitize SVG from on-chain data: strip <script>, <foreignObject>,
-        // event handler attributes, and javascript: URIs to prevent XSS.
-        function sanitizeSvg(svgStr) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(svgStr, 'image/svg+xml');
-            // Malformed XML — never return unsanitized input
-            if (doc.querySelector('parsererror')) return '';
-            // Remove dangerous elements (animate/set can mutate attrs at runtime)
-            doc.querySelectorAll('script, foreignObject, animate, set').forEach(el => el.remove());
-            // Remove event handlers, javascript: and data: URIs from all elements
-            doc.querySelectorAll('*').forEach(el => {
-                for (const attr of [...el.attributes]) {
-                    if (attr.name.startsWith('on')) {
-                        el.removeAttribute(attr.name);
-                    }
-                    const val = attr.value.trim().toLowerCase();
-                    if ((attr.name === 'href' || attr.name === 'xlink:href')
-                        && (val.startsWith('javascript:') || val.startsWith('data:'))) {
-                        el.removeAttribute(attr.name);
-                    }
-                }
-            });
-            return new XMLSerializer().serializeToString(doc.documentElement);
+        // On-chain SVG goes through the shared filter in /lib/svg-sanitize.js
+        // (DOMPurify allowlist that keeps SMIL animation, drops scripts,
+        // handlers and outside links). A collection the viewer trusts on this
+        // device keeps its scripts, but comes back as a sandboxed iframe
+        // (allow-scripts, no allow-same-origin) and never enters this page.
+        function sanitizeSvg(svgStr, collectionAddr) {
+            return filterSvg(svgStr, { trusted: isSvgTrusted(collectionAddr) });
         }
 
         // Rewrite all id="X" in an SVG to "prefix-X" and update all url(#X),
@@ -4085,8 +4099,9 @@
         // when multiple SVGs from different collections are on the same page.
         // Also normalises invalid "view-box" → "viewBox" and synthesizes a
         // viewBox from width/height when missing, so fixed-size SVGs scale correctly.
-        function scopeSvgIds(svgStr, prefix) {
-            svgStr = sanitizeSvg(svgStr);
+        function scopeSvgIds(svgStr, prefix, collectionAddr) {
+            svgStr = sanitizeSvg(svgStr, collectionAddr);
+            prefix = String(prefix).replace(/[^A-Za-z0-9_-]/g, "");
             let out = svgStr;
 
             // Fix invalid hyphenated attribute name

@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/config.js">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Create an SVG collection | Terp Network</title>
+<meta name="description" content="Write an SVG template, watch it render with sample values, and launch it as an on-chain collection on Terp Network.">
+<meta property="og:title" content="Create an SVG collection | Terp Network">
+<meta property="og:description" content="Write an SVG template, watch it render with sample values, and launch it on chain.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png">
+<link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+<link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script>
+<script type="module" src="/lib/ui/select.js"></script>
+<style>
+.ws-main { position: relative; z-index: 1; max-width: 1320px; width: 100%; margin: 0 auto; padding: 2rem 1.5rem 4rem; color: var(--tn-text); font-family: var(--tn-font); font-size: var(--tn-size-body); line-height: var(--tn-line-body); }
+.ws-main h1 { font-size: var(--tn-size-display); font-weight: var(--tn-weight-display); letter-spacing: var(--tn-track-display); font-family: var(--tn-font-display); color: var(--tn-mint); margin: 0 0 0.3rem; }
+.ws-main .lede { color: var(--tn-text-dim); max-width: 44rem; margin: 0 0 1.25rem; font-size: var(--tn-size-small); }
+.ws-main .lede a { color: var(--tn-teal); }
+.ws-main h2 { font-size: var(--tn-size-heading); font-weight: var(--tn-font-weight-medium); color: var(--tn-text-bright); letter-spacing: var(--tn-track-heading); margin: 0 0 0.4rem; }
+.ws-main h3 { font-size: var(--tn-size-small); font-weight: var(--tn-font-weight-medium); color: var(--tn-text-bright); margin: 1rem 0 0.4rem; text-transform: uppercase; letter-spacing: var(--tn-track-label); }
+.card { background: var(--tn-panel); border: 1px solid rgb(var(--tn-tint-rgb) / 0.08); border-radius: var(--tn-radius); padding: 1rem; backdrop-filter: blur(6px); }
+.ws { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 1rem; align-items: start; }
+@media (max-width: 960px) { .ws { grid-template-columns: 1fr; } }
+.ws-pane-preview { position: sticky; top: calc(var(--tn-header-h, 3.75rem) + 0.5rem); }
+@media (max-width: 960px) { .ws-pane-preview { position: static; } }
+.row { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; margin: 0.45rem 0; }
+.spacer { flex: 1; }
+input[type=text], input[type=number], select, textarea { font: inherit; font-size: var(--tn-size-small); color: var(--tn-text-bright); background: rgb(var(--tn-shade-rgb) / 0.45); border: 1px solid rgb(var(--tn-teal-rgb) / 0.22); border-radius: var(--tn-radius-sm); padding: 0.4rem 0.5rem; min-width: 0; }
+textarea { width: 100%; font-family: var(--tn-font-mono); font-size: 0.78rem; line-height: 1.5; resize: vertical; tab-size: 2; box-sizing: border-box; }
+textarea.code { min-height: 26rem; white-space: pre; }
+:is(input, select, textarea, button, a, summary, [tabindex]):focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 1px; }
+button, .btn { font-family: var(--tn-font); font-size: 0.82rem; font-weight: var(--tn-font-weight-medium); letter-spacing: var(--tn-track-nav); line-height: 1.25; padding: 0.36rem 0.7rem; border-radius: var(--tn-radius-ctl); border: 1px solid rgb(var(--tn-teal-rgb) / 0.4); background: transparent; color: var(--tn-text-bright); cursor: pointer; transition: background-color 120ms linear, border-color 120ms linear, color 120ms linear; }
+button:hover:not(:disabled), .btn:hover { color: var(--tn-mint); border-color: var(--tn-teal); background: rgb(var(--tn-teal-rgb) / 0.06); }
+button.primary { background: rgb(var(--tn-teal-rgb) / 0.14); border-color: var(--tn-teal); }
+button.danger { border-color: rgb(var(--tn-danger-rgb) / 0.6); }
+button.ghost { border-color: transparent; }
+button.icon { padding: 0.2rem 0.4rem; font-size: 0.75rem; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+.mono { font-family: var(--tn-font-mono); font-size: 0.8rem; word-break: break-all; }
+.dim { color: var(--tn-text-dim); } .small { font-size: var(--tn-size-small); } .cap { font-size: var(--tn-size-caption); }
+.status-ok { color: var(--tn-teal); } .status-bad { color: var(--tn-danger); } .status-warn { color: var(--tn-amber); }
+/* segmented tabs */
+.seg { display: inline-flex; border: 1px solid rgb(var(--tn-teal-rgb) / 0.35); border-radius: var(--tn-radius-ctl); overflow: hidden; }
+.seg button { border: 0; border-radius: 0; }
+.seg button[aria-pressed=true], .seg button[aria-selected=true] { background: rgb(var(--tn-teal-rgb) / 0.18); color: var(--tn-mint); }
+/* preview */
+.stage { position: relative; aspect-ratio: 1; width: 100%; border-radius: var(--tn-radius-sm); overflow: hidden; background: repeating-conic-gradient(rgb(var(--tn-tint-rgb) / 0.045) 0 25%, transparent 0 50%) 0 0 / 20px 20px, rgb(var(--tn-shade-rgb) / 0.35); border: 1px solid rgb(var(--tn-tint-rgb) / 0.08); }
+.stage .art { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity 140ms linear; }
+.stage .art svg, .stage .art iframe { width: 100%; height: 100%; display: block; }
+.thumb iframe, .sample .art iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
+.stage.is-busy .art { opacity: 0.55; }
+.stage .tag { position: absolute; left: 0.5rem; bottom: 0.5rem; font-family: var(--tn-font-mono); font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: var(--tn-radius-sm); background: rgb(var(--tn-shade-rgb) / 0.7); color: var(--tn-text); }
+.thumbs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; margin-top: 0.5rem; }
+.thumb { padding: 0; aspect-ratio: 1; border-radius: var(--tn-radius-sm); overflow: hidden; border: 1px solid rgb(var(--tn-tint-rgb) / 0.12); background: rgb(var(--tn-shade-rgb) / 0.35); position: relative; }
+.thumb svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+.thumb.has-err { border-color: rgb(var(--tn-danger-rgb) / 0.7); } .thumb.has-warn { border-color: rgb(var(--tn-amber-rgb) / 0.55); }
+.thumb[aria-current=true] { outline: 2px solid var(--tn-teal); outline-offset: 1px; }
+/* issues */
+.issues { margin-top: 0.6rem; font-size: var(--tn-size-small); }
+.issues summary { cursor: pointer; display: flex; gap: 0.5rem; align-items: center; list-style: none; }
+.issues summary::-webkit-details-marker { display: none; }
+.issues summary::before { content: '▸'; color: var(--tn-text-dim); transition: transform 120ms linear; }
+.issues[open] summary::before { transform: rotate(90deg); }
+.flags { list-style: none; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.25rem; font-size: var(--tn-size-small); max-height: 14rem; overflow: auto; }
+.flags li { padding: 0.28rem 0.5rem; border-left: 3px solid var(--tn-text-dim); background: rgb(var(--tn-shade-rgb) / 0.25); border-radius: 0 var(--tn-radius-sm) var(--tn-radius-sm) 0; }
+.flags li.err { border-color: var(--tn-danger); } .flags li.warn { border-color: var(--tn-amber); } .flags li.ok { border-color: var(--tn-teal); }
+.badge { display: inline-block; font-size: 0.68rem; padding: 0.05rem 0.45rem; border-radius: 999px; border: 1px solid currentColor; line-height: 1.4; white-space: nowrap; }
+.badge.err { color: var(--tn-danger); } .badge.warn { color: var(--tn-amber); } .badge.ok { color: var(--tn-teal); } .badge.pin { color: var(--tn-mint); }
+/* variables */
+.vars { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.3rem; }
+.var { display: grid; grid-template-columns: 1.1rem minmax(6rem, max-content) 1fr auto; gap: 0.5rem; align-items: center; padding: 0.25rem 0.4rem; border-radius: var(--tn-radius-sm); background: rgb(var(--tn-shade-rgb) / 0.22); border: 1px solid transparent; }
+.var.is-pinned { border-color: rgb(var(--tn-mint-rgb) / 0.35); }
+.var.is-missing { border-color: rgb(var(--tn-danger-rgb) / 0.5); }
+.var .sw { width: 1.1rem; height: 1.1rem; border-radius: 3px; border: 1px solid rgb(var(--tn-tint-rgb) / 0.25); }
+.var .name { font-family: var(--tn-font-mono); font-size: 0.78rem; color: var(--tn-teal); background: none; border: 0; padding: 0.1rem 0; text-align: left; letter-spacing: 0; }
+.var .name:hover { color: var(--tn-mint); text-decoration: underline; background: none; }
+.var input { width: 100%; font-family: var(--tn-font-mono); font-size: 0.78rem; padding: 0.2rem 0.4rem; }
+.var .meta { display: flex; gap: 0.3rem; align-items: center; }
+/* tabs */
+.tabs { margin-top: 1rem; scroll-margin-top: calc(var(--tn-header-h, 3.75rem) + 1rem); }
+.tablist { display: flex; flex-wrap: wrap; gap: 0.25rem; border-bottom: 1px solid rgb(var(--tn-tint-rgb) / 0.1); margin-bottom: 0.75rem; }
+.tablist [role=tab] { border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 0.5rem 0.8rem; color: var(--tn-text-dim); }
+.tablist [role=tab][aria-selected=true] { color: var(--tn-mint); border-bottom-color: var(--tn-teal); background: none; }
+[role=tabpanel][hidden] { display: none; }
+table.t { width: 100%; border-collapse: collapse; font-size: var(--tn-size-small); }
+table.t th, table.t td { text-align: left; padding: 0.32rem 0.5rem; border-bottom: 1px solid rgb(var(--tn-tint-rgb) / 0.07); vertical-align: top; }
+table.t th { font-weight: var(--tn-font-weight-medium); color: var(--tn-text-dim); font-size: var(--tn-size-caption); text-transform: uppercase; letter-spacing: var(--tn-track-label); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; } @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+details.ref { border-top: 1px solid rgb(var(--tn-tint-rgb) / 0.08); padding: 0.5rem 0; }
+details.ref summary { cursor: pointer; color: var(--tn-teal); font-size: var(--tn-size-small); }
+.snip { border: 1px solid rgb(var(--tn-tint-rgb) / 0.08); border-radius: var(--tn-radius-sm); padding: 0.55rem; margin: 0.45rem 0; }
+.snip .row { margin: 0; justify-content: space-between; }
+.snip pre, pre.json { font-family: var(--tn-font-mono); font-size: 0.74rem; white-space: pre-wrap; word-break: break-word; background: var(--tn-code-bg, rgb(var(--tn-shade-rgb) / 0.4)); color: var(--tn-code-text, var(--tn-text)); padding: 0.55rem; border-radius: var(--tn-radius-sm); margin: 0.35rem 0; max-height: 22rem; overflow: auto; }
+.snip textarea { min-height: 7rem; }
+label.f { display: grid; gap: 0.25rem; font-size: var(--tn-size-label); text-transform: uppercase; letter-spacing: var(--tn-track-label); color: rgb(var(--tn-mint-rgb) / max(0.6, var(--tn-alpha-floor))); }
+label.f small { text-transform: none; letter-spacing: 0; color: var(--tn-text-dim); font-size: var(--tn-size-caption); }
+.formgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; }
+.tiers td input, .tiers td select { width: 100%; } .tiers td .tn-select { display: block; width: 100%; }
+.switch { display: inline-flex; gap: 0.4rem; align-items: center; font-size: var(--tn-size-small); cursor: pointer; }
+.kv, .netbar { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; font-size: var(--tn-size-small); margin: 0.5rem 0; }
+.kv dt, .netbar dt { color: var(--tn-text-dim); } .kv dd, .netbar dd { margin: 0; }
+.facts ul { margin: 0.2rem 0 0 1.1rem; display: grid; gap: 0.25rem; font-size: var(--tn-size-small); }
+.facts strong { color: var(--tn-text-bright); font-weight: var(--tn-font-weight-strong); }
+.samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.6rem; margin-top: 0.6rem; }
+.sample { border: 1px solid rgb(var(--tn-tint-rgb) / 0.1); border-radius: var(--tn-radius-sm); padding: 0.35rem; background: rgb(var(--tn-shade-rgb) / 0.3); }
+.sample.has-err { border-color: rgb(var(--tn-danger-rgb) / 0.7); } .sample.has-warn { border-color: rgb(var(--tn-amber-rgb) / 0.55); }
+.sample .art { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.sample .art svg { width: 100%; height: 100%; display: block; }
+.sample .cap { display: flex; justify-content: space-between; gap: 0.3rem; margin-top: 0.3rem; align-items: center; }
+.toast { position: fixed; bottom: 1rem; right: 1rem; background: var(--tn-panel-solid); border: 1px solid var(--tn-teal); padding: 0.45rem 0.8rem; border-radius: var(--tn-radius-sm); font-size: var(--tn-size-small); z-index: 60; pointer-events: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .ws-main *, .ws-main *::before { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="ws-main" id="svg-create">
+  <script src="/lib/fab.js"></script>
+  <div data-tn-head>
+    <h1>Create an SVG collection</h1>
+    <p class="lede">Write a template, watch it render with sample values, then launch it on chain. Every <span class="mono">${name}</span> is a variable the contract fills per token. <a href="/svg">Browse collections</a></p>
+  </div>
+
+  <div class="ws">
+    <!-- editor -->
+    <section class="card ws-pane-editor" aria-labelledby="ed-h">
+      <div class="row" style="margin-top:0">
+        <h2 id="ed-h" class="sr-only">Editor</h2>
+        <div class="seg" role="tablist" aria-label="Editor">
+          <button type="button" role="tab" id="ed-tab-tpl" aria-selected="true" aria-controls="ed-tpl">Template</button>
+          <button type="button" role="tab" id="ed-tab-vars" aria-selected="false" aria-controls="ed-vars">Variables</button>
+        </div>
+        <span class="spacer"></span>
+        <select id="ex-select" aria-label="Load an example"><option value="">Examples…</option></select>
+      </div>
+      <div id="ed-tpl" role="tabpanel" aria-labelledby="ed-tab-tpl">
+        <div class="row">
+          <label class="btn" for="tpl-file">Upload .svg</label><input type="file" id="tpl-file" accept=".svg,image/svg+xml" hidden>
+          <button type="button" id="tpl-strip">Remove comments</button>
+          <span class="spacer"></span>
+          <span class="cap dim" id="tpl-size"></span>
+        </div>
+        <textarea id="tpl" class="code" spellcheck="false" aria-label="SVG template" aria-describedby="tpl-help"></textarea>
+        <p class="cap dim" id="tpl-help">Write each changing value as <span class="mono">${name}</span>. Click a variable below to find it here.</p>
+      </div>
+      <div id="ed-vars" role="tabpanel" aria-labelledby="ed-tab-vars" hidden>
+        <div class="row">
+          <button type="button" id="vars-fill">Add missing</button>
+          <button type="button" id="vars-format">Format</button>
+          <button type="button" id="vars-export">Export</button>
+          <label class="btn" for="vars-file">Import</label><input type="file" id="vars-file" accept=".json,application/json" hidden>
+          <span class="spacer"></span>
+          <select id="vars-saved" aria-label="Saved dictionaries"><option value="">Saved…</option></select>
+          <button type="button" id="vars-load">Load</button>
+          <button type="button" id="vars-save">Save</button>
+          <button type="button" id="vars-del" class="ghost" aria-label="Delete saved dictionary">Delete</button>
+        </div>
+        <textarea id="vars" class="code" spellcheck="false" aria-label="Variables JSON"></textarea>
+        <p class="cap dim">A JSON array of <span class="mono">{ "name", "kind" }</span>, or a dictionary with a <span class="mono">"vars"</span> array. See Dictionary below.</p>
+      </div>
+      <h3>Variables <span class="cap dim" id="var-count"></span></h3>
+      <ul class="vars" id="var-list" aria-label="Variables and their sample values"></ul>
+      <p class="cap dim" id="var-hint">Edit a value to pin it across rerolls.</p>
+    </section>
+
+    <!-- preview -->
+    <section class="card ws-pane-preview" aria-labelledby="pv-h">
+      <div class="row" style="margin-top:0">
+        <h2 id="pv-h" style="margin:0">Preview</h2>
+        <span class="spacer"></span>
+        <label class="cap dim" for="pv-seed">Seed</label>
+        <input type="number" id="pv-seed" min="0" step="1" value="0" style="width:6.5rem">
+        <button type="button" class="primary" id="pv-reroll" aria-keyshortcuts="Alt+R">Reroll</button>
+      </div>
+      <div class="stage" id="pv-stage" aria-live="off">
+        <div class="art" id="pv-art" role="img" aria-label="Preview of the template with sample values"></div>
+        <span class="tag" id="pv-tag"></span>
+      </div>
+      <div class="thumbs" id="pv-thumbs" aria-label="More samples"></div>
+      <div class="row">
+        <label class="switch"><input type="checkbox" id="s-freeze"> Freeze animation</label>
+        <label class="switch cap"><span class="dim">Values</span>
+          <select id="s-mode" aria-label="Where values come from"><option value="placeholder">Preview seed</option><option value="mint">Mint (token # = seed)</option></select></label>
+        <label class="switch cap"><span class="dim">Rules</span>
+          <select id="s-target" aria-label="Contract version to check against"><option value="source">Packed-only code (new)</option><option value="deployed">Deployed (code 71/83)</option></select></label>
+      </div>
+      <div id="pv-trust"></div>
+      <details class="issues" id="pv-issues">
+        <summary><span id="pv-status" aria-live="polite"></span></summary>
+        <ul class="flags" id="pv-flags"></ul>
+      </details>
+    </section>
+  </div>
+
+  <!-- secondary tabs -->
+  <div class="tabs card" id="ws-tabs">
+    <div class="tablist" role="tablist" aria-label="Tools">
+      <button type="button" role="tab" id="tab-parse" aria-selected="true" aria-controls="panel-parse">Parse</button>
+      <button type="button" role="tab" id="tab-dict" aria-selected="false" aria-controls="panel-dict" tabindex="-1">Dictionary</button>
+      <button type="button" role="tab" id="tab-prompts" aria-selected="false" aria-controls="panel-prompts" tabindex="-1">LLM prompts</button>
+      <button type="button" role="tab" id="tab-samples" aria-selected="false" aria-controls="panel-samples" tabindex="-1">Batch</button>
+      <button type="button" role="tab" id="tab-launch" aria-selected="false" aria-controls="panel-launch" tabindex="-1">Launch</button>
+      <button type="button" role="tab" id="tab-check" aria-selected="false" aria-controls="panel-check" tabindex="-1">Check a collection</button>
+    </div>
+
+    <section id="panel-parse" role="tabpanel" aria-labelledby="tab-parse">
+      <div class="row" style="margin-top:0">
+        <button type="button" class="primary" id="parse-run">Parse my template</button>
+        <button type="button" id="parse-copy">Copy report</button>
+        <span class="small dim" id="parse-summary" aria-live="polite"></span>
+      </div>
+      <div id="parse-out"></div>
+    </section>
+
+    <section id="panel-dict" role="tabpanel" aria-labelledby="tab-dict" hidden>
+      <p class="small dim" style="margin-top:0">The format the contract reads. Copy any block into your notes or an assistant.</p>
+      <details class="ref" open><summary>Variable kinds</summary><div id="ref-kinds"></div></details>
+      <details class="ref"><summary>Name → kind (first word of a name)</summary><table class="t" id="ref-grammar"></table></details>
+      <details class="ref"><summary>Full dictionary file</summary><div id="ref-layer"></div></details>
+      <details class="ref"><summary>Palette groups and entropy gradients</summary>
+        <p class="small">Variables in one palette group share the same <span class="mono">rgb_styled</span> ranges, so their colors belong together. The gradient is guidance for the ranges; the contract does not read it.</p>
+        <table class="t" id="ref-gradients"></table></details>
+      <details class="ref"><summary>Template rules</summary><ul class="flags" id="ref-rules"></ul></details>
+      <details class="ref"><summary>Example templates</summary><div id="ref-examples"></div></details>
+    </section>
+
+    <section id="panel-prompts" role="tabpanel" aria-labelledby="tab-prompts" hidden>
+      <p class="small dim" style="margin-top:0">Paste one into any assistant, then paste its answer into Template and Variables. Prompts include your current template and its open issues.</p>
+      <label class="f">What to draw <small>used by the first prompt</small><input type="text" id="prompt-idea" placeholder="e.g. a koi pond; fish colors and swim speed vary per token"></label>
+      <div id="prompts"></div>
+    </section>
+
+    <section id="panel-samples" role="tabpanel" aria-labelledby="tab-samples" hidden>
+      <div class="row" style="margin-top:0">
+        <label class="f">Samples<input type="number" id="s-count" min="1" max="64" value="12" style="width:5.5rem"></label>
+        <button type="button" class="primary" id="s-run">Render batch</button>
+        <span class="small" id="s-summary" aria-live="polite"></span>
+      </div>
+      <div class="samples" id="s-grid"></div>
+      <ul class="flags" id="s-findings"></ul>
+    </section>
+
+    <section id="panel-launch" role="tabpanel" aria-labelledby="tab-launch" hidden>
+      <div class="facts">
+        <ul>
+          <li><strong>Cost:</strong> one transaction to the SVG minter. You pay gas in THIOL; there is no creation fee. The gas estimate for your template is under Size and gas.</li>
+          <li><strong>Permanent:</strong> template, variables, seed, supply and price tiers are fixed once created. Pausing and the whitelist can change later.</li>
+          <li><strong>Who can create:</strong> when the minter has an owner, only the owner can create collections.</li>
+        </ul>
+      </div>
+      <h3>Network</h3>
+      <div class="row">
+        <div class="seg" role="group" aria-label="Network">
+          <button type="button" id="net-testnet" aria-pressed="true">Testnet (120u-1)</button>
+          <button type="button" id="net-mainnet" aria-pressed="false">Mainnet (morocco-1)</button>
+        </div>
+        <input type="text" id="net-rest" style="flex:1;min-width:14rem" aria-label="REST API URL">
+        <button type="button" id="net-rest-save">Use this API</button>
+        <button type="button" id="net-rest-reset">Reset</button>
+      </div>
+      <dl class="netbar" id="net-info"></dl>
+      <h3>Collection</h3>
+      <div class="formgrid">
+        <label class="f">Label<small>names the contract on chain</small><input type="text" id="m-label" value="cw721-svg-collection"></label>
+        <label class="f">Name<input type="text" id="m-name" placeholder="Koi Pond"></label>
+        <label class="f">Symbol<input type="text" id="m-symbol" placeholder="KOI"></label>
+        <label class="f">Supply<small>1 to 10,000</small><input type="number" id="m-total" min="1" max="10000" value="1000"></label>
+        <label class="f">Seed (base64)<small>mixed into every token</small><span class="row" style="margin:0"><input type="text" id="m-seed" style="flex:1"><button type="button" id="m-seed-new">New</button></span></label>
+        <label class="f">Mint opens<small>seconds after creation; blank = now</small><input type="text" id="m-start" inputmode="numeric" placeholder="0"></label>
+        <label class="f">Mint stays open<small>seconds; blank = no end</small><input type="text" id="m-duration" inputmode="numeric"></label>
+        <label class="f">Whitelist contract<small>optional; listed addresses mint free</small><input type="text" id="m-whitelist" placeholder="terp1…"></label>
+        <label class="f">Creator<small>optional; blank = sender</small><input type="text" id="m-creator" placeholder="terp1…"></label>
+        <label class="f">Payout address<small>optional; blank = creator</small><input type="text" id="m-withdraw" placeholder="terp1…"></label>
+        <label class="f">Minter<small>optional; blank = anyone can mint</small><input type="text" id="m-minter" placeholder="terp1…"></label>
+      </div>
+      <h3>Price tiers</h3>
+      <p class="small dim">A tier's price applies while fewer than "until" tokens are minted. Accepted tokens: <span id="m-denom-src"></span></p>
+      <table class="t tiers" id="m-tiers"></table>
+      <div class="row"><button type="button" id="m-tier-add">Add tier</button></div>
+      <h3>Size and gas</h3>
+      <p class="small dim" id="enc-note">The template and variables are packed (SVP1) in your browser and sent as one field.</p>
+      <table class="t" id="enc-table" aria-label="Size and gas for each encoding"></table>
+      <p class="small dim" id="enc-fit"></p>
+      <details class="ref"><summary>Dictionary hits <span class="dim" id="enc-hits-n"></span></summary><table class="t" id="enc-hits"></table></details>
+      <h3>Message</h3>
+      <ul class="flags" id="m-checks" aria-live="polite"></ul>
+      <div class="row"><button type="button" id="m-copy">Copy message</button><button type="button" id="m-download">Download .json</button><span class="small dim" id="m-target"></span></div>
+      <details class="ref"><summary>Show JSON</summary><pre class="json" id="m-json" aria-label="Generated message"></pre></details>
+      <h3>Dry run and create</h3>
+      <p class="small dim">Dry run asks a node to execute the message without signing. Create signs and sends it from your wallet.</p>
+      <div class="row">
+        <input type="text" id="d-sender" style="flex:1;min-width:16rem" placeholder="Sender address (terp1…)" aria-label="Sender address">
+        <button type="button" id="d-connect">Connect wallet</button>
+        <button type="button" id="d-run">Dry run</button>
+      </div>
+      <ul class="flags" id="d-result" aria-live="polite"></ul>
+      <div class="row" style="margin-top:0.75rem">
+        <label class="switch"><input type="checkbox" id="d-allow-mainnet"> Allow sending on mainnet</label>
+        <button type="button" class="primary danger" id="d-create" disabled>Create collection</button>
+        <span class="small dim" id="d-create-note"></span>
+      </div>
+    </section>
+
+    <section id="panel-check" role="tabpanel" aria-labelledby="tab-check" hidden>
+      <p class="small dim" style="margin-top:0">Reads a live collection's template and variables, renders it locally and compares with the contract's own preview. Nothing is sent. Uses the network chosen under Launch.</p>
+      <div class="row">
+        <input type="text" id="c-addr" style="flex:1;min-width:18rem" placeholder="terp1… collection address" aria-label="Collection address">
+        <label class="f">Samples<input type="number" id="c-count" min="1" max="32" value="8" style="width:5rem"></label>
+        <button type="button" class="primary" id="c-run">Check</button>
+      </div>
+      <div id="c-trust"></div>
+      <dl class="kv" id="c-info"></dl>
+      <p class="small" id="c-summary" aria-live="polite"></p>
+      <div class="samples" id="c-grid"></div>
+      <ul class="flags" id="c-findings"></ul>
+      <div class="row"><button type="button" id="c-use" disabled>Open in editor</button></div>
+    </section>
+  </div>
+</main>
+<script type="module">
+import * as E from '/lib/svg-launchpad/engine.js';
+import { KIND_SNIPPETS, COLLECTION_LAYER_EXAMPLE, ENTROPY_GRADIENTS, TEMPLATE_RULES, nameGrammarRows, promptTemplate, promptDictionary, promptFix } from '/lib/svg-launchpad/spec.js';
+import { EXAMPLES } from '/lib/svg-launchpad/examples.js';
+import { SOURCE_SCHEMA, SCHEMA_SOURCE } from '/lib/svg-launchpad/schema.js';
+import * as C from '/lib/svg-launchpad/chain.js';
+import * as P from '/lib/svg-launchpad/svp.js';
+import { sanitizeSvgResult, svgPlaceholder, trustedFrameHtml, isSvgTrusted, createTrustToggle } from '/lib/svg-sanitize.js';
+const WORKSPACE_TRUST = 'workspace'; // localStorage svg.trusted.workspace
+const workspaceTrusted = () => isSvgTrusted(WORKSPACE_TRUST);
+
+const $ = (id) => document.getElementById(id);
+const DRAFT_KEY = 'terp-svg-launchpad.draft.v1';
+const DICTS_KEY = 'terp-svg-launchpad.dicts.v1';
+const DEFAULT_CHECK_ADDR = 'terp1tsk4rgs87c6da2pgnypgftg267c2k2x0d3ec0kdxf7pcwdedgdrqf6dc2w';
+const DEFAULT_EXAMPLE = 'dao-fixed';
+const THUMBS = 6;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const S = { nets: null, net: null, accepted: [], acceptedSource: '', minter: null, variables: [], varsError: '', build: null, wallet: null, checked: null, tiers: [], lastFindings: [], staticFindings: [], pins: new Map(), params: [], seed: 0, renderGen: 0, hl: { name: '', i: 0 }, pack: null };
+window.__launchpad = S;
+
+// ── DOM helpers (text only; SVG goes through the sanitizer) ──
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return el;
+}
+const flags = (ul, items) => ul.replaceChildren(...items.map((it) => h('li', { class: it.level || '' }, it.text)));
+function toast(msg) { const t = h('div', { class: 'toast', role: 'status' }, msg); document.body.append(t); setTimeout(() => t.remove(), 2000); }
+async function copy(text, what = 'Copied') {
+  try { await navigator.clipboard.writeText(text); }
+  catch { const ta = h('textarea'); ta.value = text; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  S.lastCopied = text; toast(what);
+}
+function download(name, text, type = 'application/json') {
+  const a = h('a', { href: URL.createObjectURL(new Blob([text], { type })), download: name });
+  document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+const short = (a) => (a && a.length > 20 ? `${a.slice(0, 10)}…${a.slice(-6)}` : a || '—');
+const fmtInt = (n) => Number(n).toLocaleString('en-US');
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+function debounce(fn, ms) { let t = null; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+// ── tabs (roving focus, arrow keys) ──
+function wireTabs(list, onChange) {
+  const tabs = [...list.querySelectorAll('[role=tab]')];
+  const select = (tab, focus) => {
+    for (const t of tabs) { const on = t === tab; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; $(t.getAttribute('aria-controls')).hidden = !on; }
+    if (focus) tab.focus();
+    if (onChange) onChange(tab.id);
+  };
+  for (const t of tabs) {
+    t.addEventListener('click', () => select(t));
+    t.addEventListener('keydown', (e) => {
+      const i = tabs.indexOf(t);
+      const j = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+      if (j >= 0) { e.preventDefault(); select(tabs[j], true); }
+    });
+  }
+  return (id) => select($(id));
+}
+
+// ── draft ──
+function saveDraft() {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ tpl: $('tpl').value, vars: $('vars').value, form: readFormRaw(), tiers: S.tiers, net: S.net && S.net.kind, pins: [...S.pins], seed: S.seed })); } catch { /* storage blocked */ }
+}
+const queueSave = debounce(saveDraft, 400);
+
+// ── template + variables ──
+function parseVars() {
+  const txt = $('vars').value.trim();
+  S.varsError = '';
+  if (!txt) { S.variables = []; S.dictionary = null; return; }
+  try { const { variables, dictionary } = E.variablesFromDictionary(JSON.parse(txt)); S.variables = variables; S.dictionary = dictionary; }
+  catch (e) { S.variables = []; S.dictionary = null; S.varsError = e.message; }
+}
+
+/** Static checks on template + variables. Cheap; runs on every edit. */
+function analyze() {
+  parseVars();
+  const tpl = $('tpl').value;
+  const size = E.byteLength(tpl);
+  $('tpl-size').textContent = `${fmtInt(size)} / ${fmtInt(E.MAX_SVG_SIZE)} bytes`;
+  $('tpl-size').className = `cap ${size > E.MAX_SVG_SIZE ? 'status-bad' : 'dim'}`;
+  const sl = E.computeSlots(tpl, S.variables);
+  S.slotInfo = sl;
+  const f = [];
+  if (!tpl.trim()) f.push({ level: 'warn', text: 'Paste or upload a template.' });
+  if (size > E.MAX_SVG_SIZE) f.push({ level: 'err', text: `Template is ${fmtInt(size)} bytes; the limit is ${fmtInt(E.MAX_SVG_SIZE)}.` });
+  if (sl.unclosed) f.push({ level: 'err', text: `Line ${sl.unclosed.line}: "\${" is never closed.` });
+  for (const m of sl.missing) f.push({ level: 'err', text: `\${${m.name}} has no variable (line ${m.lines.join(', ')}).` });
+  for (const o of sl.occurrences) if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(o.name)) { f.push({ level: 'warn', text: `\${${o.name}} (line ${o.line}) breaks the name grammar: lowercase words joined by "-".` }); break; }
+  if (/<!--[\s\S]*?\$\{[\s\S]*?-->/.test(tpl)) f.push({ level: 'warn', text: 'Placeholders inside comments still count as slots.' });
+  const apErr = $('s-target').value === 'source';
+  for (const a of E.animatedPaintFindings(tpl)) f.push({ level: apErr ? 'err' : 'warn', text: `Line ${a.line}: <${a.element}> gets its ${a.attribute} only from animation, so it is blank in stills${apErr ? ' and the current source rejects it' : ''}. Add a static ${a.attribute}.` });
+  for (const t of E.transformUnitFindings(tpl)) f.push({ level: 'warn', text: `Line ${t.line}: ${t.attribute}="${t.value}" uses CSS units; Chrome ignores it. Use plain numbers.` });
+  const refs = E.idReferences(tpl);
+  for (const d of refs.dangling) if (!d.id.includes('${')) f.push({ level: 'err', text: `Line ${d.line}: ${d.via.replace('…', d.id)} points at a missing id="${d.id}".` });
+  for (const d of refs.duplicates) f.push({ level: 'warn', text: `id="${d.id}" is used ${d.count} times.` });
+  if (S.varsError) f.push({ level: 'err', text: `Variables JSON: ${S.varsError}` });
+  for (const v of E.validateVariables(S.variables)) f.push({ level: 'err', text: v.message });
+  for (const u of sl.unused) f.push({ level: 'warn', text: `"${u}" is defined but not used.` });
+  for (const d of sl.duplicateNames) f.push({ level: 'warn', text: `"${d}" is defined twice; the first wins.` });
+  if (tpl.trim() && !S.varsError && !sl.unclosed && !sl.missing.length) {
+    const pi = P.packInfo(tpl, S.variables);
+    if (!pi.ok) f.push({ level: 'warn', text: `Packed encoding is not available: ${pi.error}` });
+    else if (pi.packedBytes > E.MAX_SVG_SIZE) f.push({ level: 'err', text: `Packed template is ${fmtInt(pi.packedBytes)} bytes; the limit is ${fmtInt(E.MAX_SVG_SIZE)}.` });
+  }
+  S.staticFindings = f;
+  S.lastFindings = f.filter((x) => x.level !== 'ok').map((x) => x.text);
+  return sl;
+}
+
+// ── preview pipeline: substitution → checks → sanitizer → id scoping ──
+function scopeIds(svgStr, prefix) {
+  prefix = String(prefix).replace(/[^A-Za-z0-9_-]/g, '');
+  let out = svgStr.replace(/\bview-box=/gi, 'viewBox=');
+  if (!/\bviewBox=/i.test(out)) {
+    const w = out.match(/\bwidth="([\d.]+)"/), hh = out.match(/\bheight="([\d.]+)"/);
+    if (w && hh) out = out.replace(/<svg\b/, `<svg viewBox="0 0 ${w[1]} ${hh[1]}"`);
+  }
+  const ids = new Set();
+  out.replace(/\bid="([^"]+)"/g, (_, id) => ids.add(id));
+  for (const id of ids) {
+    out = out.replaceAll(`id="${id}"`, `id="${prefix}-${id}"`).replaceAll(`url(#${id})`, `url(#${prefix}-${id})`)
+      .replaceAll(`href="#${id}"`, `href="#${prefix}-${id}"`).replaceAll(`xlink:href="#${id}"`, `xlink:href="#${prefix}-${id}"`);
+  }
+  return out;
+}
+const SMIL = ['animate', 'set', 'animateTransform', 'animateMotion'];
+function tagCounts(root) { const m = new Map(); for (const el of root.querySelectorAll('*')) { const n = el.localName.toLowerCase(); m.set(n, (m.get(n) || 0) + 1); } return m; }
+
+/**
+ * One token through the site pipeline. Only sanitizer output (or the
+ * sanitizer's own refusal card) is ever placed in the DOM.
+ */
+function processToken(svg, { params = [], prefix, freeze = false, artClass = 'art', trusted = false }) {
+  const animationOnlyIsError = $('s-target').value === 'source';
+  const { errors, warnings } = E.checkRendered(svg, { params, animationOnlyIsError });
+  const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
+  const bad = doc.getElementsByTagName('parsererror')[0];
+  if (bad) errors.push({ code: 'invalid-xml', text: `Not valid SVG: ${(bad.textContent || '').trim().split('\n')[0].slice(0, 140)}` });
+  const res = sanitizeSvgResult(svg, { trusted });
+  if (!res.ok) errors.push({ code: 'refused', text: `The site filter refused it: ${res.reason}` });
+  if (res.ok && res.mode === 'trusted') {
+    // Unfiltered, but only ever inside the sandboxed frame (opaque origin).
+    let raw = res.raw;
+    if (freeze && !bad) { const d = new DOMParser().parseFromString(raw, 'image/svg+xml'); d.querySelectorAll(SMIL.join(',')).forEach((n) => n.remove()); raw = new XMLSerializer().serializeToString(d.documentElement); }
+    const art = h('div', { class: artClass, 'data-mode': 'trusted' });
+    art.innerHTML = trustedFrameHtml(raw, { title: 'Trusted preview: scripts run isolated from this site' });
+    return { art, errors, warnings, mode: 'trusted' };
+  }
+  if (res.ok && /<script\b|\son[a-z]+\s*=/i.test(svg)) warnings.push({ code: 'scripts-removed', text: 'Scripts and event handlers are removed in the filtered view. Collectors see them only if they trust the collection.' });
+  let markup = res.ok ? res.svg : svgPlaceholder(res.reason);
+  if (res.ok && !bad) {
+    const before = tagCounts(doc.documentElement);
+    const tmp = document.createElement('template'); tmp.innerHTML = res.svg;
+    const after = tagCounts(tmp.content);
+    const gone = [...before].filter(([n, c]) => (after.get(n) || 0) < c).map(([n, c]) => `<${n}> ×${c - (after.get(n) || 0)}`);
+    if (gone.length) warnings.push({ code: 'filtered', text: `The site filter removed ${gone.join(', ')}` });
+    const pre = E.idReferences(svg).dangling;
+    for (const d of E.idReferences(res.svg).dangling.filter((d) => !pre.some((x) => x.id === d.id))) errors.push({ code: 'dangling-after-filter', text: `After filtering, ${d.via.replace('…', d.id)} has no target` });
+  }
+  if (freeze && res.ok) {
+    const tmp = document.createElement('template'); tmp.innerHTML = markup;
+    tmp.content.querySelectorAll(SMIL.join(',')).forEach((n) => n.remove());
+    const d = document.createElement('div'); d.append(tmp.content); markup = d.innerHTML;
+  }
+  const art = h('div', { class: artClass, 'data-mode': res.ok ? 'filtered' : 'refused' });
+  art.innerHTML = res.ok ? scopeIds(markup, prefix) : markup; // sanitizer output only
+  return { art, errors, warnings, mode: res.mode };
+}
+
+async function paramsFor(n) {
+  if ($('s-mode').value === 'mint') {
+    const seedB64 = $('m-seed').value.trim();
+    if (!seedB64) throw new Error('Mint values need the collection seed (Launch tab).');
+    return { params: await E.mintParams(S.variables, seedB64, n, 1000000), label: `token #${n}` };
+  }
+  const seed = `sample-${n}`;
+  return { params: await E.placeholderParams(S.variables, seed), label: seed };
+}
+const applyPins = (params) => params.map((p) => (S.pins.has(p.name) ? { ...p, value: S.pins.get(p.name) } : p));
+const isFrozen = () => $('s-freeze').checked;
+
+// ── live preview ──
+async function renderPreview() {
+  const gen = ++S.renderGen;
+  const sl = analyze();
+  const stage = $('pv-stage');
+  const blocked = S.varsError ? 'Fix the Variables JSON to preview.' : sl.unclosed ? 'Close every "${" to preview.' : E.validateVariables(S.variables).length ? 'Fix the variable definitions to preview.' : '';
+  let main = null, mainParams = [];
+  const thumbs = [];
+  if (!blocked && $('tpl').value.trim()) {
+    stage.classList.add('is-busy');
+    try {
+      const p = await paramsFor(S.seed);
+      if (gen !== S.renderGen) return;
+      mainParams = applyPins(p.params);
+      main = processToken(E.renderSlots($('tpl').value, sl.slots, mainParams), { params: mainParams, prefix: 'pv', freeze: isFrozen(), trusted: workspaceTrusted() });
+      main.label = p.label;
+      for (let i = 1; i <= THUMBS; i++) {
+        const q = await paramsFor(S.seed + i);
+        if (gen !== S.renderGen) return;
+        const qp = applyPins(q.params);
+        const r = processToken(E.renderSlots($('tpl').value, sl.slots, qp), { params: qp, prefix: `th${i}`, freeze: true, trusted: workspaceTrusted() });
+        r.n = S.seed + i; r.label = q.label;
+        thumbs.push(r);
+      }
+    } catch (e) { if (gen === S.renderGen) S.staticFindings.unshift({ level: 'err', text: e.message }); }
+    stage.classList.remove('is-busy');
+  }
+  if (gen !== S.renderGen) return;
+  S.params = mainParams;
+  if (main) { $('pv-art').replaceChildren(...main.art.childNodes); $('pv-art').dataset.mode = main.mode || ''; $('pv-tag').textContent = `${main.label}${main.mode === 'trusted' ? ' · trusted' : ''}`; }
+  else { const m = h('div'); m.innerHTML = svgPlaceholder(blocked || 'Nothing to preview yet'); $('pv-art').replaceChildren(...m.childNodes); $('pv-tag').textContent = ''; }
+  $('pv-thumbs').replaceChildren(...thumbs.map((r) => {
+    const n = r.errors.length, w = r.warnings.length;
+    const b = h('button', { type: 'button', class: `thumb${n ? ' has-err' : w ? ' has-warn' : ''}`, 'aria-label': `Show ${r.label}${n ? `, ${plural(n, 'error')}` : w ? `, ${plural(w, 'warning')}` : ''}`, title: r.label, onclick: () => setSeed(r.n) });
+    b.append(...r.art.childNodes);
+    return b;
+  }));
+  // findings: static + this sample
+  const items = [...S.staticFindings];
+  if (main) {
+    for (const e of main.errors) items.push({ level: 'err', text: e.text });
+    for (const w of main.warnings) items.push({ level: 'warn', text: w.text });
+  }
+  const seen = new Set(); const uniq = items.filter((x) => (seen.has(x.text) ? false : seen.add(x.text)));
+  uniq.sort((a, b) => (a.level === b.level ? 0 : a.level === 'err' ? -1 : b.level === 'err' ? 1 : 0));
+  const ne = uniq.filter((x) => x.level === 'err').length, nw = uniq.filter((x) => x.level === 'warn').length;
+  const st = $('pv-status');
+  st.replaceChildren(...[ne ? h('span', { class: 'badge err' }, plural(ne, 'error')) : null, nw ? h('span', { class: 'badge warn' }, plural(nw, 'warning')) : null, !ne && !nw ? h('span', { class: 'badge ok' }, 'No issues') : null,
+    h('span', { class: 'cap dim' }, ` ${plural(sl.counts.length, 'variable')} · ${plural(sl.slots.length, 'slot')}`)].filter(Boolean));
+  st.dataset.errors = ne; st.dataset.warnings = nw;
+  flags($('pv-flags'), uniq.length ? uniq : [{ level: 'ok', text: 'Template, variables and this sample pass every check.' }]);
+  if (ne && !S.issuesTouched) $('pv-issues').open = true;
+  renderVarList(sl);
+  renderPrompts();
+  rebuildMsg();
+  queueSave();
+  $('pv-stage').dataset.rendered = String(S.renderGen);
+}
+const schedule = debounce(renderPreview, 180);
+function setSeed(n) { S.seed = Math.max(0, Math.floor(Number(n) || 0)); $('pv-seed').value = String(S.seed); renderPreview(); }
+
+// ── variable list: name, sample value, pin ──
+function swatchColor(v) { return /^rgba?\([\d\s.,%]+\)$|^#[0-9a-f]{3,8}$/i.test(String(v).trim()) ? String(v).trim() : ''; }
+function renderVarList(sl) {
+  const list = $('var-list');
+  const focusedName = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.var : null;
+  const byName = new Map(S.params.map((p) => [p.name, p.value]));
+  const rows = [];
+  for (const c of sl.counts) {
+    const def = S.variables.find((v) => v && v.name === c.name);
+    const val = byName.has(c.name) ? byName.get(c.name) : '';
+    const pinned = S.pins.has(c.name);
+    const sw = h('span', { class: 'sw', 'aria-hidden': 'true' });
+    const col = swatchColor(val); if (col) sw.style.backgroundColor = col; else sw.style.visibility = 'hidden';
+    const input = h('input', { type: 'text', value: val, 'data-var': c.name, 'aria-label': `Sample value for ${c.name}`, disabled: !def || null,
+      onchange: (e) => { S.pins.set(c.name, e.target.value); renderPreview(); } });
+    const pin = h('button', { type: 'button', class: 'icon ghost', 'aria-pressed': String(pinned), 'aria-label': pinned ? `Unpin ${c.name}` : `Pin ${c.name}`, title: pinned ? 'Pinned: kept on reroll. Click to release.' : 'Pin this value across rerolls', disabled: !def || null,
+      onclick: () => { if (S.pins.has(c.name)) S.pins.delete(c.name); else S.pins.set(c.name, val); renderPreview(); } }, pinned ? '● pinned' : '○ pin');
+    const kind = def ? E.kindOf(def) : null;
+    rows.push(h('li', { class: `var${pinned ? ' is-pinned' : ''}${def ? '' : ' is-missing'}`, 'data-name': c.name }, sw,
+      h('button', { type: 'button', class: 'name', title: `Find \${${c.name}} in the template (${plural(c.count, 'use')})`, onclick: () => highlightVar(c.name) }, c.name),
+      def ? input : h('span', { class: 'badge err' }, 'no variable'),
+      h('span', { class: 'meta' }, h('span', { class: 'cap dim', title: 'kind · uses' }, `${kind || '—'} ×${c.count}`), def ? pin : null)));
+  }
+  for (const u of sl.unused) rows.push(h('li', { class: 'var', 'data-name': u }, h('span'), h('span', { class: 'name', style: 'color:var(--tn-text-dim)' }, u), h('span', { class: 'cap dim' }, 'not used in the template'), h('span')));
+  list.replaceChildren(...rows);
+  if (!rows.length) list.append(h('li', { class: 'cap dim' }, 'No ${variables} in the template yet.'));
+  $('var-count').textContent = sl.counts.length ? `${sl.counts.length} · ${S.pins.size} pinned` : '';
+  if (focusedName) { const el = list.querySelector(`input[data-var="${CSS.escape(focusedName)}"]`); if (el) el.focus(); }
+}
+
+/** Select the next use of ${name} in the template and scroll to it. */
+function highlightVar(name) {
+  selectEditor('ed-tab-tpl');
+  const ta = $('tpl'); const needle = '${' + name + '}';
+  const hits = []; let i = -1; while ((i = ta.value.indexOf(needle, i + 1)) >= 0) hits.push(i);
+  if (!hits.length) return toast(`\${${name}} is not in the template`);
+  S.hl = { name, i: S.hl.name === name ? (S.hl.i + 1) % hits.length : 0 };
+  const at = hits[S.hl.i];
+  ta.focus({ preventScroll: true });
+  ta.setSelectionRange(at, at + needle.length);
+  const line = ta.value.slice(0, at).split('\n').length;
+  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 18;
+  ta.scrollTop = Math.max(0, (line - 4) * lh);
+  ta.scrollIntoView({ block: 'nearest', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+  $('var-hint').textContent = `\${${name}}: use ${S.hl.i + 1} of ${hits.length}, line ${line}. Click again for the next.`;
+}
+
+// ── Parse my template ──
+function parseReport() {
+  const tpl = $('tpl').value;
+  parseVars();
+  const sl = E.computeSlots(tpl, S.variables);
+  const refs = E.idReferences(tpl);
+  const occ = new Map();
+  for (const o of sl.occurrences) { if (!occ.has(o.name)) occ.set(o.name, []); occ.get(o.name).push(o.line); }
+  const vars = [...occ].map(([name, lines]) => { const def = S.variables.find((v) => v && v.name === name); return { name, uses: lines.length, lines: [...new Set(lines)], kind: def ? E.kindOf(def) : null, inferred: def ? null : E.kindOf(E.inferVariable(name)) }; });
+  return {
+    bytes: E.byteLength(tpl), slots: sl.slots.length, variables: vars,
+    undefined: sl.missing.map((m) => ({ name: m.name, lines: [...new Set(m.lines)] })),
+    unused: sl.unused, unclosed: sl.unclosed ? { line: sl.unclosed.line } : null,
+    dangling: refs.dangling.map((d) => ({ id: d.id, via: d.via.replace('…', d.id), line: d.line, dynamic: d.id.includes('${') })),
+    duplicateIds: refs.duplicates, ids: refs.ids,
+  };
+}
+function renderParse() {
+  const r = parseReport(); S.parsed = r;
+  const out = $('parse-out');
+  const table = (head, rows, empty) => h('table', { class: 't' }, h('thead', {}, h('tr', {}, ...head.map((x) => h('th', {}, x)))), h('tbody', {}, rows.length ? rows : [h('tr', {}, h('td', { colspan: head.length, class: 'dim' }, empty))]));
+  out.replaceChildren(
+    h('h3', {}, `Variables found (${r.variables.length})`),
+    table(['Placeholder', 'Uses', 'Lines', 'Kind'], r.variables.map((v) => h('tr', {}, h('td', {}, h('button', { type: 'button', class: 'icon ghost mono', onclick: () => highlightVar(v.name) }, '${' + v.name + '}')), h('td', {}, String(v.uses)), h('td', { class: 'mono' }, v.lines.join(', ')),
+      h('td', {}, v.kind ? h('span', { class: 'mono' }, v.kind) : h('span', { class: 'badge err' }, `undefined · name suggests ${v.inferred}`)))), 'No placeholders.'),
+    h('h3', {}, `Undefined slots (${r.undefined.length})`),
+    r.undefined.length ? h('div', {}, h('ul', { class: 'flags' }, r.undefined.map((u) => h('li', { class: 'err' }, `\${${u.name}} on line ${u.lines.join(', ')} has no variable`))), h('div', { class: 'row' }, h('button', { type: 'button', onclick: addMissingVars }, 'Add starter variables for these'))) : h('p', { class: 'small status-ok' }, 'Every placeholder has a variable.'),
+    r.unclosed ? h('ul', { class: 'flags' }, h('li', { class: 'err' }, `Line ${r.unclosed.line}: "\${" is never closed; nothing after it is read.`)) : null,
+    h('h3', {}, `Dangling references (${r.dangling.length})`),
+    r.dangling.length ? h('ul', { class: 'flags' }, r.dangling.map((d) => h('li', { class: d.dynamic ? 'warn' : 'err' }, `Line ${d.line}: ${d.via} → no id="${d.id}"${d.dynamic ? ' (built from a variable; checked per sample)' : ''}`))) : h('p', { class: 'small status-ok' }, `All references resolve (${plural(r.ids.length, 'id')} defined).`),
+    r.unused.length ? h('div', {}, h('h3', {}, `Unused variables (${r.unused.length})`), h('p', { class: 'small mono' }, r.unused.join(', '))) : null,
+    r.duplicateIds.length ? h('div', {}, h('h3', {}, 'Duplicate ids'), h('p', { class: 'small mono' }, r.duplicateIds.map((d) => `${d.id} ×${d.count}`).join(', '))) : null,
+  );
+  const s = $('parse-summary');
+  s.textContent = `${plural(r.variables.length, 'variable')} · ${plural(r.slots, 'slot')} · ${r.undefined.length} undefined · ${r.dangling.length} dangling · ${fmtInt(r.bytes)} bytes`;
+  s.className = `small ${r.undefined.length || r.dangling.some((d) => !d.dynamic) || r.unclosed ? 'status-bad' : 'status-ok'}`;
+  s.dataset.count = String(r.variables.length);
+}
+
+// ── dictionary reference + prompts ──
+function snippet(title, text, code) {
+  const body = typeof code === 'string' ? code : JSON.stringify(code, null, 2);
+  return h('div', { class: 'snip' }, h('div', { class: 'row' }, h('strong', { class: 'small' }, title), h('button', { type: 'button', class: 'copy-btn', 'aria-label': `Copy ${title}`, onclick: () => copy(body) }, 'Copy')),
+    text ? h('p', { class: 'small dim' }, text) : null, h('pre', {}, body));
+}
+function renderReference() {
+  $('ref-kinds').replaceChildren(...KIND_SNIPPETS.map((k) => { const s = snippet(`${k.title} — "${k.kind}"`, k.text, k.json); s.append(h('p', { class: 'cap mono dim' }, k.use)); return s; }));
+  const rows = nameGrammarRows();
+  $('ref-grammar').replaceChildren(h('thead', {}, h('tr', {}, h('th', {}, 'Name starts with'), h('th', {}, 'Kind'), h('th', {}, 'Default'), h('th', {}, 'Note'))),
+    h('tbody', {}, rows.map((r) => h('tr', {}, h('td', { class: 'mono' }, r.prefix), h('td', { class: 'mono' }, r.kind), h('td', { class: 'mono' }, r.def), h('td', {}, r.note || '')))));
+  $('ref-grammar').before(h('div', { class: 'row' }, h('button', { type: 'button', class: 'copy-btn', onclick: () => copy(rows.map((r) => `${r.prefix}\t${r.kind}\t${r.def}\t${r.note || ''}`).join('\n'), 'Table copied') }, 'Copy table')));
+  $('ref-layer').replaceChildren(snippet('Dictionary file (version 1)', 'Only "vars" goes on chain; the rest documents intent. Paste the whole object into Variables.', COLLECTION_LAYER_EXAMPLE));
+  $('ref-gradients').replaceChildren(h('thead', {}, h('tr', {}, h('th', {}, 'Gradient'), h('th', {}, 'Meaning'), h('th', {}, 'Spread'))), h('tbody', {}, ENTROPY_GRADIENTS.map((g) => h('tr', {}, h('td', { class: 'mono' }, g[0]), h('td', {}, g[1]), h('td', {}, g[2])))));
+  flags($('ref-rules'), TEMPLATE_RULES.map((t) => ({ text: t })));
+  $('ref-rules').before(h('div', { class: 'row' }, h('button', { type: 'button', class: 'copy-btn', onclick: () => copy(TEMPLATE_RULES.map((t) => `- ${t}`).join('\n'), 'Rules copied') }, 'Copy rules')));
+  $('ref-examples').replaceChildren(...EXAMPLES.map((ex) => h('div', { class: 'snip' }, h('div', { class: 'row' }, h('strong', { class: 'small' }, ex.title),
+    h('span', {}, h('button', { type: 'button', onclick: () => loadExample(ex.id) }, 'Open'), ' ', h('button', { type: 'button', class: 'copy-btn', onclick: () => copy(ex.template, 'Template copied') }, 'Copy template'))),
+    h('p', { class: 'small dim' }, ex.note))));
+  const sel = $('ex-select');
+  for (const ex of EXAMPLES) sel.append(h('option', { value: ex.id }, ex.title));
+}
+function loadExample(id) {
+  const ex = EXAMPLES.find((x) => x.id === id);
+  if (!ex) return;
+  $('tpl').value = ex.template; $('vars').value = JSON.stringify(ex.dictionary, null, 2);
+  S.pins.clear(); S.hl = { name: '', i: 0 };
+  renderPreview(); if (!$('panel-parse').hidden) renderParse();
+  toast(`Opened ${ex.title}`);
+}
+function renderPrompts() {
+  if ($('panel-prompts').hidden && !S.promptsOnce) return; // built lazily; copy always uses fresh text
+  S.promptsOnce = true;
+  const blocks = promptBlocks();
+  $('prompts').replaceChildren(...blocks.map(([t, d, p]) => {
+    const ta = h('textarea', { readonly: true, rows: 6, 'aria-label': t }); ta.value = p;
+    return h('div', { class: 'snip' }, h('div', { class: 'row' }, h('strong', { class: 'small' }, t), h('button', { type: 'button', class: 'copy-btn', 'aria-label': `Copy prompt: ${t}`, onclick: () => copy(promptBlocks().find((b) => b[0] === t)[2], 'Prompt copied') }, 'Copy')), h('p', { class: 'small dim' }, d), ta);
+  }));
+}
+function promptBlocks() {
+  return [
+    ['Write a new template', 'Rules, name grammar and dictionary format. Returns a template and its dictionary.', promptTemplate({ idea: $('prompt-idea').value.trim() })],
+    ['Write variables for this template', 'Includes your template and its placeholders.', promptDictionary({ template: $('tpl').value, counts: (S.slotInfo && S.slotInfo.counts) || [] })],
+    ['Fix the open issues', 'Includes the template, variables and every issue listed.', promptFix({ template: $('tpl').value, variables: S.variables, problems: [...new Set([...(S.lastFindings || []), ...(S.sampleProblems || [])])] })],
+  ];
+}
+
+// ── batch samples ──
+function sampleCard(label, r) {
+  const n = r.errors.length, w = r.warnings.length;
+  const badge = n ? h('span', { class: 'badge err' }, plural(n, 'error')) : w ? h('span', { class: 'badge warn' }, plural(w, 'warning')) : h('span', { class: 'badge ok' }, 'ok');
+  return h('div', { class: `sample${n ? ' has-err' : w ? ' has-warn' : ''}` }, r.art, h('div', { class: 'cap' }, h('span', { class: 'mono' }, label), badge));
+}
+function summarize(results, ul, summaryEl, extra = '') {
+  const byText = new Map();
+  for (const r of results) for (const [lvl, list] of [['err', r.errors], ['warn', r.warnings]]) for (const it of list) {
+    const k = `${lvl}|${it.text}`; if (!byText.has(k)) byText.set(k, { level: lvl, text: it.text, tokens: [] }); byText.get(k).tokens.push(r.label);
+  }
+  const items = [...byText.values()].sort((a, b) => (a.level === b.level ? 0 : a.level === 'err' ? -1 : 1)).map((x) => ({ level: x.level, text: `${x.text} — ${x.tokens.length === results.length ? 'every sample' : x.tokens.join(', ')}` }));
+  const ne = results.reduce((s, r) => s + r.errors.length, 0), nw = results.reduce((s, r) => s + r.warnings.length, 0);
+  summaryEl.textContent = `${plural(results.length, 'sample')} · ${plural(ne, 'error')} · ${plural(nw, 'warning')}${extra}`;
+  summaryEl.className = `small ${ne ? 'status-bad' : nw ? 'status-warn' : 'status-ok'}`;
+  summaryEl.dataset.errors = ne; summaryEl.dataset.warnings = nw;
+  flags(ul, items.length ? items : [{ level: 'ok', text: 'No issues in these samples.' }]);
+  return items;
+}
+async function renderSamples() {
+  const sl = analyze();
+  if (S.varsError || E.validateVariables(S.variables).length || sl.unclosed) { $('s-summary').textContent = 'Fix the open errors first.'; $('s-summary').className = 'small status-bad'; return; }
+  const n = Math.max(1, Math.min(64, Number($('s-count').value) || 12));
+  const results = []; $('s-grid').replaceChildren();
+  for (let i = 0; i < n; i++) {
+    let p; try { p = await paramsFor(S.seed + i); } catch (e) { $('s-summary').textContent = e.message; return; }
+    const params = applyPins(p.params);
+    const r = processToken(E.renderSlots($('tpl').value, sl.slots, params), { params, prefix: `s${i}`, freeze: isFrozen(), trusted: workspaceTrusted() });
+    r.label = p.label; results.push(r); $('s-grid').append(sampleCard(p.label, r));
+  }
+  S.sampleProblems = summarize(results, $('s-findings'), $('s-summary'), S.pins.size ? ` · ${S.pins.size} pinned` : '').map((x) => x.text);
+}
+
+// ── message ──
+const FORM_IDS = ['m-label', 'm-name', 'm-symbol', 'm-total', 'm-seed', 'm-start', 'm-duration', 'm-whitelist', 'm-creator', 'm-withdraw', 'm-minter'];
+const readFormRaw = () => Object.fromEntries(FORM_IDS.map((id) => [id, $(id).value]));
+const denomInfo = (d) => S.accepted.find((x) => x.denom === d) || null;
+function renderTiers() {
+  const opts = (sel) => [h('option', { value: '' }, S.accepted.length ? 'Choose a token' : 'No accepted tokens read'), ...S.accepted.map((a) => h('option', { value: a.denom, selected: a.denom === sel }, `${a.symbol}${a.unknown ? ' (unresolved)' : ''}`))];
+  const body = S.tiers.map((t, i) => {
+    const info = denomInfo(t.denom);
+    let base = ''; try { base = info ? E.toBaseUnits(t.display, info.decimals) : ''; } catch (e) { base = `⚠ ${e.message}`; }
+    return h('tr', {}, h('td', {}, h('input', { type: 'number', min: 1, value: t.untilCount, 'aria-label': `Tier ${i + 1} until`, oninput: (e) => { t.untilCount = e.target.value; rebuildMsg(); queueSave(); } })),
+      h('td', {}, h('input', { type: 'text', inputmode: 'decimal', value: t.display, 'aria-label': `Tier ${i + 1} price`, onchange: (e) => { t.display = e.target.value; renderTiers(); rebuildMsg(); queueSave(); } })),
+      h('td', {}, h('select', { 'aria-label': `Tier ${i + 1} token`, onchange: (e) => { t.denom = e.target.value; renderTiers(); rebuildMsg(); queueSave(); } }, ...opts(t.denom))),
+      h('td', { class: 'mono cap' }, base ? `${base}${info ? ` (${info.decimals} dp${info.guessedDecimals ? ', guessed' : ''})` : ''}` : '—'),
+      h('td', {}, h('button', { type: 'button', class: 'ghost', onclick: () => { S.tiers.splice(i, 1); renderTiers(); rebuildMsg(); queueSave(); } }, 'Remove')));
+  });
+  $('m-tiers').replaceChildren(h('thead', {}, h('tr', {}, h('th', {}, 'Until token #'), h('th', {}, 'Price'), h('th', {}, 'Token'), h('th', {}, 'Base units'), h('th', {}, ''))),
+    h('tbody', {}, body.length ? body : [h('tr', {}, h('td', { colspan: 5, class: 'dim' }, 'No tiers: minting is free.'))]));
+}
+function rebuildMsg() {
+  const f = readFormRaw(); const tierErrors = [];
+  const tiers = S.tiers.map((t, i) => { const info = denomInfo(t.denom); let amount = ''; try { amount = info ? E.toBaseUnits(t.display, info.decimals) : ''; } catch (e) { tierErrors.push(`Price tier ${i + 1}: ${e.message}`); } return { untilCount: t.untilCount, amount, denom: t.denom }; });
+  const b = E.buildCreateMsg({ template: $('tpl').value, variables: S.variables,
+    form: { label: f['m-label'], name: f['m-name'], symbol: f['m-symbol'], total: f['m-total'], seed: f['m-seed'], tiers, mintStartDelay: f['m-start'], mintDuration: f['m-duration'], whitelist: f['m-whitelist'], creator: f['m-creator'], withdrawAddress: f['m-withdraw'], minter: f['m-minter'] },
+    acceptedDenoms: new Set(S.accepted.map((a) => a.denom)), bech32Prefix: (S.net && S.net.bech32Prefix) || 'terp' });
+  b.errors.unshift(...tierErrors);
+  if (S.varsError) b.errors.unshift(`Variables JSON: ${S.varsError}`);
+  // Always packed: swap the JSON template fields for the SVP1 bytes.
+  const pi = P.packInfo($('tpl').value, S.variables); S.pack = pi;
+  const jsonInst = b.instantiateMsg;
+  if (pi.ok) {
+    const ext = { ...jsonInst.collection_info_extension, packed: pi.b64 };
+    delete ext.svg_template; delete ext.variables; delete ext.template_slots;
+    b.instantiateMsg = { ...jsonInst, collection_info_extension: ext };
+    b.msg = { create_svg_collection: { ...b.msg.create_svg_collection, instantiate_msg: b.instantiateMsg } };
+  } else if ($('tpl').value.trim()) b.errors.push(`Packing failed: ${pi.error || 'unknown error'}.`);
+  if (pi.ok && pi.packedBytes > E.MAX_SVG_SIZE) b.errors.push(`Packed template is ${fmtInt(pi.packedBytes)} bytes; the limit is ${fmtInt(E.MAX_SVG_SIZE)}.`);
+  renderEncoding(pi, jsonInst, pi.ok ? b.instantiateMsg : null);
+  const srcErr = E.validateSchema(b.msg, SOURCE_SCHEMA);
+  const items = [];
+  items.push(srcErr.length ? { level: 'err', text: `Schema: ${srcErr.slice(0, 4).map((e) => `${e.path} ${e.message}`).join('; ')}` } : { level: 'ok', text: `Matches the minter schema (${SCHEMA_SOURCE.contract}).` });
+  items.push({ level: 'warn', text: 'Needs the packed-only collection code. Deployed code 71/83 does not accept this message.' });
+  for (const e of b.errors) items.push({ level: 'err', text: e });
+  for (const w of b.warnings) items.push({ level: 'warn', text: w });
+  if (!b.errors.length) items.push({ level: 'ok', text: 'Passes the contract instantiate checks.' });
+  flags($('m-checks'), items);
+  const ok = !b.errors.length && !srcErr.length && pi.ok;
+  S.build = { ...b, ok };
+  const json = JSON.stringify(b.msg, null, 2);
+  $('m-json').textContent = ok ? json : `// Fix the errors above first. Draft:\n${json}`;
+  $('m-json').dataset.valid = ok ? '1' : '0';
+  $('m-copy').disabled = !ok; $('m-download').disabled = !ok;
+  $('m-target').textContent = S.net ? `Executes on ${short(S.net.minter)} (${S.net.chainId}), no funds attached.` : '';
+  updateSendState();
+}
+
+// ── encoding (SVP1) ──
+function renderEncoding(pi, jsonInst, packedInst) {
+  const c = P.compare(jsonInst, packedInst);
+  const pct = (a, b) => (b ? `${Math.round((1 - a / b) * 100)}% smaller` : '');
+  const row = (k, j, p, note = '') => h('tr', {}, h('td', {}, k), h('td', { class: 'mono' }, j), h('td', { class: 'mono' }, p), h('td', { class: 'dim' }, note));
+  const na = 'n/a';
+  $('enc-table').replaceChildren(
+    h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, 'Unpacked (old JSON form)'), h('th', {}, 'Packed (sent)'), h('th', {}, ''))),
+    h('tbody', {},
+      row('Template + variables bytes', fmtInt(pi.templateBytes), pi.ok ? fmtInt(pi.packedBytes) : na, pi.ok ? pct(pi.packedBytes, pi.templateBytes) : ''),
+      row('Create message bytes', fmtInt(c.jsonMsgBytes), c.packedMsgBytes != null ? fmtInt(c.packedMsgBytes) : na, c.packedMsgBytes != null ? pct(c.packedMsgBytes, c.jsonMsgBytes) : ''),
+      row('Est. create gas', `~${fmtInt(c.json.inst)}`, c.packed ? `~${fmtInt(c.packed.inst)}` : na, 'collection instantiate only'),
+      row('Est. gas per mint', `~${fmtInt(c.json.mint)}`, c.packed ? `~${fmtInt(c.packed.mint)}` : na, 'one token')));
+  $('enc-fit').textContent = `Estimates are a straight-line fit to ${P.GAS_FIT.measured} (create within 3%; mint within 15%). Dry run gives the real number.`;
+  const hits = pi.hits || [];
+  $('enc-hits-n').textContent = hits.length ? `(${hits.length} entries, ${fmtInt(hits.reduce((a, x) => a + x.saved, 0))} bytes saved)` : '(none)';
+  $('enc-hits').replaceChildren(h('thead', {}, h('tr', {}, h('th', {}, 'Entry'), h('th', {}, 'Uses'), h('th', {}, 'Bytes saved'))),
+    h('tbody', {}, ...hits.slice(0, 40).map((x) => h('tr', {}, h('td', { class: 'mono' }, x.word.replace(/\n/g, '\\n')), h('td', {}, String(x.count)), h('td', {}, String(x.saved))))));
+}
+// ── network ──
+async function selectNetwork(kind) {
+  S.net = S.nets[kind];
+  $('net-testnet').setAttribute('aria-pressed', String(kind === 'testnet'));
+  $('net-mainnet').setAttribute('aria-pressed', String(kind === 'mainnet'));
+  $('net-rest').value = S.net.rest;
+  const info = $('net-info'); const row = (k, v) => [h('dt', {}, k), h('dd', {}, v)];
+  info.replaceChildren(...row('Status', 'checking…'));
+  let status;
+  try { const st = await C.nodeStatus(S.net); status = h('span', { class: 'status-ok' }, `online · block ${fmtInt(st.height)}`); }
+  catch (e) { status = h('span', { class: 'status-bad' }, `not reachable (${e.message})`); }
+  let mi = { owner: null, codeId: null }; try { mi = await C.minterInfo(S.net); } catch { /* unknown */ }
+  S.minter = mi;
+  const acc = await C.acceptedDenoms(S.net); S.accepted = acc.denoms; S.acceptedSource = acc.source;
+  info.replaceChildren(...row('Status', status), ...row('SVG minter', h('span', { class: 'mono' }, S.net.minter || 'not configured')),
+    ...row('Minter owner', mi.owner ? h('span', { class: 'mono' }, mi.owner) : h('span', { class: 'dim' }, mi.codeId == null ? 'unknown' : 'none: anyone can create')),
+    ...row('Collection code', mi.codeId != null ? `code ${mi.codeId}` : h('span', { class: 'dim' }, 'unknown')),
+    ...row('Payment tokens', S.accepted.length ? `${S.accepted.map((a) => a.symbol).join(', ')}` : h('span', { class: 'status-warn' }, 'none read')));
+  $('m-denom-src').textContent = S.accepted.length ? `${S.accepted.map((a) => a.symbol).join(', ')} (${acc.source}).` : 'none could be read for this network.';
+  for (const t of S.tiers) if (t.denom && !denomInfo(t.denom)) t.denom = '';
+  renderTiers(); rebuildMsg(); queueSave();
+}
+
+// ── check a live collection (always filtered) ──
+async function checkCollection() {
+  const addr = $('c-addr').value.trim(); const out = $('c-summary');
+  $('c-grid').replaceChildren(); $('c-findings').replaceChildren(); $('c-info').replaceChildren(); $('c-use').disabled = true;
+  if (!S.net) await ensureNetwork();
+  if (!S.net) { out.textContent = 'Network not available.'; return; }
+  if (!E.isBech32(addr, S.net.bech32Prefix)) { out.textContent = 'Enter a terp1… collection address.'; out.className = 'small status-bad'; return; }
+  out.textContent = `Reading ${short(addr)} on ${S.net.chainId}…`; out.className = 'small dim';
+  let col; try { col = await C.loadCollection(S.net, addr); } catch (e) { out.textContent = `Could not read it: ${e.message}`; out.className = 'small status-bad'; return; }
+  S.checked = col;
+  $('c-trust').replaceChildren(createTrustToggle(addr, { onChange: () => checkCollection() }));
+  const kv = (k, v) => [h('dt', {}, k), h('dd', {}, v)];
+  $('c-info').replaceChildren(...kv('Name', `${col.name || '—'} (${col.symbol || '—'})`), ...kv('Minted', `${col.minted == null ? '?' : fmtInt(col.minted)} of ${col.total == null ? '?' : fmtInt(col.total)}`),
+    ...kv('Template', `${fmtInt(E.byteLength(col.template))} bytes · ${plural(col.variables.length, 'variable')} · ${plural(col.slots.length, 'slot')}`));
+  const mine = E.computeSlots(col.template, col.variables);
+  const slotsMatch = JSON.stringify(mine.slots) === JSON.stringify(col.slots);
+  const n = Math.max(1, Math.min(32, Number($('c-count').value) || 8));
+  const results = []; let same = 0;
+  for (let i = 0; i < n; i++) {
+    const seed = i === 0 ? null : `check-${i}`;
+    let svg; try { svg = await C.chainPlaceholder(S.net, addr, seed); } catch (e) { const r = { label: seed || 'placeholder', errors: [{ text: `svg_placeholder failed: ${e.message}` }], warnings: [], art: h('div', { class: 'art' }) }; results.push(r); $('c-grid').append(sampleCard(r.label, r)); continue; }
+    const params = await E.placeholderParams(col.variables, seed);
+    const local = E.renderSlots(col.template, col.slots, params); if (local === svg) same++;
+    const r = processToken(svg, { params, prefix: `c${i}`, freeze: isFrozen(), trusted: isSvgTrusted(addr) });
+    if (local !== svg) r.warnings.push({ text: 'Local render differs from the contract for this seed' });
+    r.label = seed || 'placeholder'; results.push(r); $('c-grid').append(sampleCard(r.label, r));
+  }
+  summarize(results, $('c-findings'), out, ` · local render matches the contract on ${same}/${n} · slots ${slotsMatch ? 'match' : 'differ'}`);
+  out.dataset.parity = `${same}/${n}`; $('c-use').disabled = false;
+}
+
+// ── dry run and create ──
+function updateSendState() {
+  const btn = $('d-create'); if (!S.net) return;
+  const wallet = S.wallet && S.wallet.chainId === S.net.chainId;
+  const mainnetOk = S.net.kind !== 'mainnet' || $('d-allow-mainnet').checked;
+  const valid = S.build && S.build.ok;
+  btn.disabled = !(wallet && mainnetOk && valid);
+  $('d-create-note').textContent = !valid ? 'Fix the message first.' : !wallet ? 'Connect a wallet on this network.' : !mainnetOk ? 'Sending on mainnet is off.' : `Signs with ${short(S.wallet.address)} on ${S.net.chainId}.`;
+}
+async function dryRun() {
+  const ul = $('d-result');
+  if (!S.build || !S.build.ok) return flags(ul, [{ level: 'err', text: 'Fix the message first.' }]);
+  const sender = $('d-sender').value.trim();
+  if (!E.isBech32(sender, S.net.bech32Prefix)) return flags(ul, [{ level: 'err', text: 'Enter the sender address (terp1…) or connect a wallet.' }]);
+  flags(ul, [{ text: `Running on ${S.net.chainId}… nothing is signed or sent.` }]);
+  try {
+    const pubkey = S.wallet && S.wallet.address === sender ? S.wallet.pubkey : '';
+    const r = await C.simulateCreate(S.net, { sender, pubkey, instantiateMsg: S.build.instantiateMsg, label: S.build.msg.create_svg_collection.label });
+    const price = Number(S.net.gasPriceStep.average || 0.025); const gasLimit = Math.ceil(r.gasUsed * 1.4); const fee = Math.ceil(gasLimit * price);
+    flags(ul, [{ level: 'ok', text: `Would succeed. Gas ${fmtInt(r.gasUsed)}; with a 1.4× margin the fee is about ${(fee / 1e6).toLocaleString('en-US', { maximumFractionDigits: 6 })} ${S.net.feeDisplay}.` }]);
+  } catch (e) {
+    const msg = String(e.message || e);
+    const hint = /unauthorized/i.test(msg) ? ' Only the minter owner can create collections.' : /account .* not found/i.test(msg) ? ' The sender has no account on this network yet.' : /public key/i.test(msg) ? ' Connect the wallet for this address.' : '';
+    flags(ul, [{ level: 'err', text: `The contract would reject it: ${msg}.${hint}` }]);
+  }
+}
+async function connect() {
+  try { const w = await C.connectWallet(S.net); S.wallet = { ...w, chainId: S.net.chainId }; $('d-sender').value = w.address; $('d-connect').textContent = `Connected ${short(w.address)}`; }
+  catch (e) { flags($('d-result'), [{ level: 'err', text: `Wallet: ${e.message || e}` }]); }
+  updateSendState();
+}
+async function create() {
+  if ($('d-create').disabled) return;
+  const net = S.net;
+  if (!window.confirm(`Create this collection on ${net.chainId}?\n\nSends create_svg_collection to ${net.minter}. You pay gas in ${net.feeDisplay}.\nTemplate, variables, seed, supply and prices cannot change afterwards.`)) return;
+  try { const res = await C.createCollection(net, S.build.msg); const hash = (res && (res.txHash || res.transactionHash || res.hash)) || JSON.stringify(res).slice(0, 120); flags($('d-result'), [{ level: 'ok', text: `Sent. Transaction ${hash}` }]); }
+  catch (e) { flags($('d-result'), [{ level: 'err', text: `Not sent: ${e.message || e}` }]); }
+}
+
+// ── saved dictionaries ──
+const readDicts = () => { try { return JSON.parse(localStorage.getItem(DICTS_KEY) || '[]'); } catch { return []; } };
+const writeDicts = (d) => { try { localStorage.setItem(DICTS_KEY, JSON.stringify(d)); } catch { toast('Browser storage is full or blocked'); } };
+function renderSaved() { $('vars-saved').replaceChildren(h('option', { value: '' }, 'Saved…'), ...readDicts().map((d, i) => h('option', { value: String(i) }, `${d.name} (${new Date(d.savedAt).toLocaleDateString()})`))); }
+
+function newSeed() { const b = new Uint8Array(32); crypto.getRandomValues(b); return E.bytesToB64(b); }
+function addMissingVars() {
+  parseVars();
+  if (S.varsError && $('vars').value.trim()) return toast('Fix the Variables JSON first');
+  const sl = E.computeSlots($('tpl').value, S.variables);
+  if (!sl.missing.length) return toast('Every placeholder has a variable');
+  const added = sl.missing.map((m) => { const v = E.inferVariable(m.name); delete v.inferred; return v; });
+  $('vars').value = JSON.stringify(S.dictionary ? { ...S.dictionary, vars: [...S.variables, ...added] } : [...S.variables, ...added], null, 2);
+  renderPreview(); if (!$('panel-parse').hidden) renderParse();
+  toast(`Added ${plural(added.length, 'variable')}; tune their ranges`);
+}
+let selectEditor = () => {};
+let netLoading = null;
+/** Chain reads start only when Launch or Check is opened (or ?network= is set). */
+function ensureNetwork() {
+  if (!netLoading) netLoading = (async () => {
+    try {
+      S.nets = await C.loadNetworks();
+      const want = new URLSearchParams(location.search).get('network');
+      await selectNetwork(want === 'mainnet' ? 'mainnet' : want === 'testnet' ? 'testnet' : S.draftNet || 'testnet');
+    } catch (e) { flags($('net-info'), [{ level: 'err', text: `Network: ${e.message || e}` }]); }
+  })();
+  return netLoading;
+}
+
+async function boot() {
+  renderReference(); renderSaved();
+  selectEditor = wireTabs($('ed-tab-tpl').parentElement);
+  wireTabs(document.querySelector('#ws-tabs [role=tablist]'), (id) => { if (id === 'tab-prompts') renderPrompts(); if (id === 'tab-parse') renderParse(); if (id === 'tab-launch' || id === 'tab-check') ensureNetwork(); });
+  let draft = null; try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch { draft = null; }
+  if (draft && draft.tpl) {
+    $('tpl').value = draft.tpl || ''; $('vars').value = draft.vars || '';
+    for (const [id, v] of Object.entries(draft.form || {})) if ($(id)) $(id).value = v;
+    S.tiers = Array.isArray(draft.tiers) ? draft.tiers : [];
+    if (Array.isArray(draft.pins)) S.pins = new Map(draft.pins);
+    if (Number.isFinite(draft.seed)) S.seed = draft.seed;
+  } else {
+    const ex = EXAMPLES.find((x) => x.id === DEFAULT_EXAMPLE) || EXAMPLES[0];
+    $('tpl').value = ex.template; $('vars').value = JSON.stringify(ex.dictionary, null, 2);
+    S.tiers = [{ untilCount: '100', display: '1', denom: '' }, { untilCount: '1000', display: '2', denom: '' }];
+  }
+  $('pv-seed').value = String(S.seed);
+  $('pv-trust').replaceChildren(createTrustToggle(WORKSPACE_TRUST, { label: 'Trust this template', onChange: () => renderPreview() }));
+  if (reduceMotion.matches) $('s-freeze').checked = true;
+  if (!$('m-seed').value) $('m-seed').value = newSeed();
+  $('c-addr').value = DEFAULT_CHECK_ADDR;
+
+  $('tpl').addEventListener('input', schedule);
+  $('vars').addEventListener('input', schedule);
+  for (const id of ['s-target', 's-mode', 's-freeze']) $(id).addEventListener('change', renderPreview);
+  $('pv-seed').addEventListener('input', debounce(() => setSeed($('pv-seed').value), 250));
+  $('pv-reroll').addEventListener('click', () => setSeed(Math.floor(Math.random() * 1e6)));
+  $('ws-tabs').closest('main').addEventListener('keydown', (e) => { if (e.altKey && (e.key === 'r' || e.key === 'R' || e.code === 'KeyR')) { e.preventDefault(); setSeed(Math.floor(Math.random() * 1e6)); } });
+  $('pv-issues').addEventListener('toggle', () => { S.issuesTouched = true; });
+  $('prompt-idea').addEventListener('input', debounce(renderPrompts, 200));
+  for (const id of FORM_IDS) $(id).addEventListener('input', () => { rebuildMsg(); queueSave(); if (id === 'm-seed' && $('s-mode').value === 'mint') schedule(); });
+  $('tpl-file').addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; $('tpl').value = await f.text(); e.target.value = ''; renderPreview(); });
+  $('tpl-strip').addEventListener('click', () => { $('tpl').value = E.stripComments($('tpl').value); renderPreview(); });
+  $('ex-select').addEventListener('change', (e) => { if (e.target.value) loadExample(e.target.value); e.target.value = ''; });
+  $('vars-fill').addEventListener('click', addMissingVars);
+  $('vars-format').addEventListener('click', () => { try { $('vars').value = JSON.stringify(JSON.parse($('vars').value), null, 2); renderPreview(); } catch (e) { toast(`Not valid JSON: ${e.message}`); } });
+  $('vars-save').addEventListener('click', () => {
+    parseVars(); if (S.varsError) return toast('Fix the JSON first');
+    const name = window.prompt('Name this dictionary', (S.dictionary && S.dictionary.collection) || 'my-dictionary'); if (!name) return;
+    const list = readDicts().filter((d) => d.name !== name); list.push({ name, savedAt: Date.now(), dict: JSON.parse($('vars').value) }); writeDicts(list); renderSaved(); toast(`Saved "${name}" in this browser`);
+  });
+  $('vars-load').addEventListener('click', () => { const i = $('vars-saved').value; if (i === '') return; const d = readDicts()[Number(i)]; if (!d) return; $('vars').value = JSON.stringify(d.dict, null, 2); renderPreview(); });
+  $('vars-del').addEventListener('click', () => { const i = $('vars-saved').value; if (i === '') return; const list = readDicts(); const [d] = list.splice(Number(i), 1); writeDicts(list); renderSaved(); toast(`Deleted "${d.name}"`); });
+  $('vars-export').addEventListener('click', () => { parseVars(); if (S.varsError) return toast('Fix the JSON first'); download(`${(S.dictionary && S.dictionary.collection) || 'svg-variables'}.dict.json`, JSON.stringify(JSON.parse($('vars').value), null, 2)); });
+  $('vars-file').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return; e.target.value = '';
+    try { const j = JSON.parse(await f.text()); if (j && j.type === 'terp-svg-launchpad.dicts' && Array.isArray(j.items)) { writeDicts([...readDicts(), ...j.items]); renderSaved(); return toast(`Imported ${j.items.length} dictionaries`); }
+      E.variablesFromDictionary(j); $('vars').value = JSON.stringify(j, null, 2); renderPreview(); toast(`Imported ${f.name}`); } catch (err) { toast(`Could not import: ${err.message}`); }
+  });
+  $('parse-run').addEventListener('click', () => { renderParse(); toast('Template parsed'); });
+  $('parse-copy').addEventListener('click', () => { renderParse(); copy(JSON.stringify(S.parsed, null, 2), 'Report copied'); });
+  $('s-run').addEventListener('click', renderSamples);
+  $('m-seed-new').addEventListener('click', () => { $('m-seed').value = newSeed(); rebuildMsg(); queueSave(); });
+  $('m-tier-add').addEventListener('click', () => { const last = S.tiers[S.tiers.length - 1]; S.tiers.push({ untilCount: String((Number(last && last.untilCount) || 0) + 100), display: last ? last.display : '1', denom: last ? last.denom : '' }); renderTiers(); rebuildMsg(); queueSave(); });
+  $('m-copy').addEventListener('click', () => copy(JSON.stringify(S.build.msg, null, 2), 'Message copied'));
+  $('m-download').addEventListener('click', () => download(`create-svg-collection-${(S.build.msg.create_svg_collection.instantiate_msg.symbol || 'svg').toLowerCase()}.json`, JSON.stringify(S.build.msg, null, 2)));
+  $('c-run').addEventListener('click', checkCollection);
+  $('c-use').addEventListener('click', () => { if (!S.checked) return; $('tpl').value = S.checked.template; $('vars').value = JSON.stringify(S.checked.variables, null, 2); S.pins.clear(); renderPreview(); $('svg-create').scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth' }); });
+  $('d-run').addEventListener('click', dryRun);
+  $('d-connect').addEventListener('click', connect);
+  $('d-allow-mainnet').addEventListener('change', updateSendState);
+  $('d-create').addEventListener('click', create);
+  $('net-testnet').addEventListener('click', () => selectNetwork('testnet'));
+  $('net-mainnet').addEventListener('click', () => { $('d-allow-mainnet').checked = false; selectNetwork('mainnet'); });
+  $('net-rest-save').addEventListener('click', () => { C.setRestOverride(S.net, $('net-rest').value.trim()); selectNetwork(S.net.kind); });
+  $('net-rest-reset').addEventListener('click', () => { C.setRestOverride(S.net, ''); selectNetwork(S.net.kind); });
+
+  await renderPreview();
+  renderParse();
+  document.documentElement.dataset.launchpadReady = 'editor';
+  S.draftNet = draft && draft.net;
+  if (new URLSearchParams(location.search).get('network')) await ensureNetwork();
+  document.documentElement.dataset.launchpadReady = '1';
+}
+boot().catch((e) => { console.error(e); document.documentElement.dataset.launchpadReady = 'error'; });
+</script>
+</body>
+</html>
