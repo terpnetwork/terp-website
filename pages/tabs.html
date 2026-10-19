@@ -36,6 +36,7 @@
 <link rel="modulepreload" href="/lib/fractal/routes.js">
 <link rel="modulepreload" href="/lib/fractal/world.js">
 <script type="module" src="/lib/fractal/world.js"></script>
+<script type="module" src="/lib/ui/select.js"></script>
 
     <style>
         /* Main */
@@ -117,6 +118,48 @@
         }
         .eco-card-detail[hidden] { display: none !important; }
         .eco-card-detail .plane { display: block !important; width: 100%; }
+        /* Eco cards (fin1). Title, then one labels row: category tags, the card's secondary link, status.
+           Tags and status are one form (Vignelli): the same square label, size and caps. Status alone carries
+           a signal colour (live teal, beta amber, soon purple); tags stay in the neutral ink, so the two kinds
+           differ by hue only. The whole card opens it: the primary button's hit area stretches over the card
+           (one control in the tab order, one accessible name); the link sits above it and stays its own target. */
+        .eco-card .eco-title { margin: 0 0 0.4rem; }
+        .eco-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.5rem; }
+        .eco-cats { display: flex; flex-wrap: wrap; gap: 0.25rem; min-width: 0; }
+        .eco-meta-end { display: inline-flex; align-items: center; gap: 0.5rem; margin-left: auto; }
+        .eco-cat, .eco-card .eco-status {
+            display: inline-block; font-size: var(--tn-size-label); line-height: 1.35; text-transform: uppercase; letter-spacing: var(--tn-track-label);
+            padding: 0.15rem 0.4rem; border-radius: var(--tn-radius-ctl); border: 1px solid; white-space: nowrap; font-weight: 600;
+        }
+        .eco-cat { color: rgb(var(--tn-text-rgb) / max(0.78, var(--tn-alpha-floor))); border-color: rgb(var(--tn-text-rgb) / 0.28); background: rgb(var(--tn-text-rgb) / 0.06); }
+        .eco-meta .eco-link {
+            position: relative; z-index: 2; border: 0; padding: 0.15rem 0; font-size: 0.8rem; line-height: 1.35;
+            color: var(--tn-teal); text-decoration: underline; text-decoration-color: rgb(var(--tn-teal-rgb) / 0.35); text-underline-offset: 2px;
+        }
+        .eco-meta .eco-link:hover { text-decoration-color: currentColor; }
+        .eco-meta .eco-link:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+        .eco-card { position: relative; transition: border-color 140ms linear, background-color 140ms linear; }
+        .eco-card.is-clickable { cursor: pointer; }
+        .eco-card.is-clickable .eco-open::after { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+        .eco-card.is-clickable:hover, .eco-card.is-clickable:has(.eco-open:focus-visible) {
+            border-color: rgb(var(--tn-teal-rgb) / 0.5); background: rgb(var(--tn-teal-rgb) / 0.07);
+        }
+        .eco-card.is-clickable:hover .eco-open { background: rgb(var(--tn-teal-rgb) / 0.22); border-color: rgb(var(--tn-teal-rgb) / 0.6); }
+        .eco-card.is-clickable .eco-open:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+        .eco-card.is-clickable:has(.eco-open:focus-visible) { box-shadow: 0 0 0 1px rgb(var(--tn-teal-rgb) / 0.5); }
+        /* In the world panel cards have no surface ("no surfaces inside pages"), so the highlight is the same
+           left rule the navigation uses for the selected card, plus the title in the section tint. */
+        .eco-card.is-clickable:is(:hover, :has(.eco-open:focus-visible)) .eco-title { color: rgb(var(--tnw-tint, 152, 232, 193)); }
+        html[data-tn-world="panel"] .eco-card.is-clickable:is(:hover, :has(.eco-open:focus-visible)) { border-left-color: rgba(var(--tnw-tint), .6) !important; }
+        html[data-tn-world="panel"] .eco-card.is-clickable:has(.eco-open:focus-visible) { border-left-color: rgb(var(--tnw-tint)) !important; }
+        @media (prefers-reduced-motion: reduce) { .eco-card { transition: none; } }
+        .eco-card .eco-status--live { color: var(--tn-teal); border-color: rgb(var(--tn-teal-rgb) / 0.5); background: rgb(var(--tn-teal-rgb) / 0.2); }
+        .eco-card .eco-status--beta { color: var(--tn-amber); border-color: rgb(var(--tn-amber-rgb) / 0.5); background: rgb(var(--tn-amber-rgb) / 0.2); }
+        .eco-card .eco-status--soon { color: var(--tn-purple); border-color: rgb(var(--tn-purple-rgb) / 0.5); background: rgb(var(--tn-purple-rgb) / 0.2); }
+        .eco-card .eco-summary { margin-bottom: 0.6rem; }
+        /* Expanded app: the card already shows the title (and, when the app's lead covers it, the summary). */
+        .eco-card-detail .plane-card:first-child > h3:first-child { display: none; }
+        .eco-card.is-open.has-lead .eco-summary { display: none; }
         .plane-nav { display: none !important; }
         #plane-storage {
             position: absolute !important; width: 1px !important; height: 1px !important;
@@ -1332,20 +1375,6 @@
             </div>
         </section>
 
-        <!-- ─── DAO-DAO plane ─── -->
-        <section class="plane" id="plane-daodao" role="tabpanel">
-            <div class="plane-card">
-                <h3>DAO-DAO</h3>
-                <p>Governance apps on Terp — proposals, voting modules, treasuries.</p>
-                <div class="plane-links">
-                    <a class="plane-link" href="https://daodao.terp.network" target="_blank" rel="noopener">Open</a>
-                    <a class="plane-link secondary" href="https://docs.daodao.zone" target="_blank" rel="noopener">Docs</a>
-                </div>
-            </div>
-        </section>
-
-
-
         <section class="plane" id="plane-ibc" role="tabpanel">
             <div class="plane-card">
                 <h3>IBC</h3>
@@ -1367,24 +1396,14 @@
             <div id="eco-releases-mount"></div>
         </section>
 
-        <!-- ─── Bounties plane ─── -->
-        <section class="plane" id="plane-bounties" role="tabpanel">
+        <!-- ─── Staking plane (lib/staking.js; reads LCD, signs with the Connect session) ─── -->
+        <section class="plane" id="plane-staking" role="tabpanel" aria-label="Staking">
             <div class="plane-card">
-                <h3>Community bounties <span class="badge-soon">Coming soon</span></h3>
-                <p>
-                    Cross-chain coordination for open work: fund tasks in native or IBC assets,
-                    attract builders across Cosmos, and settle when acceptance criteria land on-chain.
-                    The dedicated surface will live at
-                    <a href="https://bounties.terp.network" style="color:var(--tn-purple);text-decoration:none;">bounties.terp.network</a>.
-                </p>
-                <ul>
-                    <li>Intent: multi-chain payouts without single-chain lock-in</li>
-                    <li>Coordination with DAOs and abstract accounts for escrow / acceptance</li>
-                    <li>UI and indexer not shipped yet — link reserved for launch</li>
-                </ul>
+                <h3>Staking</h3>
+                <div id="eco-staking-mount"></div>
                 <div class="plane-links">
-                    <a class="plane-link" href="https://bounties.terp.network" target="_blank" rel="noopener">bounties.terp.network</a>
-                    <a class="plane-link secondary" href="https://discord.gg/W3QnHe77S6" target="_blank" rel="noopener">Discuss on Discord</a>
+                    <a class="plane-link secondary" href="https://docs.cosmos.network/main/build/modules/staking" target="_blank" rel="noopener">How staking works</a>
+                    <a class="plane-link secondary" href="https://ping.pub/terp/staking" target="_blank" rel="noopener">Validators on ping.pub</a>
                 </div>
             </div>
         </section>
@@ -1474,6 +1493,10 @@
                     if (componentId === 'svg') {
                         import('/lib/eco-svg-plane.js').then((m) => m.mountSvgPlane());
                     }
+                    if (componentId === 'staking') {
+                        import('/lib/staking.js').then((m) => m.mountStaking(document.getElementById('eco-staking-mount'), CONFIG))
+                            .catch((err) => console.warn('[tabs] staking', err));
+                    }
                     if (componentId === 'ibc') {
                         import('/lib/ibc-core.js').then(async ({ loadIbcContext, loadIbcSnapshot }) => {
                             const mount = document.getElementById('eco-ibc-mount');
@@ -1502,6 +1525,40 @@
                     returnPlane(componentId);
                 },
             });
+            // Shareable staking URLs: /eco?stake=terp1… or /eco#staking open the Staking card.
+            if (new URLSearchParams(location.search).has('stake') || location.hash === '#staking') {
+                const { openEcoProject } = await import('/lib/ecosystem.js');
+                openEcoProject('staking');
+            }
+            // Shareable bounty URLs: /eco#bounties and /eco?bounty=TB-… enter /bounties the way the
+            // navigation does: select the "Community bounties" light (its page of the catalog shows),
+            // then open it, so the router plays the fractal entrance into the Bounties shield.
+            // The task id rides along (/bounties?bounty=TB-…), where it is selected and zoomed.
+            async function enterBounties(wantBounty) {
+                const { selectEcoProject } = await import('/lib/ecosystem.js');
+                const to = '/bounties' + (wantBounty ? '?bounty=' + encodeURIComponent(wantBounty) : '');
+                history.replaceState(history.state, '', '/eco');   // Back from /bounties lands on Eco, not on this redirect
+                selectEcoProject('bounties', { scroll: false });
+                const t0 = performance.now();
+                const go = () => {
+                    if (location.pathname !== '/eco') return;     // the visitor went elsewhere meanwhile
+                    const w = window.__tnWorld && window.__tnWorld.state;
+                    const ready = w && w.current === '/eco' && !w.busy && w.eco && w.eco.selected === 'bounties';
+                    if (!ready && performance.now() - t0 < (window.__tnWorld ? 4000 : 800)) { setTimeout(go, 60); return; }
+                    if (window.__tnShell && typeof window.__tnShell.navigate === 'function') window.__tnShell.navigate(to);
+                    else location.assign(to);
+                };
+                setTimeout(go, 240);   // one beat on the selected light before it opens
+            }
+            const wantBounty = new URLSearchParams(location.search).get('bounty');
+            if (wantBounty !== null || location.hash === '#bounties') enterBounties(wantBounty);
+            // #bounties typed while already on Eco (a hash change, no page load)
+            if (!window.__tnEcoBountiesHash) {
+                window.__tnEcoBountiesHash = true;
+                addEventListener('hashchange', () => {
+                    if (location.pathname === '/eco' && location.hash === '#bounties' && document.getElementById('eco-catalog-host')) enterBounties(null);
+                });
+            }
         } catch (e) {
             console.warn('[tabs] ecosystem catalog', e);
         }

@@ -44,6 +44,26 @@
       ]
     },
     {
+      "id": "staking",
+      "title": "Staking",
+      "summary": "Delegate TERP, claim rewards, move or unbond stake.",
+      "description": "Validators, your delegations, pending rewards and unbonding, read live from the chain. Every transaction is simulated first so you see the fee before you sign.",
+      "tags": [
+        "infra",
+        "defi",
+        "governance"
+      ],
+      "status": "beta",
+      "relevance": 97,
+      "component": "staking",
+      "links": [
+        {
+          "label": "Validators",
+          "url": "https://ping.pub/terp/staking"
+        }
+      ]
+    },
+    {
       "id": "billboards",
       "title": "Terp Account Billboards (TABS)",
       "summary": "Buy a username on-chain that points at your wallet.",
@@ -94,10 +114,10 @@
       ],
       "status": "live",
       "relevance": 90,
-      "component": "daodao",
+      "component": null,
       "links": [
         {
-          "label": "Open",
+          "label": "Open DAO-DAO",
           "url": "https://daodao.terp.network"
         },
         {
@@ -172,19 +192,19 @@
     {
       "id": "bounties",
       "title": "Community bounties",
-      "summary": "Cross-chain coordination for open work \u2014 multi-chain payouts without single-chain lock-in.",
-      "description": "Fund tasks in native or IBC assets, attract builders across Cosmos, settle when acceptance criteria land on-chain. Surface reserved at bounties.terp.network.",
+      "summary": "Open Terp work in nine categories \u2014 pick a task, submit work, propose a bounty. Rewards are proposed, pending vote.",
+      "description": "The bounty catalog inside the Eco shield: nine category orbs, with the selected task and a Now / Next / Later board beside them. Submit work or propose a bounty; rewards can be any Terp token and are locked in an escrow once it is live. Rewards stay proposed, pending vote.",
       "tags": [
         "governance",
         "defi"
       ],
-      "status": "soon",
+      "status": "beta",
       "relevance": 50,
-      "component": "bounties",
+      "component": null,
       "links": [
         {
-          "label": "bounties.terp.network",
-          "url": "https://bounties.terp.network"
+          "label": "Open bounties",
+          "url": "/bounties"
         },
         {
           "label": "Discord",
