@@ -22,6 +22,7 @@
 <link rel="modulepreload" href="/lib/fractal/routes.js">
 <link rel="modulepreload" href="/lib/fractal/world.js">
 <script type="module" src="/lib/fractal/world.js"></script>
+<script type="module" src="/lib/ui/select.js"></script>
 <script type="module" src="/lib/section-shield.js"></script>
 
 <style>
@@ -154,6 +155,14 @@ body.graphs-open { overflow: hidden; }
     background: transparent;
     color-scheme: inherit;
 }
+.dg-bar { display: flex; align-items: center; gap: 0.75rem; margin: 0 0 0.5rem; flex-wrap: wrap; }
+.dg-tabs { display: inline-flex; gap: 0.2rem; padding: 0.2rem; border: 1px solid rgb(var(--tn-teal-rgb) / 0.25); border-radius: var(--tn-radius-ctl); }
+.dg-tabs[hidden] { display: none; }
+.dg-tab { font: inherit; font-size: var(--tn-size-label); color: var(--tn-text-muted); background: transparent; border: 0; border-radius: var(--tn-radius-ctl); padding: 0.3rem 0.8rem; cursor: pointer; transition: background-color .15s, color .15s; }
+.dg-tab[aria-selected="true"], .dg-tab[aria-pressed="true"] { color: var(--tn-text-bright); background: rgb(var(--tn-teal-rgb) / 0.16); }
+.dg-tab:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 1px; }
+.dg-meta { font-size: var(--tn-size-label); color: var(--tn-text-dim); margin: 0.4rem 0 0; }
+.graph-stage { height: calc(100vh - 14rem); }
 .res-side {
     display: flex;
     flex-direction: column;
@@ -488,6 +497,58 @@ body.graphs-open { overflow: hidden; }
 .sh-table tr.sh-row:hover td, .sh-table tr.sh-row:focus td { background: rgb(var(--tn-teal-rgb) / 0.05); }
 .sh-file { font-size: 0.74rem; overflow-wrap: anywhere; color: var(--tn-text-muted); }
 .sh-foot { margin-top: 0.9rem; }
+
+/* res1017: upgrades table + blake3 marker + latest release hero */
+.upg-table td, .upg-table th { vertical-align: top; }
+.upg-table .upg-h code, .sh-upg-table code { font-family: var(--tn-font-mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; }
+.upg-table tr.is-live > td:first-child { box-shadow: inset 3px 0 0 var(--tn-teal); }
+.upg-table tr.is-past, .upg-table tr.is-pending { opacity: 0.72; }
+.upg-table tr.is-upcoming > td { outline: 1px dashed rgb(var(--tn-purple-rgb) / 0.45); outline-offset: -1px; }
+.upg-table tr.is-target > td { background: rgb(var(--tn-teal-rgb) / 0.08); }
+.upg-roll-row > td { padding-top: 0; }
+details.upg-roll > summary { cursor: pointer; color: var(--tn-amber); font-size: 0.85rem; padding: 0.2rem 0; }
+details.upg-roll > summary:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+.upg-roll-list { margin: 0.4rem 0 0.2rem; padding-left: 1.1rem; }
+.upg-roll-hint { font-size: 0.8rem; }
+.rel-hero { border: 1px solid rgb(var(--tn-teal-rgb) / 0.35); border-left: 3px solid var(--tn-teal); border-radius: var(--tn-radius-ctl); padding: 0.75rem 0.9rem; margin: 0.5rem 0 1rem; }
+.rel-hero h4 { display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; align-items: center; margin: 0.2rem 0 0.4rem; }
+.sh-tag.b3, .sw.b3 { color: var(--tn-purple); border-color: rgb(var(--tn-purple-rgb) / 0.55); background: rgb(var(--tn-purple-rgb) / 0.15); }
+.sh-b3-row > td { background: rgb(var(--tn-purple-rgb) / 0.08); }
+.sh-svg .sh-upg.sh-b3 { stroke: var(--tn-purple); stroke-width: 2; }
+@media (max-width: 639px) {
+  .upg-table thead { display: none; }
+  .upg-table, .upg-table tbody, .upg-table tr, .upg-table td { display: block; width: 100%; }
+  .upg-table tr.upg-row { border: 1px solid rgb(var(--tn-teal-rgb) / 0.2); border-radius: var(--tn-radius-ctl); margin: 0 0 0.6rem; padding: 0.35rem 0.5rem; }
+  .upg-table td[data-label]::before { content: attr(data-label); display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--tn-text-dim); }
+}
+
+/* res1017b: single upgrades table, per-row plan notes */
+.upg-plan-row > td { padding-top: 0; border-top: 0; }
+details.upg-plan > summary { cursor: pointer; font-size: 0.85rem; color: var(--tn-teal); padding: 0.2rem 0; }
+details.upg-plan > summary:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+.upg-files { margin: 0.3rem 0 0.6rem; padding-left: 1.1rem; font-size: 0.85rem; word-break: break-all; }
+@media (max-width: 639px) { .upg-table tr.upg-plan-row, .upg-table tr.upg-roll-row { margin: -0.5rem 0 0.6rem; padding: 0 0.5rem; } }
+
+/* res1017d: one row per upgrade, expandable detail */
+.upg-table tr[hidden] { display: none !important; }
+.upg-table tr.upg-row { cursor: pointer; }
+.upg-table tr.upg-row:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: -2px; }
+.upg-chev { display: inline-block; width: 1em; color: var(--tn-text-dim); transition: transform 0.15s; }
+.upg-row[aria-expanded="true"] .upg-chev { transform: rotate(90deg); color: var(--tn-teal); }
+.upg-detail > td { padding: 0.25rem 0.5rem 0.9rem 1.6rem; }
+.upg-sub { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.upg-sub th { text-align: left; font-weight: 500; color: var(--tn-text-dim); white-space: nowrap; padding: 0.3rem 0.8rem 0.3rem 0; vertical-align: top; width: 9rem; }
+.upg-sub td { padding: 0.3rem 0; vertical-align: top; word-break: break-word; }
+.upg-sub code.hash { font-size: 0.75rem; color: var(--tn-text-dim); word-break: break-all; }
+.upg-kv-list { margin: 0; padding-left: 1rem; }
+.res-pill.upg-type.auto { color: var(--tn-purple); border-color: rgb(var(--tn-purple-rgb) / 0.45); }
+.res-pill.upg-type.rolling { color: var(--tn-amber); border-color: rgb(var(--tn-amber-rgb) / 0.45); }
+@media (prefers-reduced-motion: reduce) { .upg-chev { transition: none; } }
+@media (max-width: 639px) {
+  .upg-table tr.upg-detail { margin: -0.6rem 0 0.6rem; border: 1px solid rgb(var(--tn-teal-rgb) / 0.2); border-top: 0; border-radius: 0 0 var(--tn-radius-ctl) var(--tn-radius-ctl); }
+  .upg-detail > td { padding: 0.4rem 0.5rem; }
+  .upg-sub th, .upg-sub td { display: block; width: auto; padding: 0.15rem 0; }
+}
 </style>
 </head>
 <body>
@@ -580,8 +641,28 @@ body.graphs-open { overflow: hidden; }
         <div id="releases-host"></div>
     </section>
     <section class="res-panel" id="panel-graphs" hidden>
-        <div class="graph-stage">
-            <iframe class="graph-frame" id="graph-frame" title="Crate dependency graph" src="/public/graphs/dependency-map.html?embed=1"></iframe>
+        <div class="dg-bar">
+            <div class="dg-tabs" role="tablist" aria-label="Dependency language">
+                <button type="button" class="dg-tab" role="tab" id="dg-tab-rust" aria-controls="dg-rust" aria-selected="true">Rust</button>
+                <button type="button" class="dg-tab" role="tab" id="dg-tab-go" aria-controls="dg-go" aria-selected="false" tabindex="-1">Go</button>
+            </div>
+            <div class="dg-tabs" id="dg-depth" role="group" aria-label="Depth" hidden>
+                <button type="button" class="dg-tab" data-depth="1" aria-pressed="false">Depth 1</button>
+                <button type="button" class="dg-tab" data-depth="2" aria-pressed="true">Depth 2</button>
+                <button type="button" class="dg-tab" data-depth="3" aria-pressed="false">Depth 3</button>
+            </div>
+        </div>
+        <div id="dg-rust" role="tabpanel" aria-labelledby="dg-tab-rust">
+            <div class="graph-stage">
+                <iframe class="graph-frame" id="graph-frame" title="Crate dependency graph" src="/public/graphs/dependency-map.html?embed=1"></iframe>
+            </div>
+            <p class="dg-meta" id="dg-rust-date"></p>
+        </div>
+        <div id="dg-go" role="tabpanel" aria-labelledby="dg-tab-go" hidden>
+            <div class="graph-stage">
+                <iframe class="graph-frame" id="go-frame" title="Go module dependency graph" data-src="/public/graphs/go-dependency-map.html?embed=1"></iframe>
+            </div>
+            <p class="dg-meta" id="dg-go-date"></p>
         </div>
     </section>
     </div>
@@ -738,6 +819,7 @@ async function main() {
     if (kind === 'snapshot') kind = 'snapshots';
     if (kind === 'snapshot-history' || kind === 'snapshots-history') { kind = 'snapshots'; parts[1] = 'history'; }
     if (kind === 'contracts') kind = 'app-state';
+    if (/^upgrade-v/.test(kind)) { parts[1] = kind; kind = 'upgrades'; }
     if (kind.includes('=')) {
       const [k, v] = kind.split('=');
       kind = k;
@@ -804,6 +886,10 @@ async function main() {
         await mountChainResource(host, 'upgrades', {});
         host.dataset.ready = '1';
       }
+      if (/^upgrade-v/.test(sub)) {
+        const row = host?.__expandUpgrade ? host.__expandUpgrade(sub) : document.getElementById(sub);
+        if (row) { row.scrollIntoView({ block: 'center' }); row.classList.add('is-target'); }
+      }
     }
     if (kind === 'releases') {
       const host = document.getElementById('releases-host');
@@ -836,6 +922,49 @@ async function main() {
 }
 
 main();
+</script>
+
+<script type="module">
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (x) => String(x ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const day = (iso) => { const d = new Date(String(iso).replace(/Z$/, ':00Z').replace(/:00:00Z$/, ':00Z')); return isNaN(d) ? String(iso).slice(0, 10) : d.toISOString().slice(0, 10); };
+  const tabs = [$('dg-tab-rust'), $('dg-tab-go')];
+  let goLoaded = false;
+  function select(t, focus) {
+    tabs.forEach((b) => { const on = b === t; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; $(b.getAttribute('aria-controls')).hidden = !on; });
+    if (focus) t.focus();
+    $('dg-depth').hidden = t.id !== 'dg-tab-go';
+    if (t.id === 'dg-tab-go') { if (!goLoaded) loadGo(); else refit(goFrame); } else refit(frame);
+  }
+  tabs.forEach((b, i) => {
+    b.addEventListener('click', () => select(b));
+    b.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); select(tabs[(i + 1) % 2], true); } });
+  });
+  const frame = $('graph-frame');
+  const rustDate = () => { try { const el = frame.contentDocument.getElementById('DATA'); const d = JSON.parse(el.textContent); $('dg-rust-date').textContent = `${(d.crates || []).length} crates · Generated ${day(d.generated_at)}`; } catch (e) { /* ignore */ } };
+  frame.addEventListener('load', rustDate); rustDate();
+  const goFrame = $('go-frame');
+  let depth = '2';
+  const theme = () => localStorage.getItem('tn-theme') || document.documentElement.dataset.theme || 'default';
+  const refit = (f) => { const ping = () => { try { f.contentWindow.postMessage({ type: 'graph-refit', theme: theme() }, '*'); } catch (e) { /* ignore */ } }; ping(); setTimeout(ping, 120); };
+  goFrame.addEventListener('load', () => refit(goFrame));
+  function setDepth(d) {
+    depth = d;
+    document.querySelectorAll('#dg-depth [data-depth]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.depth === d)));
+    goFrame.src = `${goFrame.dataset.src}&depth=${d}`;
+  }
+  document.querySelectorAll('#dg-depth [data-depth]').forEach((b) => b.addEventListener('click', () => setDepth(b.dataset.depth)));
+  async function loadGo() {
+    goLoaded = true;
+    setDepth(depth);
+    try {
+      const d = await (await fetch('/public/graphs/go-deps.json', { cache: 'no-cache' })).json();
+      $('dg-go-date').textContent = `${d.counts.direct} direct · ${d.counts.indirect} indirect · ${d.counts.fork} forks · Generated ${day(d.generated_at)} · commit ${String(d.source.commit).slice(0, 8)}`;
+    } catch (e) { /* date line stays empty */ }
+  }
+  addEventListener('tn:theme', () => { if (goLoaded) refit(goFrame); });
+})();
 </script>
 </body>
 </html>
