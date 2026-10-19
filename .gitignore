@@ -10,3 +10,4 @@ dist
 soon
 review
 content/docs/brain
+*.bak-*

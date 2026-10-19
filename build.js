@@ -233,7 +233,7 @@ async function checkWorldRoutes() {
   const shellSrc = fs.readFileSync(path.join('lib', 'shell', 'shell.js'), 'utf8');
   const table = shellSrc.match(/var ROUTES = \{([\s\S]*?)\};/);
   const known = new Set(table ? [...table[1].matchAll(/'([^']+)'\s*:/g)].map((m) => m[1]) : []);
-  const pageFile = { '/': 'index.html', '/resources': 'snapshots.html', '/eco': 'tabs.html' };
+  const pageFile = { '/': 'index.html', '/resources': 'snapshots.html', '/eco': 'tabs.html', '/svg/create': 'create-svg.html' };
   const problems = [];
   for (const id of PAGES) {
     if (!known.has(id)) problems.push(`${id} is not a route in lib/shell/shell.js`);
