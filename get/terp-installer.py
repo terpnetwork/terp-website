@@ -28,8 +28,43 @@ PRUNING_CHOICES = ['default', 'nothing', 'everything']
 # Binary Versions
 # Keep in sync with terp-installer.sh TERPD_VERSION when cutting a release.
 # Keep in sync with get/terp-installer.sh TERPD_VERSION and s3 releases/terp-core/vX.Y.Z
-MAINNET_VERSION = "6.0.1"
-TESTNET_VERSION = "6.2.0"
+VERSIONS_JSON_URLS = (
+    "https://terp.network/public/data/versions.json",
+    "https://raw.githubusercontent.com/terpnetwork/terp-core/main/networks/chain-registry/terpnetwork/versions.json",
+)
+
+
+def _resolve_versions(mainnet_default, testnet_default):
+    """--version / TERPD_VERSION override, else last recommended_version in versions.json."""
+    import json as _json
+    import os as _os
+    import sys as _sys
+    import urllib.request as _ur
+    argv = _sys.argv[1:]
+    for i, a in enumerate(argv):
+        if a == "--version" and i + 1 < len(argv):
+            v = argv[i + 1].lstrip("v")
+            return v, v, "--version"
+        if a.startswith("--version="):
+            v = a.split("=", 1)[1].lstrip("v")
+            return v, v, "--version"
+    env = _os.environ.get("TERPD_VERSION", "").lstrip("v")
+    if env:
+        return env, env, "TERPD_VERSION"
+    for url in VERSIONS_JSON_URLS:
+        try:
+            with _ur.urlopen(url, timeout=10) as r:
+                doc = _json.loads(r.read().decode("utf-8"))
+            recs = [v.get("recommended_version") for v in doc.get("versions", []) if v.get("recommended_version")]
+            if recs:
+                return recs[-1].lstrip("v"), testnet_default, url
+        except Exception:
+            continue
+    return mainnet_default, testnet_default, "built-in default"
+
+
+MAINNET_VERSION, TESTNET_VERSION, VERSION_SOURCE = _resolve_versions("6.4.0", "6.2.1")
+print(f"Resolved terpd version: mainnet v{MAINNET_VERSION}, testnet v{TESTNET_VERSION} (source: {VERSION_SOURCE})")
 
 # GitHub Repository
 GITHUBURL = "https://github.com/terpnetwork/terp-core"
@@ -50,16 +85,25 @@ MAINNET_RPC_ENDPOINT = "https://rpc.terp.network:443"
 TESTNET_RPC_ENDPOINT = "https://testnet-rpc.terp.network:443"
 
 # Peer Nodes
-MAINNET_PEERS = []  # Uses addrbook instead
+MAINNET_PEERS = [
+    "079328a5209e58dbb7658202bd0e00f8c50e07d0@provider.akash-palmito.org:30873",
+    "8392513d34207c9cec15d5d6a45fc1bd41691bf4@provider.h6i-dedicated.eu-se-1.digitalfrontier.so:30147",
+    "58e01ab84eb931a82a024324520021d2e075ec67@185.248.24.16:29656",
+    "b04c5acab1c821b95f26662d8ebb7ccd4a39e97f@144.76.97.251:34656",
+    "5ba3e8458f584edfe5434186af74f846190d5475@213.133.100.93:16056",
+    "a16e78921e03a9953178038c2c39d1f31252655c@135.181.60.157:26716",
+]
 TESTNET_PEERS = ["9e194721d68dd28d3c4b625c17b2cb287ef30327@peer-testnet.terp.network:26656"]
 
-# Addrbook URLs
-MAINNET_ADDRBOOK_URL = "https://snapshot-mainnet.terp.network/addrbook.json"
+# Addrbook URLs (stale last-seen IPs; do not use for morocco-1 statesync)
+MAINNET_ADDRBOOK_URL = ""
 TESTNET_ADDRBOOK_URL = "https://snapshot-testnet.terp.network/addrbook.json"
+MAINNET_BOOTSTRAP_JSON = "https://s3.terp.network/snapshots/mainnet/morocco-1/bootstrap.json"
 
 # Snapshot URLs
-MAINNET_SNAPSHOT_URL = "https://snapshot-mainnet.terp.network/terp_latest.tar.lz4"
-TESTNET_SNAPSHOT_URL = "https://snapshot-testnet.terp.network/latest"
+MAINNET_SNAPSHOT_URL = "https://s3.terp.network/snapshots/mainnet/morocco-1/pruned/snapshot.json"
+TESTNET_SNAPSHOT_URL = "https://s3.terp.network/snapshots/testnet/120u-1/pruned/snapshot.json"
+CHANNEL_BASE = f"{RELEASES_S3_BASE}/channels"
 
 # Cosmovisor URLs
 COSMOVISOR_VERSION = "v1.2.0"
@@ -210,6 +254,13 @@ parser.add_argument(
     choices=['light', 'lightweight', 'pruned'],
     dest='snapshot_class',
     help="Snapshot class when sync-mode=snapshot: light or pruned",
+)
+
+parser.add_argument(
+    "--version",
+    type=str,
+    dest="terpd_version",
+    help="terpd version to install (default: latest recommended_version in versions.json)",
 )
 
 args = parser.parse_args()
@@ -675,7 +726,7 @@ def select_terp_home():
 
     """
     if args.home:
-        terp_home = args.home
+        terp_home = os.path.abspath(os.path.expanduser(args.home))
     else:
         default_home = os.path.expanduser("~/.terpd")
         print(bcolors.OKGREEN + f"""
@@ -702,7 +753,7 @@ Do you want to install Terp-Core in the default location?:
                 while True:
                     custom_home = safe_input("Enter the path for Terp-Core home: ").strip()
                     if custom_home != "":
-                        terp_home = custom_home
+                        terp_home = os.path.abspath(os.path.expanduser(custom_home))
                         break
                     else:
                         print("Invalid path. Please enter a valid directory.")
@@ -761,7 +812,7 @@ Do you want to use the default moniker?
 
 
 def select_p2p_mode():
-    """Private (default) vs public P2P. Private cannot statesync."""
+    """Private (default) vs public P2P. Private statesync uses only rpc.terp.network."""
     if args.public:
         return False
     if args.private:
@@ -770,8 +821,8 @@ def select_p2p_mode():
     print(bcolors.OKGREEN + """
 P2P mode:
 
-    1) private — no PEX, no inbound peers (default). Cannot use state-sync.
-    2) public  — gossip and accept peers. State-sync allowed.
+    1) private — PEX off, no inbound. State-sync uses only the Terp RPC peer.
+    2) public  — gossip and accept extra peers.
 
 💡 Use --public or --private to skip this prompt.
 """ + bcolors.ENDC)
@@ -791,22 +842,14 @@ P2P mode:
 
 
 def select_sync_mode(private):
-    """State-sync is refused when the node is private."""
-    if private:
-        if args.sync_mode == "statesync":
-            print(bcolors.RED + "Private node cannot use statesync (PEX off, no inbound peers)." + bcolors.ENDC)
-            print("Forcing snapshot. Use --public to enable state-sync.")
-        print(bcolors.OKGREEN + "Private node: state-sync disabled. Using snapshot.\n" + bcolors.ENDC)
-        return "snapshot"
-
+    """State-sync works in private mode with a single persistent peer (rpc.terp.network)."""
     if args.sync_mode:
         return args.sync_mode
-
     print(bcolors.OKGREEN + """
 Sync mode:
 
-    1) state-sync — fastest, downloads recent state (public P2P required)
-    2) snapshot   — restore a lightweight or pruned pack from minio.terp.network
+    1) state-sync — recent state via rpc.terp.network (private: that peer only, PEX off)
+    2) snapshot   — pruned pack from s3.terp.network
 
 💡 You can select this using --sync-mode statesync|snapshot.
 """ + bcolors.ENDC)
@@ -850,10 +893,143 @@ def apply_private_mode(terp_home):
     print("Private mode: PEX disabled, inbound peers rejected, no gossip.")
 
 
+def load_mainnet_bootstrap():
+    """Live RPC + P2P pin. Akash sentries are provider NodePorts, not :26656."""
+    global MAINNET_PEERS
+    try:
+        req = urlrq.Request(MAINNET_BOOTSTRAP_JSON, headers={"User-Agent": "terp-installer"})
+        with urlrq.urlopen(req, timeout=10) as resp:
+            d = json.loads(resp.read().decode())
+        peers = d.get("peers") or []
+        if peers:
+            MAINNET_PEERS = peers
+            MAINNET.peers = peers
+        rpcs = d.get("rpc") or []
+        if rpcs:
+            MAINNET.rpc_node = rpcs[0]
+        return int(d.get("trust_offset") or 2000)
+    except Exception:
+        return 2000
+
+
+def discover_rpc_persistent_peer(rpc):
+    """id@public-ip:port from GET /p2p then /status. Skip 0.0.0.0 and RFC1918."""
+    import ipaddress
+    import socket
+
+    rpc = rpc.rstrip("/")
+    ctx = ssl.create_default_context()
+
+    def routable(host):
+        host = (host or "").strip().strip("[]")
+        if not host or host.lower() in ("0.0.0.0", "::", "localhost", "*"):
+            return False
+        try:
+            infos = socket.getaddrinfo(host, None)
+        except socket.gaierror:
+            return False
+        for info in infos:
+            try:
+                addr = ipaddress.ip_address(info[4][0])
+            except ValueError:
+                continue
+            if addr.is_unspecified or addr.is_loopback or addr.is_link_local or addr.is_multicast or addr.is_private:
+                return False
+            return True
+        return False
+
+    def parse_hostport(raw):
+        s = str(raw).strip()
+        if "@" in s:
+            s = s.split("@", 1)[1]
+        s = s.replace("tcp://", "").replace("udp://", "")
+        if ":" in s:
+            return s.rsplit(":", 1)
+        return s, "26656"
+
+    def public_ip(host, port):
+        if not routable(host):
+            return None
+        try:
+            ip = socket.getaddrinfo(host, int(port), socket.AF_INET, socket.SOCK_STREAM)[0][4][0]
+        except Exception:
+            ip = host
+        return ip if routable(ip) else None
+
+    def peer_from_mapping(d, nid):
+        if not isinstance(d, dict):
+            return None
+        nid = d.get("id") or d.get("node_id") or nid
+        for key in ("peer", "p2p", "address", "listen_addr", "listenAddr", "external_address", "externalAddress"):
+            val = d.get(key)
+            if not val:
+                continue
+            if isinstance(val, str) and "@" in val:
+                nid = val.split("@", 1)[0] or nid
+            host, port = parse_hostport(val)
+            ip = public_ip(host, port)
+            if nid and ip:
+                return f"{nid}@{ip}:{port}"
+        return None
+
+    nid = ""
+    listen = ""
+    try:
+        req = urlrq.Request(rpc + "/status", headers={"User-Agent": "terp-installer"})
+        with urlrq.urlopen(req, context=ctx, timeout=15) as resp:
+            ni = json.loads(resp.read().decode())["result"]["node_info"]
+        nid = ni.get("id") or ""
+        listen = ni.get("listen_addr") or ""
+    except Exception:
+        return None
+    for path in ("/p2p", "/p2p.json"):
+        try:
+            req = urlrq.Request(rpc + path, headers={"User-Agent": "terp-installer"})
+            with urlrq.urlopen(req, context=ctx, timeout=10) as resp:
+                body = json.loads(resp.read().decode())
+            if isinstance(body, dict) and "result" in body:
+                body = body["result"]
+            peer = peer_from_mapping(body, nid)
+            if peer:
+                return peer
+        except Exception:
+            pass
+    host, port = parse_hostport(listen)
+    ip = public_ip(host, port)
+    if nid and ip:
+        return f"{nid}@{ip}:{port}"
+    return None
+
+
+def apply_persistent_peers(terp_home, peers):
+    if not peers:
+        return
+    csv = ",".join(peers)
+    config_toml = os.path.join(terp_home, "config", "config.toml")
+    with open(config_toml, "r") as f:
+        lines = f.readlines()
+    out = []
+    for line in lines:
+        stripped = line.lstrip()
+        if stripped.startswith("persistent_peers "):
+            out.append(f'persistent_peers = "{csv}"\n')
+        elif stripped.startswith("seeds "):
+            out.append(f'seeds = "{csv}"\n')
+        else:
+            out.append(line)
+    with open(config_toml, "w") as f:
+        f.writelines(out)
+    print(f"Persistent peers: {csv}")
+
+
 def configure_statesync(network, terp_home):
     """Enable CometBFT state-sync against the network RPC."""
-    rpc = TESTNET.rpc_node if network == NetworkChoice.TESTNET else MAINNET.rpc_node
-    offset = 1000
+    offset = 200
+    if network == NetworkChoice.TESTNET:
+        rpc = TESTNET.rpc_node
+    else:
+        offset = load_mainnet_bootstrap()
+        rpc = MAINNET.rpc_node
     context = ssl.create_default_context()
     try:
         req = urlrq.Request(rpc.rstrip("/") + "/status", headers={"User-Agent": "terp-installer"})
@@ -880,6 +1056,7 @@ def configure_statesync(network, terp_home):
             # first enable in file is often [p2p] prometheus etc — only patch [statesync]
             out.append(line)
         elif stripped.startswith("rpc_servers"):
+            # Primary and witness must be house RPC. chaintools drops the light client.
             out.append(f'rpc_servers = "{rpc},{rpc}"\n')
         elif stripped.startswith("trust_height"):
             out.append(f"trust_height = {trust_height}\n")
@@ -902,6 +1079,12 @@ def configure_statesync(network, terp_home):
     with open(config_toml, "w") as config_file:
         config_file.writelines(patched)
     print(f"State-sync configured at height {trust_height} via {rpc}.")
+    if network != NetworkChoice.TESTNET:
+        peer = discover_rpc_persistent_peer(rpc)
+        if not peer:
+            print(bcolors.RED + f"RPC {rpc} did not advertise a routable P2P address (need GET /p2p)." + bcolors.ENDC)
+            sys.exit(1)
+        apply_persistent_peers(terp_home, [peer])
     clear_screen()
 
 
@@ -1141,11 +1324,29 @@ def download_binary(network):
         sys.exit(1)
 
     if network == NetworkChoice.TESTNET:
-        binary_urls = TESTNET.binary_url
+        chain = "120u-1"
         version = TESTNET_VERSION
     else:
-        binary_urls = MAINNET.binary_url
+        chain = "morocco-1"
         version = MAINNET_VERSION
+    try:
+        with urlrq.urlopen(f"{CHANNEL_BASE}/{chain}", timeout=10) as resp:
+            ch = resp.read().decode().strip().lstrip("v")
+            if ch:
+                version = ch
+    except Exception:
+        pass
+    base = f"{RELEASES_S3_BASE}/v{version}"
+    binary_urls = {
+        "linux": {
+            "amd64": f"{base}/terpd-{version}-linux-amd64.tar.gz",
+            "arm64": f"{base}/terpd-{version}-linux-arm64.tar.gz",
+        },
+        "darwin": {
+            "amd64": None,
+            "arm64": f"{base}/terpd-{version}-darwin-arm64.tar.gz",
+        },
+    }
 
     binary_url = None
     if operating_system in binary_urls:
@@ -1793,7 +1994,11 @@ def main():
         initialize_terp_home(terp_home, moniker)
         using_cosmovisor = download_cosmovisor(terp_home)
         download_genesis(network, terp_home)
-        download_addrbook(network, terp_home)
+        if network == NetworkChoice.TESTNET:
+            download_addrbook(network, terp_home)
+        else:
+            load_mainnet_bootstrap()
+            apply_persistent_peers(terp_home, MAINNET_PEERS)
         select_pruning(terp_home)
         if private:
             apply_private_mode(terp_home)

@@ -9,17 +9,147 @@ import urllib.request as urlrq
 import ssl
 import json
 import tempfile
+import time
 from enum import Enum
 
-DEFAUT_TERP_HOME = os.path.expanduser("~/.terp")
+# ============================================================================
+# CONFIGURATION CONSTANTS - Update these for new releases or endpoints
+# ============================================================================
+
+# Default Settings
+DEFAULT_TERP_HOME = os.path.expanduser("~/.terpd")
 DEFAULT_MONIKER = "terp"
 
-NETWORK_CHOICES = ['morocco-1', '90u-4']
+# Network Choices
+NETWORK_CHOICES = ['morocco-1', '120u-1']
 INSTALL_CHOICES = ['node', 'client', 'localterp']
 PRUNING_CHOICES = ['default', 'nothing', 'everything']
 
-MAINNET_VERSION = "4.2.2"
-TESTNET_VERSION = "4.2.2"
+# Binary Versions
+# Keep in sync with terp-installer.sh TERPD_VERSION when cutting a release.
+# Keep in sync with get/terp-installer.sh TERPD_VERSION and s3 releases/terp-core/vX.Y.Z
+VERSIONS_JSON_URLS = (
+    "https://terp.network/public/data/versions.json",
+    "https://raw.githubusercontent.com/terpnetwork/terp-core/main/networks/chain-registry/terpnetwork/versions.json",
+)
+
+
+def _resolve_versions(mainnet_default, testnet_default):
+    """--version / TERPD_VERSION override, else last recommended_version in versions.json."""
+    import json as _json
+    import os as _os
+    import sys as _sys
+    import urllib.request as _ur
+    argv = _sys.argv[1:]
+    for i, a in enumerate(argv):
+        if a == "--version" and i + 1 < len(argv):
+            v = argv[i + 1].lstrip("v")
+            return v, v, "--version"
+        if a.startswith("--version="):
+            v = a.split("=", 1)[1].lstrip("v")
+            return v, v, "--version"
+    env = _os.environ.get("TERPD_VERSION", "").lstrip("v")
+    if env:
+        return env, env, "TERPD_VERSION"
+    for url in VERSIONS_JSON_URLS:
+        try:
+            with _ur.urlopen(url, timeout=10) as r:
+                doc = _json.loads(r.read().decode("utf-8"))
+            recs = [v.get("recommended_version") for v in doc.get("versions", []) if v.get("recommended_version")]
+            if recs:
+                return recs[-1].lstrip("v"), testnet_default, url
+        except Exception:
+            continue
+    return mainnet_default, testnet_default, "built-in default"
+
+
+MAINNET_VERSION, TESTNET_VERSION, VERSION_SOURCE = _resolve_versions("6.4.0", "6.2.1")
+print(f"Resolved terpd version: mainnet v{MAINNET_VERSION}, testnet v{TESTNET_VERSION} (source: {VERSION_SOURCE})")
+
+# GitHub Repository
+GITHUBURL = "https://github.com/terpnetwork/terp-core"
+GITHUB_RELEASES_URL = f"{GITHUBURL}/releases/download"
+NETWORKSURL = "https://raw.githubusercontent.com/terpnetwork/networks/refs/heads/main"
+
+# Binary Download URLs (S3 is canonical; GitHub may lag)
+RELEASES_S3_BASE = "https://s3.terp.network/releases/terp-core"
+MAINNET_BINARY_BASE_URL = f"{RELEASES_S3_BASE}/v{MAINNET_VERSION}"
+TESTNET_BINARY_BASE_URL = f"{RELEASES_S3_BASE}/v{TESTNET_VERSION}"
+
+# Genesis Files
+MAINNET_GENESIS_URL = f"{NETWORKSURL}/mainnet/morocco-1/genesis.json"
+TESTNET_GENESIS_URL = f"{NETWORKSURL}/testnet/120u-1/genesis.json"
+
+# RPC Endpoints
+MAINNET_RPC_ENDPOINT = "https://rpc.terp.network:443"
+TESTNET_RPC_ENDPOINT = "https://testnet-rpc.terp.network:443"
+
+# Peer Nodes
+MAINNET_PEERS = [
+    "079328a5209e58dbb7658202bd0e00f8c50e07d0@provider.akash-palmito.org:30873",
+    "8392513d34207c9cec15d5d6a45fc1bd41691bf4@provider.h6i-dedicated.eu-se-1.digitalfrontier.so:30147",
+    "58e01ab84eb931a82a024324520021d2e075ec67@185.248.24.16:29656",
+    "b04c5acab1c821b95f26662d8ebb7ccd4a39e97f@144.76.97.251:34656",
+    "5ba3e8458f584edfe5434186af74f846190d5475@213.133.100.93:16056",
+    "a16e78921e03a9953178038c2c39d1f31252655c@135.181.60.157:26716",
+]
+TESTNET_PEERS = ["9e194721d68dd28d3c4b625c17b2cb287ef30327@peer-testnet.terp.network:26656"]
+
+# Addrbook URLs (stale last-seen IPs; do not use for morocco-1 statesync)
+MAINNET_ADDRBOOK_URL = ""
+TESTNET_ADDRBOOK_URL = "https://snapshot-testnet.terp.network/addrbook.json"
+MAINNET_BOOTSTRAP_JSON = "https://s3.terp.network/snapshots/mainnet/morocco-1/bootstrap.json"
+
+# Snapshot URLs
+MAINNET_SNAPSHOT_URL = "https://s3.terp.network/snapshots/mainnet/morocco-1/pruned/snapshot.json"
+TESTNET_SNAPSHOT_URL = "https://s3.terp.network/snapshots/testnet/120u-1/pruned/snapshot.json"
+CHANNEL_BASE = f"{RELEASES_S3_BASE}/channels"
+
+# Cosmovisor URLs
+COSMOVISOR_VERSION = "v1.2.0"
+COSMOVISOR_BASE_URL = "https://snapshot-mainnet.terp.network/binaries/cosmovisor"
+
+# ============================================================================
+# END CONFIGURATION CONSTANTS
+# ============================================================================
+
+def persist_terpd_path(binary_path):
+    """Put terpd on PATH for zsh (not only ~/.profile) and this process."""
+    bin_dir = os.path.dirname(os.path.abspath(binary_path))
+    os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
+    home = os.path.expanduser("~")
+    local_bin = os.path.join(home, ".local", "bin")
+    for d in ("/opt/homebrew/bin", "/usr/local/bin", local_bin):
+        try:
+            if d == local_bin:
+                os.makedirs(d, exist_ok=True)
+            if os.path.isdir(d) and os.access(d, os.W_OK):
+                dest = os.path.join(d, "terpd")
+                if os.path.islink(dest) or not os.path.exists(dest):
+                    if os.path.islink(dest) or os.path.exists(dest):
+                        os.remove(dest)
+                    os.symlink(os.path.abspath(binary_path), dest)
+                    print(f"  linked {dest} -> {binary_path}")
+                    break
+        except OSError:
+            continue
+    for rc in (".zprofile", ".zshrc", ".bash_profile", ".profile"):
+        path = os.path.join(home, rc)
+        mark = f"# terp-installer: PATH {bin_dir}"
+        line = f'export PATH="{bin_dir}:$PATH"\n'
+        try:
+            existing = ""
+            if os.path.isfile(path):
+                with open(path) as f:
+                    existing = f.read()
+            if mark not in existing:
+                with open(path, "a") as f:
+                    f.write(f"\n{mark}\n{line}")
+                print(f"  PATH += {bin_dir}  ({path})")
+        except OSError:
+            continue
+    print(f"  binary: {binary_path}")
+
 
 # CLI arguments
 parser = argparse.ArgumentParser(description="Terp Network Installer")
@@ -98,6 +228,41 @@ parser.add_argument(
     help="Setup systemd service (Linux only)"
 )
 
+parser.add_argument(
+    '--public',
+    action='store_true',
+    help="Public P2P (PEX + inbound). Required for statesync.",
+)
+
+parser.add_argument(
+    '--private',
+    action='store_true',
+    help="Private P2P (default). Prohibits statesync.",
+)
+
+parser.add_argument(
+    '--sync-mode',
+    type=str,
+    choices=['statesync', 'snapshot'],
+    dest='sync_mode',
+    help="Sync mode: statesync (public nodes only) or snapshot",
+)
+
+parser.add_argument(
+    '--snapshot-class',
+    type=str,
+    choices=['light', 'lightweight', 'pruned'],
+    dest='snapshot_class',
+    help="Snapshot class when sync-mode=snapshot: light or pruned",
+)
+
+parser.add_argument(
+    "--version",
+    type=str,
+    dest="terpd_version",
+    help="terpd version to install (default: latest recommended_version in versions.json)",
+)
+
 args = parser.parse_args()
 
 # Choices
@@ -132,58 +297,65 @@ class Network:
         self.snapshot_url = snapshot_url
 
 TESTNET = Network(
-    chain_id = "90u-4",
-    version = f"v${TESTNET_VERSION}",
-    genesis_url = "https://raw.githubusercontent.com/terpnetwork/networks/refs/heads/main/testnet/90u-4/genesis.json",
+    chain_id = "120u-1",
+    version = f"v{TESTNET_VERSION}",
+    genesis_url = TESTNET_GENESIS_URL,
     binary_url = {
         "linux": {
-            "amd64": f"https://github.com/terpnetwork/terp-core/releases/download/v{TESTNET_VERSION}/terpd-linux-amd64",
-            "arm64": f"https://github.com/terpnetwork/terp-core/releases/download/v{TESTNET_VERSION}/terpd-linux-arm64"
+            "amd64": f"{TESTNET_BINARY_BASE_URL}/terpd-{TESTNET_VERSION}-linux-amd64.tar.gz",
+            "arm64": f"{TESTNET_BINARY_BASE_URL}/terpd-{TESTNET_VERSION}-linux-arm64.tar.gz",
         },
         "darwin": {
-          "amd64": f"https://github.com/terpnetwork/terp-core/releases/download/v{TESTNET_VERSION}/terpd-linux-amd64",
-          "arm64": f"https://github.com/terpnetwork/terp-core/releases/download/v{TESTNET_VERSION}/terpd-linux-arm64"
+            "amd64": None,
+            "arm64": f"{TESTNET_BINARY_BASE_URL}/terpd-{TESTNET_VERSION}-darwin-arm64.tar.gz",
         },
     },
-    peers = [
-        "9e194721d68dd28d3c4b625c17b2cb287ef30327@testnet-peer.terp.network:26656",
-        # "51d48be3809bb8907c1ef5f747e53cdd0c9ded1b@terp-testnet-peer.itrocket.net:443",
-    ],
-    rpc_node = "https://testnet-rpc.terp.network:443",
-    addrbook_url = "https://testnet-rpc.terp.network/addrbook",
-    snapshot_url = "https://snapshots.testnet.terp.network/latest" ## TODO: setup snapshot service
+    peers = TESTNET_PEERS,
+    rpc_node = TESTNET_RPC_ENDPOINT,
+    addrbook_url = TESTNET_ADDRBOOK_URL,
+    snapshot_url = TESTNET_SNAPSHOT_URL
 )
 
 MAINNET = Network(
     chain_id = "morocco-1",
     version = f"v{MAINNET_VERSION}",
-    genesis_url = "https://raw.githubusercontent.com/terpnetwork/networks/refs/heads/main/mainnet/morocco-1/genesis.json",
+    genesis_url = MAINNET_GENESIS_URL,
     binary_url = {
        "linux": {
-            "amd64": f"https://github.com/terpnetwork/terp-core/releases/download/v{MAINNET_VERSION}/terpd-linux-amd64",
-            "arm64": f"https://github.com/terpnetwork/terp-core/releases/download/v{MAINNET_VERSION}/terpd-linux-arm64"
+            "amd64": f"{MAINNET_BINARY_BASE_URL}/terpd-{MAINNET_VERSION}-linux-amd64.tar.gz",
+            "arm64": f"{MAINNET_BINARY_BASE_URL}/terpd-{MAINNET_VERSION}-linux-arm64.tar.gz",
         },
         "darwin": {
-            "amd64": f"https://github.com/terpnetwork/terp-core/releases/download/v{MAINNET_VERSION}/terpd-linux-amd64",
-            "arm64": f"https://github.com/terpnetwork/terp-core/releases/download/v{MAINNET_VERSION}/terpd-linux-arm64"
+            "amd64": None,
+            "arm64": f"{MAINNET_BINARY_BASE_URL}/terpd-{MAINNET_VERSION}-darwin-arm64.tar.gz",
         },
     },
-    peers = None,
-    rpc_node = "https://rpc-terp.zenchainlabs.io:443",
-    addrbook_url = "https://server-3.itrocket.net/mainnet/terp/addrbook.json",
-    snapshot_url = "https://snapshots.nodejumper.io/terp/terp_latest.tar.lz4"
+    peers = MAINNET_PEERS if MAINNET_PEERS else None,
+    rpc_node = MAINNET_RPC_ENDPOINT,
+    addrbook_url = MAINNET_ADDRBOOK_URL,
+    snapshot_url = MAINNET_SNAPSHOT_URL
 )
 
 COSMOVISOR_URL = {
-    # "darwin": {
-    #     "amd64": "https://osmosis.fra1.digitaloceanspaces.com/binaries/cosmovisor/cosmovisor-v1.2.0-darwin-amd64",
-    #     "arm64": "https://osmosis.fra1.digitaloceanspaces.com/binaries/cosmovisor/cosmovisor-v1.2.0-darwin-arm64"
-    # },
+    "darwin": {
+        "amd64": "https://osmosis.fra1.digitaloceanspaces.com/binaries/cosmovisor/cosmovisor-v1.2.0-darwin-amd64",
+        "arm64": "https://osmosis.fra1.digitaloceanspaces.com/binaries/cosmovisor/cosmovisor-v1.2.0-darwin-arm64"
+    },
     "linux": {
         "amd64": "https://osmosis.fra1.digitaloceanspaces.com/binaries/cosmovisor/cosmovisor-v1.2.0-linux-amd64",
         "arm64": "https://osmosis.fra1.digitaloceanspaces.com/binaries/cosmovisor/cosmovisor-v1.2.0-linux-arm64"
     }
 }
+# COSMOVISOR_URL = {
+#     # "darwin": {
+#     #     "amd64": f"{COSMOVISOR_BASE_URL}/cosmovisor-{COSMOVISOR_VERSION}-darwin-amd64",
+#     #     "arm64": f"{COSMOVISOR_BASE_URL}/cosmovisor-{COSMOVISOR_VERSION}-darwin-arm64"
+#     # },
+#     "linux": {
+#         "amd64": f"{COSMOVISOR_BASE_URL}/cosmovisor-{COSMOVISOR_VERSION}-linux-amd64",
+#         "arm64": f"{COSMOVISOR_BASE_URL}/cosmovisor-{COSMOVISOR_VERSION}-linux-arm64"
+#     }
+# }
 # Terminal utils
 
 class bcolors:
@@ -192,21 +364,213 @@ class bcolors:
     ENDC = '\033[0m'
     PURPLE = '\033[95m'
 
+def _use_color():
+    if os.environ.get("NO_COLOR"):
+        return False
+    if os.environ.get("FORCE_COLOR") == "1":
+        return True
+    return sys.stdout.isatty()
+
+def _rgb(r, g, b):
+    return f"\033[38;2;{r};{g};{b}m" if _use_color() else ""
+
+def _reset():
+    return "\033[0m" if _use_color() else ""
+
+TEAL = (94, 234, 212)
+BLUE = (121, 192, 255)
+WHITE = (232, 240, 248)
+MUT = (134, 147, 164)
+DIMC = (74, 83, 96)
+
+FIGLET_TERP = [
+    "████████╗███████╗██████╗ ██████╗       █████╗  █████╗ ██████╗ ███████╗",
+    "╚══██╔══╝██╔════╝██╔══██╗██╔══██╗      ██╔══██╗██╔══██╗██╔══██╗██╔════╝",
+    "   ██║   █████╗  ██████╔╝██████╔╝█████╗██║  ╚═╝██║  ██║██████╔╝█████╗  ",
+    "   ██║   ██╔══╝  ██╔══██╗██╔═══╝ ╚════╝██║  ██╗██║  ██║██╔══██╗██╔══╝  ",
+    "   ██║   ███████╗██║  ██║██║           ╚█████╔╝╚█████╔╝██║  ██║███████╗",
+    "   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝            ╚════╝  ╚════╝ ╚═╝  ╚═╝╚════╝ ",
+]
+
+HOLE_FRAMES = [
+    [
+        "                   ",
+        "                   ",
+        "                   ",
+        "                   ",
+        "                   ",
+        "                   ",
+    ],
+    [
+        "                   ",
+        "                   ",
+        "         ·         ",
+        "         ·         ",
+        "                   ",
+        "                   ",
+    ],
+    [
+        "                   ",
+        "        ░░░        ",
+        "       ░   ░       ",
+        "       ░   ░       ",
+        "        ░░░        ",
+        "                   ",
+    ],
+    [
+        "       ░░░░░       ",
+        "      ░▒▒▒▒▒░      ",
+        "     ░▒▓▓▓▓▓▒░     ",
+        "     ░▒▓▓▓▓▓▒░     ",
+        "      ░▒▒▒▒▒░      ",
+        "       ░░░░░       ",
+    ],
+    [
+        "     ░░░░░░░░░     ",
+        "    ░▒▒▒▓▓▓▒▒▒░    ",
+        "   ░▒▓▓█████▓▓▒░   ",
+        "   ░▒▓▓█████▓▓▒░   ",
+        "    ░▒▒▒▓▓▓▒▒▒░    ",
+        "     ░░░░░░░░░     ",
+    ],
+    [
+        "    ░░░░░░░░░░░    ",
+        "  ░▒▒▒▒▓▓▓▓▓▒▒▒▒░  ",
+        " ░▒▓▓▓███████▓▓▓▒░ ",
+        " ░▒▓▓▓███████▓▓▓▒░ ",
+        "  ░▒▒▒▒▓▓▓▓▓▒▒▒▒░  ",
+        "    ░░░░░░░░░░░    ",
+    ],
+    [
+        "    ▓▓▓▓▓▓▓▓▓▓▓    ",
+        "  ▓███████████████ ",
+        " █████████████████ ",
+        " █████████████████ ",
+        "  ▓███████████████ ",
+        "    ▓▓▓▓▓▓▓▓▓▓▓    ",
+    ],
+    [
+        "███████████████████",
+        "███████████████████",
+        "███████████████████",
+        "███████████████████",
+        "███████████████████",
+        "███████████████████",
+    ],
+]
+
+HOLE_SEQUENCE = [
+    (0, 0.060, "hole"),
+    (1, 0.110, "hole"),
+    (2, 0.110, "hole"),
+    (3, 0.130, "hole"),
+    (4, 0.150, "hole"),
+    (5, 0.280, "hole"),
+    (6, 0.070, "pulse"),
+    (7, 0.055, "flash"),
+]
+
+def _hole_color_for(ch, phase):
+    if phase == "flash":
+        return _rgb(*WHITE)
+    if phase == "pulse":
+        return _rgb(*WHITE) if ch == "█" else _rgb(*TEAL)
+    if ch in ("·", "░"):
+        return _rgb(*TEAL)
+    if ch == "▒":
+        return _rgb(*BLUE)
+    if ch == "▓":
+        return _rgb(60, 84, 122)
+    if ch == "█":
+        return _rgb(18, 24, 38)
+    return _reset()
+
+def _colorize_hole_line(line, phase):
+    out = []
+    last = None
+    for ch in line:
+        c = _hole_color_for(ch, phase)
+        if c != last:
+            out.append(c)
+            last = c
+        out.append(ch)
+    out.append(_reset())
+    return "".join(out)
+
+def _grad_color(i, total):
+    t = 0 if total <= 1 else i / (total - 1)
+    r = round(177 + (80 - 177) * t)
+    g = round(235 + (160 - 235) * t)
+    b = round(235 + (220 - 235) * t)
+    return _rgb(r, g, b)
+
+def _print_figlet_terp():
+    for i, line in enumerate(FIGLET_TERP):
+        sys.stdout.write(f"{_grad_color(i, len(FIGLET_TERP))}{line}{_reset()}\n")
+    sys.stdout.write(f"{_rgb(*MUT)}        ·  t e r p   n e t w o r k  ·  installer{_reset()}\n")
+    sys.stdout.write(f"{_rgb(*DIMC)}        join morocco-1 or 120u-1{_reset()}\n\n")
+    sys.stdout.flush()
+
+def intro_terp():
+    """Hole-open then TERP figlet — same cadence as grok-remote installer.ts."""
+    color = _use_color()
+    animate = color and sys.stdout.isatty() and not os.environ.get("NO_ANIMATE")
+    if not animate:
+        _print_figlet_terp()
+        return
+    try:
+        sys.stdout.write("\033[?25l")
+        for _ in range(6):
+            sys.stdout.write("\n")
+        sys.stdout.write("\033[6A")
+        sys.stdout.flush()
+        for idx, hold, phase in HOLE_SEQUENCE:
+            frame = HOLE_FRAMES[idx]
+            for line in frame:
+                sys.stdout.write("\033[2K\r" + _colorize_hole_line(line, phase) + "\n")
+            sys.stdout.write(f"\033[{len(frame)}A")
+            sys.stdout.flush()
+            time.sleep(hold)
+        _print_figlet_terp()
+    finally:
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+
 def clear_screen():
     os.system('clear')
+
+def safe_input(prompt):
+    """
+    Wrapper around input() that handles EOFError and KeyboardInterrupt gracefully.
+
+    Args:
+        prompt (str): The prompt to display to the user.
+
+    Returns:
+        str: The user's input, or exits the program if EOF or Ctrl+C is encountered.
+    """
+    try:
+        return input(prompt)
+    except EOFError:
+        print(bcolors.RED + "\n\nError: No input available (EOF detected)." + bcolors.ENDC)
+        print("This script requires interactive input. Please run it in an interactive terminal.")
+        print("If you want to run this non-interactively, use the command-line flags:")
+        print("  --install <node|client|localterp>")
+        print("  --network <morocco-1|120u-1>")
+        print("  --home <path>")
+        print("  --moniker <name>")
+        print("\nFor full options, run: python3 terp-installer.py --help")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print(bcolors.OKGREEN + "\n\nInstallation cancelled by user." + bcolors.ENDC)
+        print("Exiting...")
+        sys.exit(0)
 
 # Messages
 
 def welcome_message():
+    intro_terp()
     print(bcolors.OKGREEN + """
-████████╗███████╗██████╗ ██████╗       █████╗  █████╗ ██████╗ ███████╗
-╚══██╔══╝██╔════╝██╔══██╗██╔══██╗      ██╔══██╗██╔══██╗██╔══██╗██╔════╝
-   ██║   █████╗  ██████╔╝██████╔╝█████╗██║  ╚═╝██║  ██║██████╔╝█████╗
-   ██║   ██╔══╝  ██╔══██╗██╔═══╝ ╚════╝██║  ██╗██║  ██║██╔══██╗██╔══╝
-   ██║   ███████╗██║  ██║██║           ╚█████╔╝╚█████╔╝██║  ██║███████╗
-   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝            ╚════╝  ╚════╝ ╚═╝  ╚═╝╚══════╝
-
-
 Welcome to the Terp-Core node installer!
 
 
@@ -282,7 +646,7 @@ Please choose the desired installation:
         """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -334,7 +698,7 @@ Please choose the desired network:
 """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -362,20 +726,20 @@ def select_terp_home():
 
     """
     if args.home:
-        terp_home = args.home
+        terp_home = os.path.abspath(os.path.expanduser(args.home))
     else:
-        default_home = os.path.expanduser("~/.terp")
+        default_home = os.path.expanduser("~/.terpd")
         print(bcolors.OKGREEN + f"""
 Do you want to install Terp-Core in the default location?:
 
-    1) Yes, use default location {DEFAUT_TERP_HOME} (recommended)
+    1) Yes, use default location {DEFAULT_TERP_HOME} (recommended)
     2) No, specify custom location
 
 💡 You can specify the home using the --home flag.
 """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -387,9 +751,9 @@ Do you want to install Terp-Core in the default location?:
 
             elif choice == Answer.NO:
                 while True:
-                    custom_home = input("Enter the path for Terp-Core home: ").strip()
+                    custom_home = safe_input("Enter the path for Terp-Core home: ").strip()
                     if custom_home != "":
-                        terp_home = custom_home
+                        terp_home = os.path.abspath(os.path.expanduser(custom_home))
                         break
                     else:
                         print("Invalid path. Please enter a valid directory.")
@@ -422,7 +786,7 @@ Do you want to use the default moniker?
 """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -433,7 +797,7 @@ Do you want to use the default moniker?
                 break
             elif choice == Answer.NO:
                 while True:
-                    custom_moniker = input("Enter the custom moniker: ")
+                    custom_moniker = safe_input("Enter the custom moniker: ")
                     if custom_moniker.strip() != "":
                         moniker = custom_moniker
                         break
@@ -445,6 +809,283 @@ Do you want to use the default moniker?
 
     clear_screen()
     return moniker
+
+
+def select_p2p_mode():
+    """Private (default) vs public P2P. Private statesync uses only rpc.terp.network."""
+    if args.public:
+        return False
+    if args.private:
+        return True
+
+    print(bcolors.OKGREEN + """
+P2P mode:
+
+    1) private — PEX off, no inbound. State-sync uses only the Terp RPC peer.
+    2) public  — gossip and accept extra peers.
+
+💡 Use --public or --private to skip this prompt.
+""" + bcolors.ENDC)
+
+    while True:
+        choice = safe_input("Enter your choice [1]: ").strip() or "1"
+        if choice.lower() == "exit":
+            print("Exiting the program...")
+            sys.exit(0)
+        if choice == "1":
+            clear_screen()
+            return True
+        if choice == "2":
+            clear_screen()
+            return False
+        print("Invalid choice. Please enter 1 or 2.")
+
+
+def select_sync_mode(private):
+    """State-sync works in private mode with a single persistent peer (rpc.terp.network)."""
+    if args.sync_mode:
+        return args.sync_mode
+    print(bcolors.OKGREEN + """
+Sync mode:
+
+    1) state-sync — recent state via rpc.terp.network (private: that peer only, PEX off)
+    2) snapshot   — pruned pack from s3.terp.network
+
+💡 You can select this using --sync-mode statesync|snapshot.
+""" + bcolors.ENDC)
+
+    while True:
+        choice = safe_input("Enter your choice [1]: ").strip() or "1"
+        if choice.lower() == "exit":
+            print("Exiting the program...")
+            sys.exit(0)
+        if choice == "1":
+            clear_screen()
+            return "statesync"
+        if choice == "2":
+            clear_screen()
+            return "snapshot"
+        print("Invalid choice. Please enter 1 or 2.")
+
+
+def apply_private_mode(terp_home):
+    """Lock down P2P: no PEX, no inbound, no seeds."""
+    config_toml = os.path.join(terp_home, "config", "config.toml")
+    if not os.path.isfile(config_toml):
+        return
+    with open(config_toml, "r") as config_file:
+        lines = config_file.readlines()
+    out = []
+    for line in lines:
+        stripped = line.lstrip()
+        if stripped.startswith("pex "):
+            out.append("pex = false\n")
+        elif stripped.startswith("max_num_inbound_peers"):
+            out.append("max_num_inbound_peers = 0\n")
+        elif stripped.startswith("seeds "):
+            out.append('seeds = ""\n')
+        elif stripped.startswith("broadcast "):
+            out.append("broadcast = false\n")
+        else:
+            out.append(line)
+    with open(config_toml, "w") as config_file:
+        config_file.writelines(out)
+    print("Private mode: PEX disabled, inbound peers rejected, no gossip.")
+
+
+def load_mainnet_bootstrap():
+    """Live RPC + P2P pin. Akash sentries are provider NodePorts, not :26656."""
+    global MAINNET_PEERS
+    try:
+        req = urlrq.Request(MAINNET_BOOTSTRAP_JSON, headers={"User-Agent": "terp-installer"})
+        with urlrq.urlopen(req, timeout=10) as resp:
+            d = json.loads(resp.read().decode())
+        peers = d.get("peers") or []
+        if peers:
+            MAINNET_PEERS = peers
+            MAINNET.peers = peers
+        rpcs = d.get("rpc") or []
+        if rpcs:
+            MAINNET.rpc_node = rpcs[0]
+        return int(d.get("trust_offset") or 2000)
+    except Exception:
+        return 2000
+
+
+def discover_rpc_persistent_peer(rpc):
+    """id@public-ip:port from GET /p2p then /status. Skip 0.0.0.0 and RFC1918."""
+    import ipaddress
+    import socket
+
+    rpc = rpc.rstrip("/")
+    ctx = ssl.create_default_context()
+
+    def routable(host):
+        host = (host or "").strip().strip("[]")
+        if not host or host.lower() in ("0.0.0.0", "::", "localhost", "*"):
+            return False
+        try:
+            infos = socket.getaddrinfo(host, None)
+        except socket.gaierror:
+            return False
+        for info in infos:
+            try:
+                addr = ipaddress.ip_address(info[4][0])
+            except ValueError:
+                continue
+            if addr.is_unspecified or addr.is_loopback or addr.is_link_local or addr.is_multicast or addr.is_private:
+                return False
+            return True
+        return False
+
+    def parse_hostport(raw):
+        s = str(raw).strip()
+        if "@" in s:
+            s = s.split("@", 1)[1]
+        s = s.replace("tcp://", "").replace("udp://", "")
+        if ":" in s:
+            return s.rsplit(":", 1)
+        return s, "26656"
+
+    def public_ip(host, port):
+        if not routable(host):
+            return None
+        try:
+            ip = socket.getaddrinfo(host, int(port), socket.AF_INET, socket.SOCK_STREAM)[0][4][0]
+        except Exception:
+            ip = host
+        return ip if routable(ip) else None
+
+    def peer_from_mapping(d, nid):
+        if not isinstance(d, dict):
+            return None
+        nid = d.get("id") or d.get("node_id") or nid
+        for key in ("peer", "p2p", "address", "listen_addr", "listenAddr", "external_address", "externalAddress"):
+            val = d.get(key)
+            if not val:
+                continue
+            if isinstance(val, str) and "@" in val:
+                nid = val.split("@", 1)[0] or nid
+            host, port = parse_hostport(val)
+            ip = public_ip(host, port)
+            if nid and ip:
+                return f"{nid}@{ip}:{port}"
+        return None
+
+    nid = ""
+    listen = ""
+    try:
+        req = urlrq.Request(rpc + "/status", headers={"User-Agent": "terp-installer"})
+        with urlrq.urlopen(req, context=ctx, timeout=15) as resp:
+            ni = json.loads(resp.read().decode())["result"]["node_info"]
+        nid = ni.get("id") or ""
+        listen = ni.get("listen_addr") or ""
+    except Exception:
+        return None
+    for path in ("/p2p", "/p2p.json"):
+        try:
+            req = urlrq.Request(rpc + path, headers={"User-Agent": "terp-installer"})
+            with urlrq.urlopen(req, context=ctx, timeout=10) as resp:
+                body = json.loads(resp.read().decode())
+            if isinstance(body, dict) and "result" in body:
+                body = body["result"]
+            peer = peer_from_mapping(body, nid)
+            if peer:
+                return peer
+        except Exception:
+            pass
+    host, port = parse_hostport(listen)
+    ip = public_ip(host, port)
+    if nid and ip:
+        return f"{nid}@{ip}:{port}"
+    return None
+
+
+def apply_persistent_peers(terp_home, peers):
+    if not peers:
+        return
+    csv = ",".join(peers)
+    config_toml = os.path.join(terp_home, "config", "config.toml")
+    with open(config_toml, "r") as f:
+        lines = f.readlines()
+    out = []
+    for line in lines:
+        stripped = line.lstrip()
+        if stripped.startswith("persistent_peers "):
+            out.append(f'persistent_peers = "{csv}"\n')
+        elif stripped.startswith("seeds "):
+            out.append(f'seeds = "{csv}"\n')
+        else:
+            out.append(line)
+    with open(config_toml, "w") as f:
+        f.writelines(out)
+    print(f"Persistent peers: {csv}")
+
+
+def configure_statesync(network, terp_home):
+    """Enable CometBFT state-sync against the network RPC."""
+    offset = 200
+    if network == NetworkChoice.TESTNET:
+        rpc = TESTNET.rpc_node
+    else:
+        offset = load_mainnet_bootstrap()
+        rpc = MAINNET.rpc_node
+    context = ssl.create_default_context()
+    try:
+        req = urlrq.Request(rpc.rstrip("/") + "/status", headers={"User-Agent": "terp-installer"})
+        with urlrq.urlopen(req, context=context, timeout=20) as resp:
+            status = json.loads(resp.read().decode())
+        latest = int(status["result"]["sync_info"]["latest_block_height"])
+        trust_height = max(1, latest - offset)
+        commit_url = rpc.rstrip("/") + f"/commit?height={trust_height}"
+        req = urlrq.Request(commit_url, headers={"User-Agent": "terp-installer"})
+        with urlrq.urlopen(req, context=context, timeout=20) as resp:
+            commit = json.loads(resp.read().decode())
+        trust_hash = commit["result"]["signed_header"]["commit"]["block_id"]["hash"]
+    except Exception as e:
+        print(bcolors.RED + f"Failed to fetch state-sync trust params from {rpc}: {e}" + bcolors.ENDC)
+        sys.exit(1)
+
+    config_toml = os.path.join(terp_home, "config", "config.toml")
+    with open(config_toml, "r") as config_file:
+        lines = config_file.readlines()
+    out = []
+    for line in lines:
+        stripped = line.lstrip()
+        if stripped.startswith("enable ") and "enable =" in stripped:
+            # first enable in file is often [p2p] prometheus etc — only patch [statesync]
+            out.append(line)
+        elif stripped.startswith("rpc_servers"):
+            # Primary and witness must be house RPC. chaintools drops the light client.
+            out.append(f'rpc_servers = "{rpc},{rpc}"\n')
+        elif stripped.startswith("trust_height"):
+            out.append(f"trust_height = {trust_height}\n")
+        elif stripped.startswith("trust_hash"):
+            out.append(f'trust_hash = "{trust_hash}"\n')
+        elif stripped.startswith("trust_period"):
+            out.append('trust_period = "168h0m0s"\n')
+        else:
+            out.append(line)
+    # Second pass: set statesync enable only inside [statesync]
+    in_statesync = False
+    patched = []
+    for line in out:
+        if line.strip().startswith("[") and line.strip().endswith("]"):
+            in_statesync = line.strip() == "[statesync]"
+        if in_statesync and line.lstrip().startswith("enable "):
+            patched.append("enable = true\n")
+        else:
+            patched.append(line)
+    with open(config_toml, "w") as config_file:
+        config_file.writelines(patched)
+    print(f"State-sync configured at height {trust_height} via {rpc}.")
+    if network != NetworkChoice.TESTNET:
+        peer = discover_rpc_persistent_peer(rpc)
+        if not peer:
+            print(bcolors.RED + f"RPC {rpc} did not advertise a routable P2P address (need GET /p2p)." + bcolors.ENDC)
+            sys.exit(1)
+        apply_persistent_peers(terp_home, [peer])
+    clear_screen()
 
 
 def initialize_terp_home(terp_home, moniker):
@@ -474,7 +1115,7 @@ Do you want to initialize the Terp-Core home directory at '{terp_home}'?
 💡 You can overwrite the terp network home using --overwrite flag.
             """ + bcolors.ENDC)
 
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -541,7 +1182,7 @@ Please choose your desired pruning settings:
     """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -645,15 +1286,20 @@ def download_binary(network):
     Raises:
         SystemExit: If the binary download URL is not available for the current operating system and architecture.
     """
-    binary_path = os.path.join(args.binary_path, "terpd")
+    binary_path = os.path.expanduser(os.path.join(args.binary_path, "terpd"))
 
     if not args.overwrite:
-        # Check if terpd is already installed
+        # Check if terpd is already installed by sourcing ~/.profile first
         try:
-            subprocess.run([binary_path, "version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(
+                ["sh", "-c", "source ~/.profile && terpd version"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
             print("terpd is already installed at " + bcolors.OKGREEN + f"{binary_path}" + bcolors.ENDC)
             while True:
-                choice = input("Do you want to skip the download or overwrite the binary? (skip/overwrite): ").strip().lower()
+                choice = safe_input("Do you want to skip the download or overwrite the binary? (skip/overwrite): ").strip().lower()
                 if choice == "skip":
                     print("Skipping download.")
                     return
@@ -662,7 +1308,7 @@ def download_binary(network):
                     break
                 else:
                     print("Invalid input. Please enter 'skip' or 'overwrite'.")
-        except FileNotFoundError:
+        except (subprocess.CalledProcessError, FileNotFoundError):
             print("terpd is not installed. Proceeding with download.")
 
     operating_system = platform.system().lower()
@@ -670,7 +1316,7 @@ def download_binary(network):
 
     if architecture == "x86_64":
         architecture = "amd64"
-    elif architecture == "aarch64":
+    elif architecture in ("aarch64", "arm64"):
         architecture = "arm64"
 
     if architecture not in ["arm64", "amd64"]:
@@ -678,44 +1324,125 @@ def download_binary(network):
         sys.exit(1)
 
     if network == NetworkChoice.TESTNET:
-        binary_urls = TESTNET.binary_url
+        chain = "120u-1"
+        version = TESTNET_VERSION
     else:
-        binary_urls = MAINNET.binary_url
-
-    if operating_system in binary_urls and architecture in binary_urls[operating_system]:
-        binary_url = binary_urls[operating_system][architecture]
-    else:
-        print(f"Binary download URL not available for {operating_system}/{architecture}")
-        sys.exit(0)
-
+        chain = "morocco-1"
+        version = MAINNET_VERSION
     try:
-        print("Downloading " + bcolors.PURPLE + "terpd" + bcolors.ENDC, end="\n\n")
-        print("from " + bcolors.OKGREEN + f"{binary_url}" + bcolors.ENDC, end=" ")
-        print("to " + bcolors.OKGREEN + f"{binary_path}" + bcolors.ENDC)
-        print()
-        print(bcolors.OKGREEN + "💡 You can change the path using --binary_path" + bcolors.ENDC)
+        with urlrq.urlopen(f"{CHANNEL_BASE}/{chain}", timeout=10) as resp:
+            ch = resp.read().decode().strip().lstrip("v")
+            if ch:
+                version = ch
+    except Exception:
+        pass
+    base = f"{RELEASES_S3_BASE}/v{version}"
+    binary_urls = {
+        "linux": {
+            "amd64": f"{base}/terpd-{version}-linux-amd64.tar.gz",
+            "arm64": f"{base}/terpd-{version}-linux-arm64.tar.gz",
+        },
+        "darwin": {
+            "amd64": None,
+            "arm64": f"{base}/terpd-{version}-darwin-arm64.tar.gz",
+        },
+    }
 
-        subprocess.run(["wget", binary_url, "-q", "-O", "/tmp/terpd"], check=True)
-        os.chmod("/tmp/terpd", 0o755)
+    binary_url = None
+    if operating_system in binary_urls:
+        binary_url = binary_urls[operating_system].get(architecture)
 
-        if platform.system() == "Linux":
-            subprocess.run(["sudo", "mv", "/tmp/terpd", binary_path], check=True)
-            subprocess.run(["sudo", "chown", f"{os.environ['USER']}:{os.environ['USER']}", binary_path], check=True)
-            subprocess.run(["sudo", "chmod", "+x", binary_path], check=True)
+    if binary_url:
+        try:
+            print("Downloading " + bcolors.PURPLE + "terpd" + bcolors.ENDC + f" v{version}", end="\n\n")
+            print("from " + bcolors.OKGREEN + f"{binary_url}" + bcolors.ENDC, end=" ")
+            print("to " + bcolors.OKGREEN + f"{binary_path}" + bcolors.ENDC)
+            print()
+            print(bcolors.OKGREEN + "💡 You can change the path using --binary_path" + bcolors.ENDC)
+
+            tmp = "/tmp/terpd-download"
+            subprocess.run(["wget", binary_url, "-q", "-O", tmp], check=True)
+
+            extracted = "/tmp/terpd"
+            if binary_url.endswith(".tar.gz") or binary_url.endswith(".tgz"):
+                tmpdir = tempfile.mkdtemp(prefix="terpd-ext-")
+                subprocess.run(["tar", "-xzf", tmp, "-C", tmpdir], check=True)
+                found = None
+                for root, _, files in os.walk(tmpdir):
+                    for name in files:
+                        if name == "terpd" or name.startswith("terpd-linux-") or name.startswith("terpd-darwin-"):
+                            found = os.path.join(root, name)
+                            break
+                    if found:
+                        break
+                if not found:
+                    raise RuntimeError("tarball did not contain terpd")
+                extracted = found
+            else:
+                extracted = tmp
+
+            os.chmod(extracted, 0o755)
+            dest_dir = os.path.dirname(binary_path)
+            os.makedirs(dest_dir, exist_ok=True)
+            if platform.system() == "Linux" and not os.access(dest_dir, os.W_OK):
+                subprocess.run(["sudo", "mv", extracted, binary_path], check=True)
+                subprocess.run(["sudo", "chown", f"{os.environ['USER']}:{os.environ['USER']}", binary_path], check=True)
+                subprocess.run(["sudo", "chmod", "+x", binary_path], check=True)
+            else:
+                import shutil
+                shutil.move(extracted, binary_path)
+                os.chmod(binary_path, 0o755)
+
+            subprocess.run([binary_path, "version"], check=True)
+            persist_terpd_path(binary_path)
+            print("Binary downloaded successfully.")
+            clear_screen()
+            return
+        except Exception as e:
+            print(f"Download failed ({e}). Falling back to build from source.")
+
+    if operating_system == "darwin" or binary_url is None:
+        try:
+            subprocess.run(["go", "version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print(bcolors.RED + "Error: Go is required to build terpd from source." + bcolors.ENDC)
+            print("Install Go from https://go.dev/dl/ or: brew install go")
+            sys.exit(1)
+
+        print("Building " + bcolors.PURPLE + "terpd" + bcolors.ENDC + f" v{version} from source (this may take a few minutes)...")
+        clones = [
+            os.path.expanduser("~/abstract/terp-core"),
+            os.path.expanduser("~/terp-core"),
+        ]
+        src = next((p for p in clones if os.path.isdir(os.path.join(p, "cmd", "terpd"))), None)
+        if src and operating_system == "darwin":
+            subprocess.run(["make", "build-darwin-arm64"], cwd=src, check=True)
+            built = os.path.join(src, "build", "terpd-darwin-arm64")
+            import shutil
+            shutil.copy2(built, binary_path)
+            os.chmod(binary_path, 0o755)
         else:
-            subprocess.run(["mv", "/tmp/terpd", binary_path], check=True)
+            subprocess.run(
+                ["go", "install", f"github.com/terpnetwork/terp-core/v6/cmd/terpd@v{version}"],
+                check=True,
+            )
+            go_bin = os.path.join(
+                subprocess.run(["go", "env", "GOPATH"], capture_output=True, text=True, check=True).stdout.strip(),
+                "bin", "terpd"
+            )
+            if os.path.isfile(go_bin) and go_bin != binary_path:
+                import shutil
+                shutil.copy2(go_bin, binary_path)
+                os.chmod(binary_path, 0o755)
 
-        # Test binary
-        subprocess.run(["terpd", "version"], check=True)
+        subprocess.run([binary_path, "version"], check=True)
+        persist_terpd_path(binary_path)
+        print("Binary built and installed successfully.")
+        clear_screen()
+        return
 
-        print("Binary downloaded successfully.")
-
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Failed to download the binary.")
-        sys.exit(1)
-
-    clear_screen()
+    print(f"Binary download URL not available for {operating_system}/{architecture}")
+    sys.exit(1)
 
 def download_genesis(network, terp_home):
     """
@@ -809,7 +1536,7 @@ Do you want me to install it?
     2) No, continue without installing lz4
         """ + bcolors.ENDC)
 
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -853,58 +1580,86 @@ Do you want me to install it?
         """
         snapshot_info = []
 
+        def catalog_urls(chain_id, kind):
+            net = "testnet" if chain_id == "120u-1" else "mainnet"
+            base = f"https://minio.terp.network/snapshots/{net}/{chain_id}"
+            if kind == "pruned":
+                return [f"{base}/pruned/snapshot.json", f"{base}/snapshot.json"]
+            return [f"{base}/snapshot_light.json", f"{base}/pruned/snapshot.json"]
+
+        def latest_from_catalog(urls):
+            for u in urls:
+                try:
+                    req = urlrq.Request(u, headers={"User-Agent": "terp-installer"})
+                    with urlrq.urlopen(req, context=ssl.create_default_context()) as resp:
+                        body = json.loads(resp.read().decode())
+                    latest = body.get("latest") or body.get("url")
+                    if not latest and body.get("snapshots"):
+                        latest = body["snapshots"][0]
+                    if latest:
+                        return latest, u
+                except Exception:
+                    continue
+            return None, None
+
+        if args.snapshot_class in ("pruned", "2"):
+            kind = "pruned"
+        elif args.snapshot_class in ("light", "lightweight"):
+            kind = "light"
+        else:
+            print(bcolors.OKGREEN + """
+Snapshot class (private nodes cannot state-sync):
+
+    1) lightweight — small recent state (snapshot_light.json, then pruned/)
+    2) pruned      — pruned pack from minio.terp.network
+
+💡 You can select this using --snapshot-class light|pruned.
+""" + bcolors.ENDC)
+            kind_choice = safe_input("Enter your choice [1]: ").strip() or "1"
+            kind = "pruned" if kind_choice == "2" else "light"
+
         if network == NetworkChoice.TESTNET:
             snapshot_url = TESTNET.snapshot_url
             chain_id = TESTNET.chain_id
-            quicksync_prefix = "90u-4"
         elif network == NetworkChoice.MAINNET:
             snapshot_url = MAINNET.snapshot_url
             chain_id = MAINNET.chain_id
-            quicksync_prefix = "morocco-1"
         else:
             print(f"Invalid network choice - {network}")
             sys.exit(1)
 
-        # Set SSL context
+        latest, src = latest_from_catalog(catalog_urls(chain_id, kind))
+        if latest:
+            snapshot_info.append({
+                "network": chain_id,
+                "mirror": "minio.terp.network",
+                "url": latest,
+                "type": kind,
+                "provider": "terp",
+            })
+            print(f"Resolved {kind} snapshot from {src}")
+        else:
+            print(bcolors.RED + f"No {kind} snapshot catalog at minio.terp.network; trying legacy pointer." + bcolors.ENDC)
+
         context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-
-        req = urlrq.Request(snapshot_url, headers={'User-Agent': 'Mozilla/5.0'})
-        resp = urlrq.urlopen(req, context=context)
-        latest_snapshot_url = resp.read().decode()
-
-        snapshot_info.append({
-            "network": chain_id,
-            "mirror": "Germany",
-            "url": latest_snapshot_url.rstrip('\n'),
-            "type": "pruned",
-            "provider": "terp"
-        })
-
-        # Parse quicksync snapshot json
         try:
-            url = "https://dl2.quicksync.io/json/osmosis.json"
-            resp = urlrq.urlopen(url, context=context)
-            data = resp.read().decode()
-
-            snapshots = json.loads(data)
-
-            for snapshot in snapshots:
-
-                if not snapshot["file"].startswith(quicksync_prefix):
-                    continue
-
+            req = urlrq.Request(snapshot_url, headers={'User-Agent': 'Mozilla/5.0'})
+            resp = urlrq.urlopen(req, context=context, timeout=20)
+            latest_snapshot_url = resp.read().decode().strip()
+            if latest_snapshot_url and latest_snapshot_url not in [s["url"] for s in snapshot_info]:
                 snapshot_info.append({
                     "network": chain_id,
-                    "mirror": snapshot["mirror"],
-                    "url": snapshot["url"],
-                    "type": snapshot["network"],
-                    "provider": "chainlayer"
+                    "mirror": "legacy",
+                    "url": latest_snapshot_url,
+                    "type": kind,
+                    "provider": "terp",
                 })
+        except Exception as e:
+            print(f"Legacy snapshot pointer skipped: {e}")
 
-        except (urlrq.URLError, json.JSONDecodeError) as e:
-            print(f"Error: Failed to fetch or parse snapshot JSON - {e}")
+        if not snapshot_info:
+            print(bcolors.RED + "No snapshot URLs resolved. Check minio.terp.network catalogs." + bcolors.ENDC)
+            sys.exit(1)
 
         return snapshot_info
 
@@ -940,20 +1695,30 @@ Choose one of the following snapshots:
     install_snapshot_prerequisites()
     snapshots = parse_snapshot_info(network)
 
-    while True:
+    if len(snapshots) == 1:
+        choice = "1"
+        print(f"Using {snapshots[0]['type']} snapshot from {snapshots[0]['provider']} ({snapshots[0]['mirror']})")
+    else:
+        while True:
+            print_snapshot_download_info(snapshots)
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip() or "1"
 
-        print_snapshot_download_info(snapshots)
-        choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            if choice.lower() == "exit":
+                print("Exiting the program...")
+                sys.exit(0)
 
-        if choice.lower() == "exit":
-            print("Exiting the program...")
-            sys.exit(0)
+            try:
+                idx = int(choice)
+            except ValueError:
+                clear_screen()
+                print(bcolors.RED + "Invalid input. Please choose a valid option." + bcolors.ENDC)
+                continue
 
-        if int(choice) < 0 or int(choice) > len(snapshots):
-            clear_screen()
-            print(bcolors.RED + "Invalid input. Please choose a valid option." + bcolors.ENDC)
-        else:
-            break
+            if idx < 1 or idx > len(snapshots):
+                clear_screen()
+                print(bcolors.RED + "Invalid input. Please choose a valid option." + bcolors.ENDC)
+            else:
+                break
 
     snapshot_url = snapshots[int(choice) - 1]['url']
 
@@ -993,7 +1758,7 @@ Do you want to install cosmovisor?
 """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -1014,7 +1779,7 @@ Do you want to install cosmovisor?
 
     if architecture == "x86_64":
         architecture = "amd64"
-    elif architecture == "aarch64":
+    elif architecture in ("aarch64", "arm64"):
         architecture = "arm64"
 
     if architecture not in ["arm64", "amd64"]:
@@ -1028,7 +1793,7 @@ Do you want to install cosmovisor?
         sys.exit(0)
 
     try:
-        binary_path = os.path.join(args.binary_path, "cosmovisor")
+        binary_path = os.path.expanduser(os.path.join(args.binary_path, "cosmovisor"))
 
         print("Downloading " + bcolors.PURPLE+ "cosmovisor" + bcolors.ENDC, end="\n\n")
         print("from " + bcolors.OKGREEN + f"{binary_url}" + bcolors.ENDC, end=" ")
@@ -1101,7 +1866,7 @@ Do you want to setup cosmovisor as a background service?
 """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -1170,7 +1935,7 @@ Do you want to set up terpd as a background service?
 """ + bcolors.ENDC)
 
         while True:
-            choice = input("Enter your choice, or 'exit' to quit: ").strip()
+            choice = safe_input("Enter your choice, or 'exit' to quit: ").strip()
 
             if choice.lower() == "exit":
                 print("Exiting the program...")
@@ -1221,15 +1986,26 @@ def main():
 
     if chosen_install == InstallChoice.NODE:
         network = select_network()
+        private = select_p2p_mode()
+        sync_mode = select_sync_mode(private)
         download_binary(network)
         terp_home = select_terp_home()
         moniker = select_moniker()
         initialize_terp_home(terp_home, moniker)
         using_cosmovisor = download_cosmovisor(terp_home)
         download_genesis(network, terp_home)
-        download_addrbook(network, terp_home)
+        if network == NetworkChoice.TESTNET:
+            download_addrbook(network, terp_home)
+        else:
+            load_mainnet_bootstrap()
+            apply_persistent_peers(terp_home, MAINNET_PEERS)
         select_pruning(terp_home)
-        download_snapshot(network, terp_home)
+        if private:
+            apply_private_mode(terp_home)
+        if sync_mode == "statesync":
+            configure_statesync(network, terp_home)
+        else:
+            download_snapshot(network, terp_home)
         if using_cosmovisor:
             using_service = setup_cosmovisor_service(terp_home)
         else:

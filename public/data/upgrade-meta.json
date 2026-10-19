@@ -1,0 +1,24 @@
+{
+  "updated": "2026-10-17",
+  "note": "Site-only metadata. versions.json (chain-registry schema) has no date field. Dates are the block time at the upgrade height from api.terp.network; where that block is pruned, the passed proposal voting_end_time is shown instead (basis vote-end).",
+  "live": { "plan": "v6.4", "tag": "v6.4.0", "source": "applied_plan v6.4 = 23893263 and node_info application_version 6.4.0 (api.terp.network, 2026-10-17)" },
+  "dates": {
+    "2847602":  { "date": "2023-10-10", "basis": "vote-end", "source": "proposal 24 voting_end_time" },
+    "3039061":  { "date": "2023-10-21", "basis": "vote-end", "source": "proposal 25 voting_end_time" },
+    "3341663":  { "date": "2023-11-09", "basis": "vote-end", "source": "proposal 27 voting_end_time" },
+    "3698609":  { "date": "2023-12-03", "basis": "vote-end", "source": "proposal 30 voting_end_time" },
+    "14170662": { "date": "2025-09-26", "basis": "vote-end", "source": "proposal 50 voting_end_time" },
+    "21725359": { "date": "2026-07-18", "basis": "block", "source": "block 21725359 time 18:20:58Z" },
+    "22810000": { "date": "2026-08-29", "basis": "block", "source": "block 22810000 time 07:19:48Z" },
+    "23191300": { "date": "2026-09-13", "basis": "block", "source": "block 23191300 time 14:55:17Z" },
+    "23191302": { "date": "2026-09-13", "basis": "block", "source": "block 23191302 time 16:29:24Z" },
+    "23893261": { "date": "2026-10-16", "basis": "block", "source": "block 23893261 time 07:00:37Z" },
+    "23893263": { "date": "2026-10-16", "basis": "block", "source": "block 23893263 time 20:08:04Z" }
+  },
+  "binaries": {
+    "v6.3": {
+      "note": "The on-chain plan names 6.3.0. Use 6.3.1: 6.3.0 exits on nodes that ran v6.1.",
+      "linux/amd64": { "url": "https://s3.terp.network/releases/terp-core/v6.3.1/terpd-6.3.1-linux-amd64.tar.gz", "sha256": "884c7656d13cde3c9fe15b19e403bd93cd556a2af87e719ae762b5df89684d4f" }
+    }
+  }
+}

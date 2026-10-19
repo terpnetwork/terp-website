@@ -19,13 +19,35 @@ set -euo pipefail
 
 # ── Configuration (user‑overridable via env vars) ────────────────────────
 # Keep in sync with get/terp-installer.py and s3.terp.network/releases/terp-core/vX.Y.Z
-# morocco-1 (mainnet) stays on the rolling patch until the v6.1 halt.
-# 120u-1 (testnet) is the dual-upgrade line (v6.2.0 includes v6.1).
-MAINNET_VERSION="${MAINNET_VERSION:-6.0.1}"
-TESTNET_VERSION="${TESTNET_VERSION:-6.2.0}"
+# Mainnet default = last recommended_version in terp-core versions.json, read at
+# fetch time (VERSIONS_JSON_URL). Override with --version x.y.z or TERPD_VERSION.
+# Testnet still follows releases/terp-core/channels/<chain-id>.
+VERSIONS_JSON_URL="${VERSIONS_JSON_URL:-https://terp.network/public/data/versions.json}"
+VERSIONS_JSON_FALLBACK="${VERSIONS_JSON_FALLBACK:-https://raw.githubusercontent.com/terpnetwork/terp-core/main/networks/chain-registry/terpnetwork/versions.json}"
+MAINNET_VERSION="${MAINNET_VERSION:-6.4.0}"   # offline fallback only
+TESTNET_VERSION="${TESTNET_VERSION:-6.2.1}"
 RELEASES_BASE="${RELEASES_BASE:-https://s3.terp.network/releases/terp-core}"
 S3_BASE="${S3_BASE:-https://s3.terp.network/snapshots}"
+CHANNEL_BASE="${CHANNEL_BASE:-${RELEASES_BASE}/channels}"
 BINARY_DEST="${TERPD_BIN:-$HOME/go/bin/terpd}"
+# Live P2P + light-client RPC pin (Akash sentries are NodePorts, not :26656).
+MAINNET_BOOTSTRAP_JSON="${MAINNET_BOOTSTRAP_JSON:-https://s3.terp.network/snapshots/mainnet/morocco-1/bootstrap.json}"
+TESTNET_BOOTSTRAP_JSON="${TESTNET_BOOTSTRAP_JSON:-https://s3.terp.network/snapshots/testnet/120u-1/bootstrap.json}"
+DEFAULT_MAINNET_PEERS="079328a5209e58dbb7658202bd0e00f8c50e07d0@provider.akash-palmito.org:30873,8392513d34207c9cec15d5d6a45fc1bd41691bf4@provider.h6i-dedicated.eu-se-1.digitalfrontier.so:30147,58e01ab84eb931a82a024324520021d2e075ec67@185.248.24.16:29656,b04c5acab1c821b95f26662d8ebb7ccd4a39e97f@144.76.97.251:34656,5ba3e8458f584edfe5434186af74f846190d5475@213.133.100.93:16056,a16e78921e03a9953178038c2c39d1f31252655c@135.181.60.157:26716"
+
+# ── --version override (consumed here, not passed to terpd bootstrap) ──
+_n=$#
+while [ "$_n" -gt 0 ]; do
+    _a="$1"; shift; _n=$((_n - 1))
+    case "$_a" in
+        --version)
+            if [ "$_n" -lt 1 ]; then echo "Error: --version needs a value (e.g. --version v6.4.0)" >&2; exit 1; fi
+            TERPD_VERSION="$1"; shift; _n=$((_n - 1)) ;;
+        --version=*) TERPD_VERSION="${_a#--version=}" ;;
+        *) set -- "$@" "$_a" ;;
+    esac
+done
+if [ -n "${TERPD_VERSION:-}" ]; then TERPD_VERSION="${TERPD_VERSION#v}"; _ver_src="override"; fi
 
 # ── TTY helpers (work with curl | bash pipes) ──────────────────────────
 # stdin_available returns 0 if user interaction is possible.
@@ -51,21 +73,275 @@ prompt() {
     eval "$__var=\$__val"
 }
 
-# confirm "Prompt" [default] — returns 0 if yes, 1 if no.
+# confirm "Prompt" [default Y|N] — hint is y/N (default no) or Y/n (default yes).
 confirm() {
     local __prompt=$1 __default=${2:-N}
-    local __yn
+    local __hint __yn
+    case "$__default" in
+        [yY]*) __hint="Y/n" ;;
+        *)     __hint="y/N" ;;
+    esac
     if [ -t 0 ]; then
-        printf "%s [%s/%s] " "$__prompt" "$(echo "$__default" | tr 'YN' 'yn')" "$(echo "$__default" | tr 'YN' 'YN')"
+        printf "%s [%s] " "$__prompt" "$__hint"
         read -r __yn
     elif [ -e /dev/tty ]; then
-        printf "%s [%s/%s] " "$__prompt" "$(echo "$__default" | tr 'YN' 'yn')" "$(echo "$__default" | tr 'YN' 'YN')" > /dev/tty
+        printf "%s [%s] " "$__prompt" "$__hint" > /dev/tty
         read -r __yn < /dev/tty
     else
         __yn="$__default"
     fi
     [ -z "$__yn" ] && __yn="$__default"
     case "$__yn" in [yY]|[yY][eE][sS]) return 0;; *) return 1;; esac
+}
+
+# terpd does not expand ~. Interactive "~/.terpd-testing" must become $HOME/...
+expand_node_home() {
+    _p="$1"
+    [ -n "$_p" ] || { printf '%s\n' "${HOME}/.terpd"; return 0; }
+    # Do not use case '~/'*) or ${_p#~/}: sh expands ~ in those patterns.
+    _lead="$(printf '%s' "$_p" | cut -c1-2)"
+    if [ "$_p" = "~" ]; then
+        _p="$HOME"
+    elif [ "$_lead" = "~/" ]; then
+        _p="${HOME}/$(printf '%s' "$_p" | cut -c3-)"
+    fi
+    _abslead="$(printf '%s' "$_p" | cut -c1)"
+    if [ "$_abslead" != "/" ]; then
+        _p="${PWD}/${_p}"
+    fi
+    mkdir -p "$_p"
+    (cd "$_p" && pwd)
+}
+
+cmd_get_home() {
+    _rest="$1"
+    _h=""
+    while [ -n "$_rest" ]; do
+        _tok="${_rest%% *}"
+        _rest="${_rest#"$_tok"}"
+        _rest="${_rest# }"
+        case "$_tok" in
+            --home)
+                _h="${_rest%% *}"
+                break
+                ;;
+            --home=*) _h="${_tok#--home=}"; break ;;
+        esac
+    done
+    if [ -z "$_h" ]; then
+        printf '%s\n' "${HOME}/.terpd"
+    else
+        expand_node_home "$_h"
+    fi
+}
+
+cmd_set_home() {
+    _in="$1"
+    _abs="$2"
+    _out=""
+    _seen=0
+    _rest="$_in"
+    while [ -n "$_rest" ]; do
+        _tok="${_rest%% *}"
+        _rest="${_rest#"$_tok"}"
+        _rest="${_rest# }"
+        case "$_tok" in
+            --home)
+                _skip="${_rest%% *}"
+                _rest="${_rest#"$_skip"}"
+                _rest="${_rest# }"
+                _out="${_out} --home ${_abs}"
+                _seen=1
+                ;;
+            --home=*)
+                _out="${_out} --home=${_abs}"
+                _seen=1
+                ;;
+            *) _out="${_out} ${_tok}" ;;
+        esac
+    done
+    [ "$_seen" = 1 ] || _out="${_out} --home ${_abs}"
+    printf '%s' "$_out" | sed 's/^ //'
+}
+
+ensure_priv_validator_state() {
+    _h="$1"
+    mkdir -p "${_h}/data"
+    if [ ! -f "${_h}/data/priv_validator_state.json" ]; then
+        printf '%s\n' '{"height":"0","round":0,"step":0}' > "${_h}/data/priv_validator_state.json"
+        echo "  wrote ${_h}/data/priv_validator_state.json"
+    fi
+}
+
+# Discover id@ip:port from the public RPC. Never use ListenAddr 0.0.0.0/10.x
+# or a hardcoded provider hostname — those rotate with the lease.
+# Order: GET /p2p (nginx advertise JSON), then /status if listen_addr is routable.
+fetch_rpc_persistent_peer() {
+    _rpc="${1:-https://rpc.terp.network:443}"
+    command -v python3 >/dev/null 2>&1 || { echo "python3 required to discover P2P from RPC" >&2; return 1; }
+    python3 - "$_rpc" <<'PY'
+import ipaddress, json, socket, ssl, sys, urllib.error, urllib.request
+
+rpc = sys.argv[1].rstrip("/")
+ctx = ssl.create_default_context()
+hdr = {"User-Agent": "terp-installer", "Accept": "application/json"}
+
+def get(url, timeout=15):
+    req = urllib.request.Request(url, headers=hdr)
+    with urllib.request.urlopen(req, context=ctx, timeout=timeout) as r:
+        return r.read()
+
+def routable(host):
+    host = (host or "").strip().strip("[]")
+    if not host or host.lower() in ("0.0.0.0", "::", "localhost", "*"):
+        return False
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror:
+        return False
+    for info in infos:
+        ip = info[4][0]
+        try:
+            addr = ipaddress.ip_address(ip)
+        except ValueError:
+            continue
+        if addr.is_unspecified or addr.is_loopback or addr.is_link_local or addr.is_multicast or addr.is_private:
+            return False
+        return True
+    return False
+
+def parse_hostport(raw):
+    s = str(raw).strip()
+    if "@" in s:
+        s = s.split("@", 1)[1]
+    s = s.replace("tcp://", "").replace("udp://", "")
+    if s.startswith("["):
+        br = s.find("]")
+        host, rest = s[1:br], s[br + 1:]
+        port = rest[1:] if rest.startswith(":") else "26656"
+        return host, port
+    if ":" in s:
+        return s.rsplit(":", 1)
+    return s, "26656"
+
+def public_ip(host, port):
+    if not routable(host):
+        return None
+    try:
+        ip = socket.getaddrinfo(host, int(port), socket.AF_INET, socket.SOCK_STREAM)[0][4][0]
+    except Exception:
+        ip = host
+    return ip if routable(ip) else None
+
+def peer_from_mapping(d, nid):
+    if not isinstance(d, dict):
+        return None
+    nid = d.get("id") or d.get("node_id") or nid
+    for key in ("peer", "p2p", "address", "listen_addr", "listenAddr", "external_address", "externalAddress"):
+        val = d.get(key)
+        if not val:
+            continue
+        if isinstance(val, str) and "@" in val:
+            nid = val.split("@", 1)[0] or nid
+        host, port = parse_hostport(val)
+        ip = public_ip(host, port)
+        if nid and ip:
+            return f"{nid}@{ip}:{port}"
+    return None
+
+nid, listen = "", ""
+try:
+    st = json.loads(get(rpc + "/status"))
+    ni = (st.get("result") or st).get("node_info") or {}
+    nid = ni.get("id") or ni.get("default_node_id") or ""
+    listen = ni.get("listen_addr") or ""
+except Exception as e:
+    print(f"status failed: {e}", file=sys.stderr)
+    sys.exit(1)
+
+# Dedicated advertise document on the product RPC (not /net_info — that stays 403).
+for path in ("/p2p", "/p2p.json"):
+    try:
+        raw = get(rpc + path)
+        body = json.loads(raw)
+        if isinstance(body, dict) and "result" in body:
+            body = body["result"]
+        peer = peer_from_mapping(body, nid)
+        if peer:
+            print(peer)
+            sys.exit(0)
+    except Exception:
+        pass
+
+host, port = parse_hostport(listen)
+ip = public_ip(host, port)
+if nid and ip:
+    print(f"{nid}@{ip}:{port}")
+    sys.exit(0)
+
+print(
+    "public RPC did not advertise a routable P2P address "
+    f"(id={nid or '?'} listen_addr={listen or 'missing'}; GET {rpc}/p2p expected JSON "
+    '{"id","listen_addr"} with a public IP:port). /net_info is intentionally closed.',
+    file=sys.stderr,
+)
+sys.exit(1)
+PY
+}
+
+# terpd bootstrap --public is required to allow statesync; then we lock P2P.
+lock_p2p_toml() {
+    _home="$1"
+    _peer="$2"
+    _pex="$3"
+    python3 - "$_home/config/config.toml" "$_peer" "$_pex" <<'PY'
+import sys
+path, peer, pex = sys.argv[1], sys.argv[2], sys.argv[3]
+text = open(path).read()
+lines = text.splitlines(True)
+out, sec = [], ""
+for line in lines:
+    if line.startswith("[") and line.strip().endswith("]"):
+        sec = line.strip()
+    stripped = line.lstrip()
+    key = stripped.split("=", 1)[0].strip() if "=" in stripped else ""
+    if sec == "[p2p]" and key == "persistent_peers":
+        line = f'persistent_peers = "{peer}"\n'
+    elif sec == "[p2p]" and key == "seeds":
+        line = 'seeds = ""\n'
+    elif sec == "[p2p]" and key == "pex":
+        line = f'pex = {pex}\n'
+    elif sec == "[p2p]" and key == "max_num_inbound_peers":
+        line = "max_num_inbound_peers = 0\n" if pex == "false" else line
+    elif sec == "[p2p]" and key == "unconditional_peer_ids":
+        nid = peer.split("@", 1)[0]
+        line = f'unconditional_peer_ids = "{nid}"\n'
+    out.append(line)
+open(path, "w").write("".join(out))
+print(f"P2P locked persistent_peers={peer} pex={pex}")
+PY
+}
+
+patch_statesync_toml() {
+    _home="$1"
+    python3 - "$_home/config/config.toml" <<'PY'
+import sys
+path = sys.argv[1]
+lines = open(path).read().splitlines(True)
+out, sec = [], ""
+for line in lines:
+    if line.startswith("[") and line.strip().endswith("]"):
+        sec = line.strip()
+    stripped = line.lstrip()
+    key = stripped.split("=", 1)[0].strip() if "=" in stripped else ""
+    if sec == "[statesync]" and key == "chunk_request_timeout":
+        line = 'chunk_request_timeout = "60s"\n'
+    elif sec == "[statesync]" and key == "discovery_time":
+        line = 'discovery_time = "30s"\n'
+    out.append(line)
+open(path, "w").write("".join(out))
+print("statesync chunk_request_timeout=60s discovery_time=30s")
+PY
 }
 
 # ── Animated TERP intro (grok-remote hole → figlet) ────────────────────
@@ -218,7 +494,59 @@ case "$NETWORK" in
     morocco-1) S3_NET="mainnet";  _default_ver="$MAINNET_VERSION" ;;
     *)         S3_NET="mainnet";  _default_ver="$MAINNET_VERSION" ;;
 esac
+# Mainnet: latest recommended_version from versions.json.
+if [ -z "${TERPD_VERSION:-}" ] && [ "$NETWORK" = "morocco-1" ]; then
+    _vj="$(curl -fsSL "$VERSIONS_JSON_URL" 2>/dev/null || curl -fsSL "$VERSIONS_JSON_FALLBACK" 2>/dev/null || true)"
+    _vr="$(printf '%s' "$_vj" | grep -o '"recommended_version"[[:space:]]*:[[:space:]]*"[^"]*"' | tail -n 1 | sed 's/.*"\([^"]*\)"$/\1/' | tr -d 'v' || true)"
+    if [ -n "$_vr" ]; then
+        _default_ver="$_vr"
+        _ver_src="versions.json"
+    fi
+fi
+# Testnet (or versions.json unreachable): channel file pin, then script default.
+if [ -z "${TERPD_VERSION:-}" ] && [ -z "${_ver_src:-}" ]; then
+    _ch="$(curl -fsSL "${CHANNEL_BASE}/${NETWORK}" 2>/dev/null || true)"
+    _ch="$(printf '%s' "$_ch" | tr -d 'v \t\r\n')"
+    if [ -n "$_ch" ]; then
+        _default_ver="$_ch"
+    fi
+fi
 TERPD_VERSION="${TERPD_VERSION:-$_default_ver}"
+echo "Resolved terpd version: v${TERPD_VERSION} (source: ${_ver_src:-channel/default})"
+
+load_bootstrap_pin() {
+    _json_url="$1"
+    BOOTSTRAP_PEERS="${BOOTSTRAP_PEERS:-}"
+    BOOTSTRAP_RPCS="${BOOTSTRAP_RPCS:-}"
+    BOOTSTRAP_TRUST_OFFSET="${BOOTSTRAP_TRUST_OFFSET:-200}"
+    _raw="$(curl -fsSL "$_json_url" 2>/dev/null || true)"
+    if [ -n "$_raw" ] && command -v python3 >/dev/null 2>&1; then
+        _parsed="$(printf '%s' "$_raw" | python3 -c 'import json,sys
+d=json.load(sys.stdin)
+peers=",".join(d.get("peers") or [])
+rpcs=",".join(d.get("rpc") or [])
+off=d.get("trust_offset") or 2000
+print(peers)
+print(rpcs)
+print(off)
+' 2>/dev/null || true)"
+        if [ -n "$_parsed" ]; then
+            BOOTSTRAP_PEERS="$(printf '%s' "$_parsed" | sed -n '1p')"
+            BOOTSTRAP_RPCS="$(printf '%s' "$_parsed" | sed -n '2p')"
+            BOOTSTRAP_TRUST_OFFSET="$(printf '%s' "$_parsed" | sed -n '3p')"
+        fi
+    fi
+    [ -n "$BOOTSTRAP_PEERS" ] || BOOTSTRAP_PEERS="$DEFAULT_MAINNET_PEERS"
+    [ -n "$BOOTSTRAP_RPCS" ] || true
+}
+
+if [ "$NETWORK" = "120u-1" ]; then
+    load_bootstrap_pin "$TESTNET_BOOTSTRAP_JSON"
+    [ -n "$BOOTSTRAP_RPCS" ] || BOOTSTRAP_RPCS="https://testnet-rpc.terp.network:443,https://testnet-rpc.terp.network:443"
+else
+    load_bootstrap_pin "$MAINNET_BOOTSTRAP_JSON"
+    [ -n "$BOOTSTRAP_RPCS" ] || BOOTSTRAP_RPCS="https://rpc.terp.network:443,https://rpc.terp.network:443"
+fi
 
 DOWNLOAD_URL_TGZ="${RELEASES_BASE}/v${TERPD_VERSION}/terpd-${TERPD_VERSION}-${OS}-${ARCH}.tar.gz"
 DOWNLOAD_URL="${RELEASES_BASE}/v${TERPD_VERSION}/${BINARY_NAME}"
@@ -453,9 +781,46 @@ echo ""
 # ── Bootstrap phase ─────────────────────────────────────────────────────
 # Build bootstrap flags.  If the user already passed explicit flags, use
 # those verbatim.  If no flags and we have a terminal, run the wizard.
+STATESYNC_LOCK_PEER=""
+STATESYNC_LOCK_PEX="false"
 if [ $# -gt 0 ]; then
-    # Explicit flags from command line — pass them through
-    BOOTSTRAP_CMD="$BINARY_DEST bootstrap $*"
+    # Explicit flags from command line — keep them, pin RPC/P2P unless already set.
+    EXTRA=""
+    case " $* " in
+        *" --statesync-rpcs "*) ;;
+        *) EXTRA="$EXTRA --statesync-rpcs $BOOTSTRAP_RPCS" ;;
+    esac
+    case " $* " in
+    *" --sync-mode statesync "*)
+        RPC_PEER="$(fetch_rpc_persistent_peer "${BOOTSTRAP_RPCS%%,*}")"
+        case " $* " in
+            *" --bootstrap-peers "*) ;;
+            *) EXTRA="$EXTRA --bootstrap-peers $RPC_PEER" ;;
+        esac
+        case " $* " in
+            *" --setup-only "*) ;;
+            *) EXTRA="$EXTRA --setup-only" ;;
+        esac
+        case " $* " in
+            *" --public "*) ;;
+            *) EXTRA="$EXTRA --public" ;;
+        esac
+        STATESYNC_LOCK_PEER="$RPC_PEER"
+        STATESYNC_LOCK_PEX="false"
+        case " $* " in *" --public "*) STATESYNC_LOCK_PEX="true" ;; esac
+        ;;
+    *)
+        case " $* " in
+            *" --bootstrap-peers "*) ;;
+            *) EXTRA="$EXTRA --bootstrap-peers $BOOTSTRAP_PEERS --bootstrap-seeds $BOOTSTRAP_PEERS" ;;
+        esac
+        ;;
+    esac
+    case " $* " in
+        *" --trust-offset "*) ;;
+        *) EXTRA="$EXTRA --trust-offset $BOOTSTRAP_TRUST_OFFSET" ;;
+    esac
+    BOOTSTRAP_CMD="$BINARY_DEST bootstrap $* $EXTRA"
 elif stdin_available; then
     # ── Interactive Setup Wizard ──────────────────────────────────────
     echo "╔══════════════════════════════════════════════════════════╗"
@@ -469,9 +834,13 @@ elif stdin_available; then
     BOOTSTRAP_FLAGS="--network ${NETWORK}"
     echo ""
 
-    # 2. Custom home directory
-    prompt TERP_HOME "Home directory [~/.terpd]:" ""
-    [ -n "$TERP_HOME" ] && BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --home $TERP_HOME"
+    # 2. Custom home directory (~ is expanded; terpd will not do that)
+    prompt TERP_HOME "Home directory [${HOME}/.terpd]:" ""
+    if [ -n "$TERP_HOME" ]; then
+        TERP_HOME="$(expand_node_home "$TERP_HOME")"
+        BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --home $TERP_HOME"
+        echo "  -> ${TERP_HOME}"
+    fi
     echo ""
 
     # 3. Custom moniker
@@ -479,50 +848,50 @@ elif stdin_available; then
     [ -n "$MONIKER" ] && BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --moniker $MONIKER"
     echo ""
 
-    # 4. P2P mode (ask before sync — private cannot statesync)
+    # 4. P2P mode (private statesync is allowed: one persistent peer, PEX off)
     echo "2) P2P mode"
-    echo "   private — no PEX, no inbound peers (default). Cannot use state-sync."
-    echo "   public  — gossip and accept peers. State-sync allowed."
+    echo "   private — PEX off, no inbound. State-sync uses only rpc.terp.network as a peer."
+    echo "   public  — gossip and accept extra peers."
     PRIVATE_NODE=1
     if confirm "Public mode (enable PEX gossip and accept peers)?" "N"; then
-        BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --public"
         PRIVATE_NODE=0
         echo "  -> public"
     else
-        echo "  -> private (statesync prohibited)"
+        echo "  -> private"
     fi
     echo ""
 
     # 5. Sync mode
     echo "3) Sync Mode"
-    if [ "$PRIVATE_NODE" = "1" ]; then
-        echo "   Private node: state-sync is disabled (needs public P2P)."
-        echo "   Snapshot: lightweight (small recent state) or pruned (pruned pack)."
-        BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --sync-mode snapshot"
-        SYNC_CHOICE="2"
-        echo "  -> snapshot"
-    else
-        echo "   State-sync is fastest — downloads recent state only (public P2P)."
-        echo "   Snapshot restores a pack (lightweight or pruned)."
-        prompt SYNC_CHOICE "Sync mode [1=state-sync, 2=snapshot, Enter=1]:" "1"
-        case "$SYNC_CHOICE" in
-            2) BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --sync-mode snapshot"
-               echo "  -> snapshot" ;;
-            *) BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --sync-mode statesync"
-               echo "  -> state-sync" ;;
-        esac
-    fi
+    echo "   State-sync is fastest — recent state via rpc.terp.network (works private or public)."
+    echo "   Snapshot restores a pruned pack from s3.terp.network."
+    prompt SYNC_CHOICE "Sync mode [1=state-sync, 2=snapshot, Enter=1]:" "1"
+    case "$SYNC_CHOICE" in
+        2) BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --sync-mode snapshot"
+           echo "  -> snapshot" ;;
+        *) BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --sync-mode statesync"
+           echo "  -> state-sync" ;;
+    esac
     echo ""
 
     # 6. State-sync RPCs or snapshot class
     if [ "$SYNC_CHOICE" != "2" ]; then
-        if [ "$NETWORK" = "120u-1" ]; then
-            DEFAULT_RPCS="https://testnet-rpc.terp.network:443,https://testnet-rpc.terp.network:443"
-        else
-            DEFAULT_RPCS="https://rpc.terp.network:443,https://rpc.terp.network:443"
-        fi
+        DEFAULT_RPCS="$BOOTSTRAP_RPCS"
         prompt RPC_CHOICE "State-sync RPCs (comma-separated) [${DEFAULT_RPCS}]:" ""
-        [ -n "$RPC_CHOICE" ] && BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --statesync-rpcs $RPC_CHOICE"
+        [ -z "$RPC_CHOICE" ] && RPC_CHOICE="$DEFAULT_RPCS"
+        RPC_PEER="$(fetch_rpc_persistent_peer "${RPC_CHOICE%%,*}")" || {
+            echo "Could not discover a public P2P address from ${RPC_CHOICE%%,*} (need GET /p2p JSON)." >&2
+            exit 1
+        }
+        echo "  persistent peer: ${RPC_PEER}"
+        BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --statesync-rpcs $RPC_CHOICE"
+        BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --bootstrap-peers $RPC_PEER"
+        BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --trust-offset ${BOOTSTRAP_TRUST_OFFSET}"
+        # Binary refuses private+statesync; --public is only the gate, then we lock P2P.
+        BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --public --setup-only"
+        STATESYNC_LOCK_PEER="$RPC_PEER"
+        STATESYNC_LOCK_PEX="false"
+        [ "$PRIVATE_NODE" = "0" ] && STATESYNC_LOCK_PEX="true"
     else
         echo "   Snapshot class"
         echo "   1) lightweight — small recent state (snapshot_light / pruned class)"
@@ -543,9 +912,9 @@ elif stdin_available; then
             _netpath="mainnet/${NETWORK}"
             [ "$NETWORK" = "120u-1" ] && _netpath="testnet/120u-1"
             if [ "$SNAP_KIND" = "pruned" ]; then
-                _cat="https://minio.terp.network/snapshots/${_netpath}/pruned/snapshot.json"
+                _cat="${S3_BASE}/${_netpath}/pruned/snapshot.json"
             else
-                _cat="https://minio.terp.network/snapshots/${_netpath}/snapshot_light.json"
+                _cat="${S3_BASE}/${_netpath}/pruned/snapshot.json"
             fi
             _resolved=""
             if command -v python3 >/dev/null 2>&1; then
@@ -593,10 +962,15 @@ print(u or "")' 2>/dev/null || true)"
     fi
     echo ""
 
+    # Snapshot path still needs live P2P to catch the tip after restore.
+    case "$BOOTSTRAP_FLAGS" in
+        *--bootstrap-peers*) ;;
+        *) BOOTSTRAP_FLAGS="$BOOTSTRAP_FLAGS --bootstrap-peers $BOOTSTRAP_PEERS --bootstrap-seeds $BOOTSTRAP_PEERS" ;;
+    esac
     BOOTSTRAP_CMD="$BINARY_DEST bootstrap $BOOTSTRAP_FLAGS"
 else
-    # Non-interactive with no flags — use defaults for mainnet
-    BOOTSTRAP_CMD="$BINARY_DEST bootstrap --network ${NETWORK}"
+    # Non-interactive: pin house RPC + Akash P2P (never chaintools / :26656 sentries).
+    BOOTSTRAP_CMD="$BINARY_DEST bootstrap --network ${NETWORK} --sync-mode snapshot --snapshot-class pruned --statesync-rpcs ${BOOTSTRAP_RPCS} --bootstrap-peers ${BOOTSTRAP_PEERS} --bootstrap-seeds ${BOOTSTRAP_PEERS} --trust-offset ${BOOTSTRAP_TRUST_OFFSET}"
 fi
 
 # ── Run bootstrap ───────────────────────────────────────────────────────
@@ -607,5 +981,119 @@ echo "╚═══════════════════════�
 echo ""
 echo "Executing bootstrap..."
 
+# Statesync/snapshot cannot load leftover IAVL. A July ~/.terpd at store
+# 21465807 has no hashmerchant (added at v6 halt 22810000) and terpd start
+# exits: "version of store hashmerchant mismatch root store's version".
+bootstrap_home="$(cmd_get_home "$BOOTSTRAP_CMD")"
+BOOTSTRAP_CMD="$(cmd_set_home "$BOOTSTRAP_CMD" "$bootstrap_home")"
+echo "  Node home: ${bootstrap_home}"
+if [ -d "$bootstrap_home/data/application.db" ] || [ -d "$bootstrap_home/data/data/application.db" ]; then
+    echo "Existing chain data at ${bootstrap_home}/data is from an older store or a nested snapshot extract."
+    echo "Keeping config/ and keyring; removing data/, wasm/, ibc_08-wasm/ so statesync or a pruned pack can load."
+    rm -rf "$bootstrap_home/data" "$bootstrap_home/wasm" "$bootstrap_home/ibc_08-wasm"
+    # Comet requires this file; terpd init is skipped when config/ already exists.
+    ensure_priv_validator_state "$bootstrap_home"
+fi
+ensure_priv_validator_state "$bootstrap_home"
+# Flatten a nested extract (terpd bootstrap unpacks into home/data, but house
+# packs are tar -C home of data/ + wasm/, so application.db lands at data/data/).
+flatten_nested_snapshot() {
+    _h="$1"
+    if [ -d "$_h/data/data/application.db" ]; then
+        echo "Flattening nested snapshot under ${_h}/data/data -> ${_h}/data"
+        _tmp="$(mktemp -d "${TMPDIR:-/tmp}/terp-snap.XXXXXX")"
+        mv "$_h/data/data" "$_tmp/data"
+        if [ -d "$_h/data/wasm" ]; then
+            mv "$_h/data/wasm" "$_tmp/wasm"
+        fi
+        rm -rf "$_h/data"
+        mv "$_tmp/data" "$_h/data"
+        if [ -d "$_tmp/wasm" ]; then
+            rm -rf "$_h/wasm"
+            mv "$_tmp/wasm" "$_h/wasm"
+        fi
+        rmdir "$_tmp" 2>/dev/null || true
+    fi
+}
+
+# House packs extract with -C <home>. terpd bootstrap HTTP path uses -C <home>/data.
+# Pre-extract here and drop --snapshot-url so bootstrap will not nest the tree.
+case " $BOOTSTRAP_CMD " in
+    *" --sync-mode snapshot "*|*" --snapshot-url "*|*" --snapshot-class "*)
+        _snap_url=""
+        _scan="$BOOTSTRAP_CMD"
+        while [ -n "$_scan" ]; do
+            _tok="${_scan%% *}"
+            _scan="${_scan#"$_tok"}"
+            _scan="${_scan# }"
+            case "$_tok" in
+                --snapshot-url)
+                    _snap_url="${_scan%% *}"
+                    _scan="${_scan#"$_snap_url"}"
+                    _scan="${_scan# }"
+                    ;;
+                --snapshot-url=*) _snap_url="${_tok#--snapshot-url=}" ;;
+            esac
+        done
+        if [ -z "$_snap_url" ]; then
+            _netpath="mainnet/${NETWORK}"
+            [ "$NETWORK" = "120u-1" ] && _netpath="testnet/120u-1"
+            _cat="${S3_BASE}/${_netpath}/pruned/snapshot.json"
+            if command -v python3 >/dev/null 2>&1; then
+                _snap_url="$(curl -fsSL "$_cat" 2>/dev/null | python3 -c 'import json,sys
+d=json.load(sys.stdin)
+u=d.get("latest") or d.get("url") or ((d.get("snapshots") or [None])[0])
+print(u or "")' 2>/dev/null || true)"
+            fi
+        fi
+        if [ -n "$_snap_url" ]; then
+            echo "Extracting snapshot into ${bootstrap_home} (data/ + wasm/ at home, not home/data/data/)"
+            echo "  $_snap_url"
+            mkdir -p "$bootstrap_home"
+            if command -v lz4 >/dev/null 2>&1; then
+                curl -fSL "$_snap_url" | lz4 -dc | tar xf - -C "$bootstrap_home"
+            else
+                echo "Error: lz4 is required to unpack .tar.lz4 snapshots" >&2
+                exit 1
+            fi
+            flatten_nested_snapshot "$bootstrap_home"
+            if [ ! -d "$bootstrap_home/data/application.db" ]; then
+                echo "Error: snapshot extract did not produce ${bootstrap_home}/data/application.db" >&2
+                exit 1
+            fi
+            echo "  application.db present; wasm=$( [ -d "$bootstrap_home/wasm" ] && echo yes || echo missing )"
+            # Drop URL so terpd bootstrap does not extract again into home/data.
+            _new=""
+            _scan="$BOOTSTRAP_CMD"
+            while [ -n "$_scan" ]; do
+                _tok="${_scan%% *}"
+                _scan="${_scan#"$_tok"}"
+                _scan="${_scan# }"
+                case "$_tok" in
+                    --snapshot-url|--snapshot-class)
+                        _skip="${_scan%% *}"
+                        _scan="${_scan#"$_skip"}"
+                        _scan="${_scan# }"
+                        ;;
+                    --snapshot-url=*|--snapshot-class=*) ;;
+                    *) _new="${_new} ${_tok}" ;;
+                esac
+            done
+            BOOTSTRAP_CMD="$(printf '%s' "$_new" | sed 's/^ //')"
+        fi
+        ;;
+esac
+flatten_nested_snapshot "$bootstrap_home"
+
 # shellcheck disable=SC2086
 $BOOTSTRAP_CMD
+_bs_rc=$?
+[ "$_bs_rc" -eq 0 ] || exit "$_bs_rc"
+
+if [ -n "${STATESYNC_LOCK_PEER:-}" ]; then
+    lock_p2p_toml "$bootstrap_home" "$STATESYNC_LOCK_PEER" "$STATESYNC_LOCK_PEX"
+    patch_statesync_toml "$bootstrap_home"
+    ensure_priv_validator_state "$bootstrap_home"
+    echo "Starting node at ${bootstrap_home} ..."
+    exec "$BINARY_DEST" start --home "$bootstrap_home"
+fi

@@ -1,14 +1,27 @@
 {
-  "updated": "2026-10-05",
+  "updated": "2026-10-17",
   "source": "https://s3.terp.network/releases/terp-core/",
   "entries": [
     {
+      "version": "v6.3.1",
+      "parent": "v6.3",
+      "tags": [
+        "rolling-coordination"
+      ],
+      "title": "terpd 6.3.1 (replaces 6.3.0 at the v6.3 halt)",
+      "summary": "morocco-1 halted at 23893261 for plan v6.3. The published 6.3.0 ELF exits while opening the store on nodes that ran v6.1 (orphan b3-* trees). 6.3.1 is the same upgrade with that open fixed; no new proposal. Place it in cosmovisor/upgrades/v6.3/bin/terpd, keep 6.4.0 in upgrades/v6.4, and keep DAEMON_ALLOW_DOWNLOAD_BINARIES=false. v6.4 stays armed at 23893263.",
+      "operator": ""
+    },
+    {
       "version": "v6.2.1",
-      "tags": ["rolling-coordination"],
+      "tags": [
+        "rolling-coordination"
+      ],
       "title": "terpd 6.2.1",
       "summary": "Same-home binary replacement for nodes already on 6.2.0. Not a governance software-upgrade plan; Cosmovisor will not download it. Every signing node switches in the same step so the set stays consistent when a contract transaction runs.",
       "operator": "https://s3.terp.network/releases/terp-core/v6.2.1/OPERATOR.html",
-      "completed": true
+      "completed": true,
+      "parent": "v6.2"
     }
   ]
 }
