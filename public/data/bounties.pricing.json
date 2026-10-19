@@ -1,0 +1,241 @@
+{
+  "schema": "terp-bounty-pricing/v1",
+  "params_version": "2026-10-18.2-draft",
+  "status": "DRAFT, proposed, pending vote. Baseline inputs come from the governance-ratified page (Prop 61). Every value under `placeholders` (including budget_cap) is a PLACEHOLDER chosen by the Bounties Coordinator bot; none has been voted on. Amounts are proposals pending a vote and must not be paid.",
+  "formula": {
+    "reward_tokens": "reward[asset] = base_rate[asset](h) x base_work_units x tier_multiplier[tier] x priority_multiplier[priority]",
+    "base_rate": "base_rate[asset](h) = 1 / baseline_price[asset](h): tokens per work unit, where one work unit is the value the baseline assigns to one verified block ($1 at the reference point)",
+    "baseline_price": "baseline_price[asset](h) = V(h) / supply[asset](h), rounded to 5 decimal places (the page's rounding)",
+    "network_value": "V(h) = (h - missed_blocks) x verified_block_value + missed_blocks x missed_block_value",
+    "micro_amount": "amount[denom] = floor(reward[asset] x 10^exponent)",
+    "stipend": "stipend[asset] per month = base_rate[asset](h) x stipend_work_units_per_month[band]",
+    "h": "the listing height. The amount is fixed when the bounty is listed and recorded together with h and params_version. See placeholders.recompute_rule."
+  },
+  "baseline": {
+    "source": {
+      "url": "https://s3.terp.network/static/gov/baseline-valuation/baseline.html",
+      "local_copy": "catalog/baseline-2026-10-18.html",
+      "sha256": "fa02d2d49b315a53d7fef02001b872651c5e5446643d6372c7438147f06a2bd9",
+      "fetched": "2026-10-18T07:47:17Z",
+      "http_last_modified": "Wed, 07 Oct 2026 23:38:10 GMT",
+      "ratified_by": {
+        "proposal_id": 61,
+        "title": "text proposal: yesterday's price isnt todays price",
+        "status": "PROPOSAL_STATUS_PASSED",
+        "submit_time": "2026-10-08T04:58:58Z",
+        "voting_end_time": "2026-10-15T01:55:33Z",
+        "final_tally": {
+          "yes": "4897668746120",
+          "no": "0",
+          "abstain": "0",
+          "no_with_veto": "0"
+        },
+        "evidence": "catalog/pricing-snapshot/prop-61.json (from https://api.terp.network/cosmos/gov/v1/proposals, fetched 2026-10-18)",
+        "note": "Prop 61 ratifies the page as 'the working baseline for coordinating negotiations for the initial coordination of funds' and the 'non-negotiable starting point for initial token pricing discussions, bootstrapping negotiations with external parties, and internal treasury valuation'. It says 'a floor for those talks, not a market price'. Using it to price bounty payouts is an application this file proposes; see placeholders.apply_baseline_to_bounties."
+      }
+    },
+    "values": {
+      "verified_block_value_usd": {
+        "value": 1,
+        "cite": "baseline page, section 'Method': 'A verified block counts $1 (1,318 sats at the reference time).'"
+      },
+      "missed_block_value_usd": {
+        "value": 0.67,
+        "cite": "baseline page, section 'Method': 'The 6,641,532 missed blocks ... count $0.67 each: a one-third penalty.'"
+      },
+      "missed_blocks": {
+        "value": 6641532,
+        "cite": "baseline page, sections 'Method' and 'Reference point' ('16,596,620 verified, 6,641,532 missed')"
+      },
+      "network_value_formula": {
+        "value": "V(h) = (h - 6,641,532) x $1 + 6,641,532 x $0.67",
+        "cite": "baseline page, section 'Method' (code block)"
+      },
+      "token_baseline_formula": {
+        "value": "TERP = V(h) / TERP supply at h; THIOL = V(h) / THIOL supply at h",
+        "cite": "baseline page, section 'Method'"
+      },
+      "baseline_rises_per_block": {
+        "value": true,
+        "cite": "baseline page, section 'Method': 'The baseline rises with every new block: yesterday's prices are not today's prices.'"
+      },
+      "price_rounding_decimals": {
+        "value": 5,
+        "cite": "baseline page, section 'Initial baseline': 'Values are rounded to five decimal places.'"
+      },
+      "reference_point": {
+        "value": {
+          "chain_id": "morocco-1",
+          "height": 23238152,
+          "time": "2026-09-15T15:06:14Z",
+          "app_hash": "4827CA4AE8FFA676C2D0E0C4A9DC7ABB90AE783C432EB0F87C4B6B709B06308D",
+          "btc_usd": 75869.26,
+          "sats_per_usd": 1318
+        },
+        "cite": "baseline page, section 'Reference point'"
+      },
+      "initial_baseline": {
+        "value": {
+          "network_value_usd": 21046446.44,
+          "TERP_usd": 0.05012,
+          "THIOL_usd": 0.0236,
+          "TERP_sats": 66.1,
+          "THIOL_sats": 31.1,
+          "TERP_supply": 419894441.995,
+          "THIOL_supply": 891626585.813,
+          "supply_date": "2026-09-29"
+        },
+        "cite": "baseline page, section 'Initial baseline' and the summary table ('Initial \u00b7 15 Sep 2026')"
+      },
+      "live_input_sources": {
+        "value": {
+          "height": "api.terp.network latest block / rpc.terp.network/status",
+          "supply": "api.terp.network/cosmos/bank/v1beta1/supply"
+        },
+        "cite": "baseline page, section 'Sources'"
+      }
+    }
+  },
+  "assets": {
+    "TERP": {
+      "denom": "uterp",
+      "exponent": 6,
+      "cite": "denom from on-chain bank supply (catalog/pricing-snapshot/supply-uterp-23908167.json). The chain has no denom metadata for uterp (denoms_metadata returns code 5), so exponent 6 is derived: the page's TERP supply 419,894,441.995 matches the on-chain uterp supply / 10^6 at that scale."
+    },
+    "THIOL": {
+      "denom": "uthiol",
+      "exponent": 6,
+      "cite": "as for TERP, from supply-uthiol-23908167.json; the page's THIOL supply 891,626,585.813 matches uthiol / 10^6."
+    }
+  },
+  "snapshot": {
+    "note": "Inputs for the indicative amounts printed in the catalog. Fetched from api.terp.network on 2026-10-18 with x-cosmos-block-height pinned to the same height. At listing, recompute at the listing height.",
+    "chain_id": "morocco-1",
+    "height": 23908167,
+    "block_time": "2026-10-18T07:47:51Z",
+    "supply_micro": {
+      "uterp": "419893354696000",
+      "uthiol": "892998780596945"
+    },
+    "evidence": [
+      "catalog/pricing-snapshot/block-23908167.json",
+      "catalog/pricing-snapshot/supply-uterp-23908167.json",
+      "catalog/pricing-snapshot/supply-uthiol-23908167.json"
+    ]
+  },
+  "placeholders": {
+    "_label": "PLACEHOLDER: not voted. Each needs a governance (or DAO) decision before any amount is paid.",
+    "apply_baseline_to_bounties": {
+      "value": true,
+      "placeholder": true,
+      "needs_vote": "Adopt the Prop 61 baseline (one work unit = one verified-block value) as the conversion for bounty payouts in TERP and THIOL. Prop 61's stated scope is pricing discussions, negotiations and treasury valuation; it does not name bounty payouts."
+    },
+    "base_work_units": {
+      "value": 100,
+      "placeholder": true,
+      "needs_vote": "Size of one T1 unit (work units = $1-equivalent verified blocks at the baseline)."
+    },
+    "tier_multiplier": {
+      "value": {
+        "T1": 1,
+        "T2": 3,
+        "T3": 10,
+        "T4": 30,
+        "T5": 90
+      },
+      "placeholder": true,
+      "needs_vote": "Per-tier multipliers. Chosen so that base x multiplier (100 / 300 / 1,000 / 3,000 / 9,000 work units) sits inside the catalog v1 draft USD bands. Those bands were never voted either."
+    },
+    "priority_multiplier": {
+      "value": {
+        "P0": 1.5,
+        "P1": 1.2,
+        "P2": 1.0,
+        "P3": 1.0
+      },
+      "placeholder": true,
+      "needs_vote": "Urgency multipliers, carried over from the catalog v1 draft (P0 x1.5 while the incident is open, P1 x1.2 inside the window)."
+    },
+    "stipend_work_units_per_month": {
+      "value": {
+        "R1": 100,
+        "R2": 300,
+        "R3": 750
+      },
+      "placeholder": true,
+      "needs_vote": "Monthly stipend sizes. Set inside the catalog v1 draft R1-R3 bands."
+    },
+    "stipend_holdback_pct": {
+      "value": 10,
+      "placeholder": true,
+      "needs_vote": "Holdback released at the 12-month report (from the relayer plan draft)."
+    },
+    "multiplier_cap": {
+      "value": 1.5,
+      "placeholder": true,
+      "needs_vote": "Combined multipliers (priority, partner match, upstream bonus) never exceed this factor of the tier amount."
+    },
+    "upstream_bonus": {
+      "value": 0.1,
+      "placeholder": true,
+      "needs_vote": "+10% when merged upstream or accepted by a partner."
+    },
+    "partner_match_max_ratio": {
+      "value": 1.0,
+      "placeholder": true,
+      "needs_vote": "Terp may match partner co-funding up to 1:1."
+    },
+    "retro_max_fraction": {
+      "value": 1.0,
+      "placeholder": true,
+      "needs_vote": "Retroactive awards up to 100% of the computed amount."
+    },
+    "asset_policy": {
+      "value": "per-bounty choice of TERP or THIOL at listing; the catalog prints both",
+      "placeholder": true,
+      "needs_vote": "Which asset pays which bounty, or a fixed TERP/THIOL split, and from which treasury (community pool vs Foundation DAO)."
+    },
+    "recompute_rule": {
+      "value": "fix at listing height h; re-list (new h) if the baseline price moves more than 20% or the bounty is unclaimed for 7 days",
+      "placeholder": true,
+      "needs_vote": "When to recompute amounts as the baseline rises. The 20%/7-day rule is the bounty-amounts.md draft rule, not voted."
+    },
+    "severity_scaling": {
+      "value": "TB-SEC-001 tier set by confirmed severity (T2..T5)",
+      "placeholder": true,
+      "needs_vote": "Severity-to-tier map for the standing bug bounty."
+    },
+    "budget_cap": {
+      "value": {
+        "scope_horizon": "Now",
+        "yearly_budget_fraction_of_supply": 0.005,
+        "yearly_budget_asset": "THIOL",
+        "share_for_scope": 0.25,
+        "apply_scale_to": "all",
+        "scale_decimals": 6
+      },
+      "placeholder": true,
+      "label": "PLACEHOLDER (not voted): Now-set cap = 25% of a yearly budget of 0.5% of THIOL supply",
+      "rule": [
+        "yearly_budget_THIOL(h) = yearly_budget_fraction_of_supply x THIOL supply at h (0.5%; basis: priority-ranking-v2.md 'Bounty budget' row, which resizes econ-dex-proxy-analysis.md's '~0.5% of the treasury' to THIOL supply)",
+        "cap_THIOL(h) = share_for_scope x yearly_budget_THIOL(h)  (25% of that yearly budget for the Now set)",
+        "cap_work_units(h) = cap_THIOL(h) x baseline_price[THIOL](h)  (1 work unit = $1 of baseline value, so the cap is the same value whichever asset pays)",
+        "raw_Now_work_units = sum over Now items of base_work_units x tier_multiplier x priority_multiplier (one-off amounts; stipends are counted separately)",
+        "budget_scale k = min(1, floor_6dp(cap_work_units / raw_Now_work_units))",
+        "every item's work units (and stipend work units) are multiplied by k before conversion to tokens (apply_scale_to = all, so a T3 in Next is not worth more than a T3 in Now); micro amounts are floored",
+        "invariant checked at build: sum of Now THIOL amounts <= cap_THIOL and sum of Now TERP amounts <= cap_work_units / baseline_price[TERP]"
+      ],
+      "needs_vote": "Total bounty budget and the Now-set share (TB-GOV-001). No envelope has been voted; 0.5% of supply and the 25% share are placeholders.",
+      "basis_refs": [
+        "/workspace/terp/collabs-research/priority-ranking-v2.md (Bounty budget row: 0.005 x THIOL supply)",
+        "/workspace/terp/collabs/econ-dex-proxy-analysis.md \u00a74.8 item 4 ('~0.5% of the treasury')"
+      ]
+    }
+  },
+  "implementation_choices": {
+    "_label": "Technical, not policy. No vote needed, but listed so they can be reviewed.",
+    "amount_rounding": "floor to whole micro-denom; display with 2 decimals of the whole token",
+    "price_used": "the 5-decimal rounded baseline price (as the page publishes it)"
+  },
+  "label": "proposed, pending vote"
+}
