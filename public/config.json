@@ -56,6 +56,22 @@
         "indexer": "",
         "merkleServer": "http://127.0.0.1:29090",
         "whitelistTreeId": ""
+      },
+      "bounties": {
+        "_comment": "chain1: on-chain bounty board (DAO pre-propose module) + one escrow per task (instantiate2). Empty contract = not deployed on this network: /bounties shows the bundled catalog as a draft preview. See design/specs/bounties-onchain-2026-10-19.md.",
+        "contract": "",
+        "dao": "",
+        "proposalModule": "",
+        "prePropose": "",
+        "cidGateway": [
+          "https://s3.terp.network/static/bounties/cid/",
+          "https://ipfs.terp.network/ipfs/"
+        ],
+        "codeIds": {
+          "board": null,
+          "escrow": null
+        },
+        "escrowChecksum": ""
       }
     },
     "morocco-1": {
@@ -115,9 +131,9 @@
       },
       "explorer": "https://ping.pub/terp",
       "gasPriceStep": {
-        "average": 0.025,
-        "high": 0.04,
-        "low": 0.01
+        "average": 0.0625,
+        "high": 0.075,
+        "low": 0.05
       },
       "grpc": "https://grpc.terp.network",
       "rest": "https://api.terp.network",
@@ -133,6 +149,22 @@
         "s3Base": "https://s3.terp.network/snapshots/mainnet/morocco-1",
         "snapshotsManifest": "/public/snapshots.json",
         "onboard": "https://hash.terp.network"
+      },
+      "bounties": {
+        "_comment": "chain1: on-chain bounty board (DAO pre-propose module) + one escrow per task (instantiate2). Empty contract = not deployed on this network: /bounties shows the bundled catalog as a draft preview. See design/specs/bounties-onchain-2026-10-19.md.",
+        "contract": "",
+        "dao": "",
+        "proposalModule": "",
+        "prePropose": "",
+        "cidGateway": [
+          "https://s3.terp.network/static/bounties/cid/",
+          "https://ipfs.terp.network/ipfs/"
+        ],
+        "codeIds": {
+          "board": null,
+          "escrow": null
+        },
+        "escrowChecksum": ""
       }
     }
   },
