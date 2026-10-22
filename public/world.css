@@ -17,6 +17,11 @@
   --tnw-left: clamp(300px, 38vw, 560px); /* keep in sync with leftW() in world.js */
   --tnw-ease: cubic-bezier(.2, .7, .2, 1);
   --tnw-tint: 152, 232, 193;            /* rgb triplet, current section colour */
+  /* hover / focus for whole-target highlights (tabs, catalog cards): one language */
+  --tnw-hover-wash: rgba(var(--tnw-tint), .07);
+  --tnw-hover-ring: rgba(var(--tnw-tint), .45);
+  --tnw-focus-ring: rgb(var(--tnw-tint));
+  --tnw-hover-dur: 140ms;
   --tn-chrome-h: 56px;                  /* measured by lib/fab.js */
   --tnw-halo: 0 0 10px rgb(var(--tn-canvas-rgb) / .9), 0 0 2px rgb(var(--tn-canvas-rgb) / .85); /* soft text shadow, no box */
   /* the canvas background (a radial wash; world.js keeps these in step) */
@@ -133,6 +138,10 @@ html[data-tn-world="panel"] body > main { overflow-x: clip; }
 html[data-tn-xfade] body > main > *, html[data-tn-xfade] body > .container { transition: opacity 180ms linear; }
 html[data-tn-xfade="out"] body > main > *, html[data-tn-xfade="out"] body > .container { opacity: 0; pointer-events: none; }
 html[data-tn-xfade="in"] body > main > *, html[data-tn-xfade="in"] body > .container { transition-duration: 280ms; }
+/* Dissolve (moves that are not a direct parent/child zoom): calmer, eased, matched to the shield layer's fade in world.js. */
+html[data-tn-dissolve][data-tn-xfade] body > main > *, html[data-tn-dissolve][data-tn-xfade] body > .container { transition: opacity 280ms cubic-bezier(.45, 0, .55, 1); }
+html[data-tn-dissolve][data-tn-xfade="in"] body > main > *, html[data-tn-dissolve][data-tn-xfade="in"] body > .container { transition-duration: 340ms; }
+html[data-tn-dissolve] #tn-world { transform-origin: 50% 50%; will-change: opacity, transform; }
 
 /* Page titles and their details buttons hold their place under the banner; text
    scrolled beneath them fades into the canvas background. */
@@ -145,8 +154,8 @@ html[data-tn-world="panel"][data-tn-stuck] [data-tn-head]::before { opacity: 1; 
 /* Details, guides, documentation and collection dialogs open in the page's own
    column (never over the navigation), as type on the background with a thin
    rule in the section colour. The page underneath steps back while one is open. */
-html[data-tn-world="panel"] :is(.res-info-overlay, #modal-docs, .modal, dialog.info-modal) { animation: none !important; transition: none !important; }
-html[data-tn-world="panel"] :is(.res-info-overlay, #modal-docs, .modal) { position: fixed !important; inset: auto !important; top: calc(var(--tn-chrome-h) + 4px) !important; left: var(--tnw-left) !important; right: 0 !important; bottom: 0 !important;
+html[data-tn-world="panel"] :is(.res-info-overlay:not(.is-inline), #modal-docs, .modal, dialog.info-modal) { animation: none !important; transition: none !important; }
+html[data-tn-world="panel"] :is(.res-info-overlay:not(.is-inline), #modal-docs, .modal) { position: fixed !important; inset: auto !important; top: calc(var(--tn-chrome-h) + 4px) !important; left: var(--tnw-left) !important; right: 0 !important; bottom: 0 !important;
   align-items: flex-start !important; justify-content: flex-start !important; padding: 8px 40px 40px 32px !important; overflow-y: auto; overscroll-behavior: contain; background: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-sizing: border-box; z-index: 200; }
 html[data-tn-world="panel"] [data-tn-behind] { visibility: hidden !important; }
 html[data-tn-world="panel"] :is(.modal-backdrop, .res-info-overlay > .tnw-none) { background: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
@@ -164,7 +173,7 @@ html[data-tn-world="panel"] dialog.info-modal::backdrop { background: none; }
 html[data-tn-world="panel"] .md-guide .snap-code { margin-left: 0; }
 /* the page steps back while a dialog is open */
 html[data-tn-world="panel"] body > main > *, html[data-tn-world="panel"] body > .container { transition: opacity 160ms linear; }
-html[data-tn-world="panel"][data-tn-sheet] body > main > :not(.modal):not(#modal-docs):not(.res-info-overlay):not(dialog) { opacity: 0 !important; pointer-events: none; }
+html[data-tn-world="panel"][data-tn-sheet] body > main > :not(.modal):not(#modal-docs):not(.res-info-overlay:not(.is-inline)):not(dialog) { opacity: 0 !important; pointer-events: none; }
 
 /* Home: the mark fills the view, the landing copy sits bottom-left. */
 html[data-tn-world="home"] body { display: block; padding: 0; min-height: 100svh; }
@@ -212,7 +221,18 @@ html[data-tn-world="home"] .install-section > .install-close:focus-visible { out
 /* Catalog and resources: selection is made from the navigation; the page mirrors it. */
 html[data-tn-world] .eco-card.is-selected { box-shadow: none !important; }
 html[data-tn-world] .eco-card.is-selected :is(h3, .eco-card-title, .eco-title) { color: rgb(var(--tnw-tint)); }
-html[data-tn-world] .eco-card.is-selected { border-left: 1px solid rgba(var(--tnw-tint), .6) !important; }
+html[data-tn-world] .eco-card:is(.is-selected, .is-open, .is-active, [aria-current], [aria-selected="true"], [aria-pressed="true"]) { border-left: 0 !important; border-left-width: 0 !important; }
+/* Hover covers the whole target, not a side rule. A transient wash + ring on a
+   pseudo-element that bleeds past the text column, so the page keeps "no surfaces"
+   at rest and layout never shifts. Keyboard focus gets the same shape, stronger ring. */
+html[data-tn-world="panel"] .eco-card { isolation: isolate; }
+html[data-tn-world="panel"] .eco-card::before { content: ""; position: absolute; z-index: -1; inset: -8px -12px; border-radius: var(--tn-radius-ctl, 2px); pointer-events: none;
+  background: transparent; box-shadow: inset 0 0 0 1px transparent; transition: background-color var(--tnw-hover-dur) linear, box-shadow var(--tnw-hover-dur) linear; }
+html[data-tn-world="panel"] .eco-card.is-clickable:hover::before { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-hover-ring); }
+/* Pressed, selected, open and active states: the same full-object shape as hover (never a side rule). */
+html[data-tn-world="panel"] .eco-card:is(.is-selected, .is-open, .is-active, [aria-current], [aria-selected="true"], [aria-pressed="true"], :active, :focus-within)::before { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-hover-ring); }
+html[data-tn-world="panel"] .eco-card.is-clickable:has(.eco-open:focus-visible)::before { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-focus-ring); }
+@media (prefers-reduced-motion: reduce) { html[data-tn-world="panel"] .eco-card::before { transition: none; } }
 html[data-tn-world="panel"] #res-subtabs { display: none; }
 html[data-tn-world="panel"] .res-layout { grid-template-columns: minmax(0, 1fr); }
 
@@ -246,7 +266,7 @@ html[data-tn-world="panel"] main :is(h1, h2, h3, h4, p, li, dt, dd, td, th, labe
   html[data-tn-world="panel"] body > main { padding-top: 16px; min-height: calc(66vh - 16px); background: none; }
   .tnw-crumbs { display: none; }
   /* dialogs sit in the page flow under the navigation (world.js sets their top) */
-  html[data-tn-world="panel"] :is(.res-info-overlay, #modal-docs, .modal) { position: absolute !important; left: 0 !important; right: 0 !important; bottom: auto !important; padding: 0 16px 40px !important; overflow: visible; }
+  html[data-tn-world="panel"] :is(.res-info-overlay:not(.is-inline), #modal-docs, .modal) { position: absolute !important; left: 0 !important; right: 0 !important; bottom: auto !important; padding: 0 16px 40px !important; overflow: visible; }
   html[data-tn-world="panel"] dialog.info-modal { position: absolute; left: 16px; right: 16px; max-height: none !important; overflow: visible !important; }
 }
 @media (max-width: 599px) {
@@ -292,6 +312,9 @@ html:is([data-theme="light"], [data-theme="sandman"]) .shield-orb:hover .shield-
 .shield-orb:hover .shield-label { color: var(--tnw-ink, var(--tn-text)); }
 .shield-orb[aria-selected="true"] .shield-label { color: var(--tnw-strong, var(--tn-text-bright)); font-weight: 600; }
 .shield-orb:focus { outline: none; }
+.shield-orb { border-left: 0; }
+.shield-orb:not(.bx3-node, .bx3-back):is(:hover, :active, .is-active, .is-selected, [aria-selected="true"], [aria-pressed="true"]) { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-hover-ring); }
+.shield-orb:not(.bx3-node, .bx3-back):focus-visible { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-focus-ring, var(--tnw-hover-ring)); }
 .shield-orb:focus-visible { outline: 1px solid var(--tnw-focus, var(--tn-teal)); outline-offset: 2px; }
 .shield-panel[hidden] { display: none; }
 .shield-panel.is-entering { animation: shield-in 220ms var(--tnw-ease, ease) both; }

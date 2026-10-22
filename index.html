@@ -901,7 +901,7 @@
                     <div class="install-wrapper">
                         <div class="install-input-wrapper">
                             <input type="text" class="install-box" id="install-command"
-                                value="curl -sL https://terp.network/install | python3" size="50" readonly=""
+                                value="curl -fsSL https://terp.network/get/terp-installer.sh | bash" size="50" readonly=""
                                 onclick="this.select()">
                         </div>
                         <button class="copy-button" onclick="copyToClipboard()">
@@ -1031,7 +1031,7 @@
     <script>
         // Install commands for different platforms
         const installCommands = {
-            shell: "curl -sL https://terp.network/install | python3",
+            shell: "curl -fsSL https://terp.network/get/terp-installer.sh | bash",
             python: "uvx --from terp-core terpd"
         };
 
@@ -1141,7 +1141,7 @@
 
                 // Try fetching from nginx endpoint first
                 try {
-                    const response = await fetch('/install');
+                    const response = await fetch('/get/terp-installer.sh');
                     if (response.ok) {
                         scriptContent = await response.text();
                     } else {
@@ -1150,7 +1150,7 @@
                 } catch (fetchError) {
                     // Fallback: try direct file path (for local development)
                     console.log('Trying fallback path...');
-                    const fallbackResponse = await fetch('install/terp-installer.py');
+                    const fallbackResponse = await fetch('get/terp-installer.sh');
                     if (!fallbackResponse.ok) {
                         throw new Error(`Failed to fetch installer script`);
                     }

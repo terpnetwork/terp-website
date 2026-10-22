@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="590" viewBox="0 0 720 590" role="img" aria-labelledby="fig-accounts-title fig-accounts-desc">
+  <title id="fig-accounts-title">Smart accounts and authenticators</title>
+  <desc id="fig-accounts-desc">A transaction selects one registered authenticator from a smart account. The account checks its authenticator set and reaches a decision with a live gas budget. Authenticators can be a signature verification key, a CosmWasmAuthenticatorV1 contract, or a message filter. AllOf requires every member to approve; AnyOf requires any one member. Leaves include a second device key and an Ethereum key.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg">
+    <defs>
+      <pattern id="fig-accounts-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="7" x2="7" y2="0" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      </pattern>
+      <pattern id="fig-accounts-stipple" width="7" height="7" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r=".7" fill="currentColor" opacity=".3"/>
+        <circle cx="5" cy="4.5" r=".5" fill="currentColor" opacity=".2"/>
+      </pattern>
+      <marker id="fig-accounts-arrow" markerWidth="7" markerHeight="7" refX="6.5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+        <path d="M0 0 L7 3.5 L0 7 Z" fill="currentColor" opacity=".5"/>
+      </marker>
+    </defs>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".42" stroke-width=".6">
+      <path d="M178 125 L286 130" marker-end="url(#fig-accounts-arrow)"/>
+      <path d="M454 125 L550 125" marker-end="url(#fig-accounts-arrow)"/>
+      <path d="M330 202 L230 267" stroke-opacity=".18"/>
+      <path d="M410 202 L530 267" stroke-opacity=".18"/>
+      <path d="M220 383 L95 413" marker-end="url(#fig-accounts-arrow)"/>
+      <path d="M230 383 L230 409" marker-end="url(#fig-accounts-arrow)"/>
+      <path d="M240 383 L365 415" marker-end="url(#fig-accounts-arrow)"/>
+      <path d="M540 383 L485 425" marker-end="url(#fig-accounts-arrow)"/>
+      <path d="M550 383 L600 425" marker-end="url(#fig-accounts-arrow)"/>
+      <path d="M651 170 L655 193" stroke-opacity=".22"/>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-tx" tabindex="0" role="button" aria-label="Transaction selects one authenticator">
+      <circle cx="120" cy="125" r="58" fill="url(#fig-accounts-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="120" cy="125" r="50" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="120" y="119" text-anchor="middle" font-size="16">Transaction</text>
+      <text x="120" y="136" text-anchor="middle" font-size="8.5" class="tf-mono tf-dim">one authenticator</text>
+      <text x="120" y="152" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">messages</text>
+      <text x="233" y="100" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">selects</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-account" tabindex="0" role="button" aria-label="Smart account holds its authenticator set">
+      <circle cx="370" cy="130" r="82" fill="url(#fig-accounts-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="370" cy="130" r="74" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <circle cx="370" cy="130" r="70" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width=".5" stroke-dasharray="1 4"/>
+      <circle cx="424" cy="170" r="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width=".6"/>
+      <circle cx="402" cy="184" r="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width=".6"/>
+      <circle cx="370" cy="190" r="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width=".6"/>
+      <circle cx="338" cy="184" r="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width=".6"/>
+      <circle cx="316" cy="170" r="6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width=".6"/>
+      <text x="370" y="118" text-anchor="middle" font-size="16">Account</text>
+      <text x="370" y="135" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">authenticator set</text>
+      <text x="370" y="151" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">funds · sequence</text>
+      <text x="370" y="252" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">registered authenticators</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-outcome" tabindex="0" role="button" aria-label="Decision with live gas budget">
+      <circle cx="610" cy="125" r="58" fill="url(#fig-accounts-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="610" cy="125" r="50" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="610" y="119" text-anchor="middle" font-size="16">Decision</text>
+      <text x="610" y="136" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">checks pass</text>
+      <text x="610" y="152" text-anchor="middle" font-size="8.5" class="tf-mono tf-dim">approve / reject</text>
+      <text x="502" y="100" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">checks</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-gas" tabindex="0" role="button" aria-label="Live gas budget">
+      <circle cx="655" cy="215" r="24" fill="url(#fig-accounts-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="655" cy="215" r="18" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="655" y="213" text-anchor="middle" font-size="10.5" class="tf-mono">gas</text>
+      <text x="655" y="225" text-anchor="middle" font-size="8.5" class="tf-mono tf-dim">budget</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-allof" tabindex="0" role="button" aria-label="AllOf requires every member">
+      <circle cx="220" cy="325" r="58" fill="url(#fig-accounts-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="220" cy="325" r="50" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="220" y="321" text-anchor="middle" font-size="16">AllOf</text>
+      <text x="220" y="337" text-anchor="middle" font-size="9" class="tf-mono tf-dim">all members pass</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-anyof" tabindex="0" role="button" aria-label="AnyOf requires any one member">
+      <circle cx="540" cy="325" r="58" fill="url(#fig-accounts-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="540" cy="325" r="50" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="540" y="321" text-anchor="middle" font-size="16">AnyOf</text>
+      <text x="540" y="337" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">any one passes</text>
+      <circle cx="485" cy="470" r="42" fill="url(#fig-accounts-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="485" cy="470" r="35" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="485" y="458" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">second</text>
+      <text x="485" y="475" text-anchor="middle" font-size="11.5">device key</text>
+      <circle cx="600" cy="470" r="42" fill="url(#fig-accounts-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="600" cy="470" r="35" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="600" y="458" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">Ethereum</text>
+      <text x="600" y="475" text-anchor="middle" font-size="11.5">key</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-sigverify" tabindex="0" role="button" aria-label="SignatureVerification public key">
+      <circle cx="95" cy="470" r="54" fill="url(#fig-accounts-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".8"/>
+      <circle cx="95" cy="470" r="46" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="95" y="446" text-anchor="middle" font-size="14">Signature</text>
+      <text x="95" y="462" text-anchor="middle" font-size="14">Verification</text>
+      <text x="95" y="478" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">public key</text>
+      <text x="95" y="492" text-anchor="middle" font-size="8.5" class="tf-mono tf-dim">e.g. 2nd device</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-contract" tabindex="0" role="button" aria-label="CosmwasmAuthenticatorV1 contract judges the transaction">
+      <circle cx="230" cy="470" r="58" fill="url(#fig-accounts-hatch)" stroke="currentColor" stroke-opacity=".55" stroke-width=".8"/>
+      <circle cx="230" cy="470" r="50" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="230" y="448" text-anchor="middle" font-size="16">CosmWasm</text>
+      <text x="230" y="464" text-anchor="middle" font-size="9" class="tf-mono tf-dim">authenticator V1</text>
+      <text x="230" y="479" text-anchor="middle" font-size="10" class="tf-mono tf-dim">contract judges</text>
+      <text x="230" y="494" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">e.g. ETH key</text>
+    </g>
+
+    <g class="tf-layer" data-tf="sa-msgfilter" tabindex="0" role="button" aria-label="MessageFilter limits messages">
+      <circle cx="365" cy="470" r="52" fill="url(#fig-accounts-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".8"/>
+      <circle cx="365" cy="470" r="44" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="365" y="455" text-anchor="middle" font-size="14">Message</text>
+      <text x="365" y="471" text-anchor="middle" font-size="14">Filter</text>
+      <text x="365" y="487" text-anchor="middle" font-size="8.5" class="tf-mono tf-dim">limits messages</text>
+    </g>
+  </g>
+</svg>

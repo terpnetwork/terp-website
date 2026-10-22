@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="450" viewBox="0 0 720 450" role="img" aria-labelledby="fig-consensus-title fig-consensus-desc">
+  <title id="fig-consensus-title">Consensus: validator, full and archive nodes with finality and trust</title>
+  <desc id="fig-consensus-desc">Three stacked panels show node roles. Validators propose blocks and vote in two rounds; a block is final once more than two-thirds of staked TERP signs it, and the chain stays safe while less than one-third misbehaves. A double sign is jailed and slashed. Full and sentry nodes check commit signatures, replay every transaction and stop on a mismatch. Archive nodes replay from public snapshots and serve older history. Linked squares are successive blocks; the hatched bar is signed stake and the dotted remainder is below finality. Light clients check validator signatures on each header, so staked TERP, not a server, is what a reader trusts.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg" transform="translate(0,-80)">
+    <defs>
+      <pattern id="fig-consensus-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="7" x2="7" y2="0" stroke="currentColor" stroke-opacity=".22" stroke-width=".5"/>
+      </pattern>
+      <pattern id="fig-consensus-stipple" width="7" height="7" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r=".7" fill="currentColor" opacity=".3"/>
+        <circle cx="5" cy="4.5" r=".5" fill="currentColor" opacity=".2"/>
+      </pattern>
+      <marker id="fig-consensus-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L8 4 L0 8 Z" fill="currentColor"/>
+      </marker>
+    </defs>
+
+
+
+    <text x="54" y="113" font-size="11" letter-spacing="1.2" class="tf-mono tf-dim">NODE ROLES</text>
+    <text x="354" y="113" text-anchor="end" font-size="10.5" class="tf-italic tf-dim">same chain · different duties</text>
+    <line x1="36" y1="130" x2="36" y2="414" stroke="currentColor" stroke-opacity=".25" stroke-width=".5" stroke-dasharray="1 4"/>
+    <circle cx="36" cy="175" r="1.3" fill="currentColor" opacity=".5"/>
+    <circle cx="36" cy="281" r="1.3" fill="currentColor" opacity=".5"/>
+    <circle cx="36" cy="377" r="1.3" fill="currentColor" opacity=".5"/>
+
+    <g class="tf-layer" data-tf="cons-validator">
+      <rect x="54" y="124" width="300" height="102" fill="currentColor" fill-opacity=".025" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="70" y="146" font-size="16">Validator</text>
+      <text x="70" y="166" font-size="11" class="tf-dim">proposes blocks, votes in two rounds</text>
+      <text x="70" y="181" font-size="11">more than two-thirds of staked TERP</text>
+      <text x="70" y="196" font-size="11" class="tf-dim">holders delegate TERP for rewards</text>
+      <text x="70" y="211" font-size="11" class="tf-dim">double sign → jail and slash</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cons-full">
+      <rect x="54" y="240" width="300" height="82" fill="currentColor" fill-opacity=".025" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="70" y="262" font-size="16">Full / sentry node</text>
+      <text x="70" y="281" font-size="11" class="tf-dim">checks every commit signature</text>
+      <text x="70" y="296" font-size="11" class="tf-dim">replays every transaction itself</text>
+      <text x="70" y="311" font-size="11">stops if its result differs</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cons-archive">
+      <rect x="54" y="336" width="300" height="82" fill="currentColor" fill-opacity=".025" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="70" y="358" font-size="16">Archive node</text>
+      <text x="70" y="377" font-size="11" class="tf-dim">replays from public snapshots</text>
+      <text x="70" y="392" font-size="11" class="tf-dim">serves older history to compare</text>
+      <text x="70" y="407" font-size="10.5" class="tf-mono tf-dim">mainnet since 2023-04-10</text>
+    </g>
+
+
+    <text x="390" y="113" font-size="11" letter-spacing="1.2" class="tf-mono tf-dim">FINALITY AND TRUST</text>
+
+    <g class="tf-layer" data-tf="cons-history">
+      <text x="696" y="128" text-anchor="end" font-size="10.5" class="tf-mono tf-dim">commit signatures</text>
+      <g fill="currentColor" fill-opacity=".03" stroke="currentColor" stroke-width=".8">
+        <rect x="402" y="136" width="44" height="44"/>
+        <rect x="470" y="136" width="44" height="44"/>
+        <rect x="538" y="136" width="44" height="44"/>
+        <rect x="606" y="136" width="44" height="44"/>
+      </g>
+      <g font-size="9.5" class="tf-mono" text-anchor="middle">
+        <text x="424" y="154">b−3</text>
+        <text x="492" y="154">b−2</text>
+        <text x="560" y="154">b−1</text>
+        <text x="628" y="154">b</text>
+      </g>
+      <g stroke="currentColor" stroke-opacity=".35" stroke-width=".5">
+        <line x1="410" y1="169" x2="438" y2="169"/>
+        <line x1="478" y1="169" x2="510" y2="169"/>
+        <line x1="546" y1="169" x2="578" y2="169"/>
+        <line x1="614" y1="169" x2="646" y2="169"/>
+      </g>
+      <g stroke="currentColor" stroke-opacity=".55" stroke-width=".7" marker-end="url(#fig-consensus-arrow)">
+        <line x1="606" y1="158" x2="583" y2="158"/>
+        <line x1="538" y1="158" x2="515" y2="158"/>
+        <line x1="470" y1="158" x2="447" y2="158"/>
+      </g>
+      <text x="390" y="202" font-size="11.5" class="tf-dim">each block names the hash of the block before it</text>
+      <text x="390" y="219" font-size="10.5" class="tf-mono tf-dim">b = block · hash links make a rewrite visible</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cons-finality">
+      <text x="390" y="250" font-size="10.5" letter-spacing="1" class="tf-mono tf-dim">SIGNED STAKE</text>
+      <text x="696" y="250" text-anchor="end" font-size="10.5" letter-spacing="1.2" class="tf-mono tf-accent-fill">FINAL</text>
+      <rect x="390" y="260" width="204" height="18" fill="url(#fig-consensus-hatch)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <rect x="594" y="260" width="102" height="18" fill="url(#fig-consensus-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <line x1="594" y1="254" x2="594" y2="284" stroke="currentColor" stroke-opacity=".7" stroke-width=".9"/>
+      <text x="492" y="273" text-anchor="middle" font-size="10.5" class="tf-mono">&gt; 2/3</text>
+      <text x="645" y="273" text-anchor="middle" font-size="9.5" class="tf-mono tf-faint">rest</text>
+      <text x="390" y="298" font-size="11.5">a block is final once more than two-thirds</text>
+      <text x="390" y="312" font-size="11.5">of staked TERP have signed it</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cons-safety">
+      <text x="390" y="334" font-size="11.5" class="tf-italic">safe while less than one-third misbehaves</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cons-history">
+      <rect x="390" y="348" width="306" height="68" fill="currentColor" fill-opacity=".025" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="406" y="368" font-size="14">Light client</text>
+      <text x="406" y="386" font-size="11" class="tf-dim">checks validator signatures on each new header</text>
+      <text x="406" y="401" font-size="11" class="tf-dim">wallets and other chains follow without a server</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cons-finality">
+      <text x="390" y="440" font-size="10.5" letter-spacing="1" class="tf-mono tf-dim">YOU TRUST</text>
+      <text x="390" y="458" font-size="13">the stake, not the server</text>
+      <text x="390" y="484" font-size="10.5" letter-spacing="1" class="tf-mono tf-dim">FINALITY GIVES</text>
+      <text x="390" y="502" font-size="13">one history; a rewrite cannot pass</text>
+    </g>
+
+  </g>
+</svg>

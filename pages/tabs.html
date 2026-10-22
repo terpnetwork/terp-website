@@ -147,11 +147,9 @@
         .eco-card.is-clickable:hover .eco-open { background: rgb(var(--tn-teal-rgb) / 0.22); border-color: rgb(var(--tn-teal-rgb) / 0.6); }
         .eco-card.is-clickable .eco-open:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
         .eco-card.is-clickable:has(.eco-open:focus-visible) { box-shadow: 0 0 0 1px rgb(var(--tn-teal-rgb) / 0.5); }
-        /* In the world panel cards have no surface ("no surfaces inside pages"), so the highlight is the same
-           left rule the navigation uses for the selected card, plus the title in the section tint. */
+        /* In the world panel the whole card highlights on hover / keyboard focus (wash + ring from
+           public/world.css tokens --tnw-hover-*), plus the title in the section tint. */
         .eco-card.is-clickable:is(:hover, :has(.eco-open:focus-visible)) .eco-title { color: rgb(var(--tnw-tint, 152, 232, 193)); }
-        html[data-tn-world="panel"] .eco-card.is-clickable:is(:hover, :has(.eco-open:focus-visible)) { border-left-color: rgba(var(--tnw-tint), .6) !important; }
-        html[data-tn-world="panel"] .eco-card.is-clickable:has(.eco-open:focus-visible) { border-left-color: rgb(var(--tnw-tint)) !important; }
         @media (prefers-reduced-motion: reduce) { .eco-card { transition: none; } }
         .eco-card .eco-status--live { color: var(--tn-teal); border-color: rgb(var(--tn-teal-rgb) / 0.5); background: rgb(var(--tn-teal-rgb) / 0.2); }
         .eco-card .eco-status--beta { color: var(--tn-amber); border-color: rgb(var(--tn-amber-rgb) / 0.5); background: rgb(var(--tn-amber-rgb) / 0.2); }
@@ -1396,17 +1394,7 @@
             <div id="eco-releases-mount"></div>
         </section>
 
-        <!-- ─── Staking plane (lib/staking.js; reads LCD, signs with the Connect session) ─── -->
-        <section class="plane" id="plane-staking" role="tabpanel" aria-label="Staking">
-            <div class="plane-card">
-                <h3>Staking</h3>
-                <div id="eco-staking-mount"></div>
-                <div class="plane-links">
-                    <a class="plane-link secondary" href="https://docs.cosmos.network/main/build/modules/staking" target="_blank" rel="noopener">How staking works</a>
-                    <a class="plane-link secondary" href="https://ping.pub/terp/staking" target="_blank" rel="noopener">Validators on ping.pub</a>
-                </div>
-            </div>
-        </section>
+        <!-- Staking moved to its own page (/staking, pages/staking.html); the Eco card links there. -->
 
         </div><!-- /#plane-storage -->
 
@@ -1493,10 +1481,6 @@
                     if (componentId === 'svg') {
                         import('/lib/eco-svg-plane.js').then((m) => m.mountSvgPlane());
                     }
-                    if (componentId === 'staking') {
-                        import('/lib/staking.js').then((m) => m.mountStaking(document.getElementById('eco-staking-mount'), CONFIG))
-                            .catch((err) => console.warn('[tabs] staking', err));
-                    }
                     if (componentId === 'ibc') {
                         import('/lib/ibc-core.js').then(async ({ loadIbcContext, loadIbcSnapshot }) => {
                             const mount = document.getElementById('eco-ibc-mount');
@@ -1525,10 +1509,28 @@
                     returnPlane(componentId);
                 },
             });
-            // Shareable staking URLs: /eco?stake=terp1… or /eco#staking open the Staking card.
-            if (new URLSearchParams(location.search).has('stake') || location.hash === '#staking') {
-                const { openEcoProject } = await import('/lib/ecosystem.js');
-                openEcoProject('staking');
+            // Old staking URLs (/eco?stake=terp1…, /eco#staking) enter the standalone /staking page
+            // the way the navigation does: select the "Staking" light, then open it, so the router
+            // plays the same fractal zoom into the orb shield. ?stake= rides along.
+            async function enterStaking(stakeAddr) {
+                const { selectEcoProject } = await import('/lib/ecosystem.js');
+                const to = '/staking' + (stakeAddr ? '?stake=' + encodeURIComponent(stakeAddr) : '');
+                history.replaceState(history.state, '', '/eco');   // Back from /staking lands on Eco
+                selectEcoProject('staking', { scroll: false });
+                const t0 = performance.now();
+                const go = () => {
+                    if (location.pathname !== '/eco') return;
+                    const w = window.__tnWorld && window.__tnWorld.state;
+                    const ready = w && w.current === '/eco' && !w.busy && w.eco && w.eco.selected === 'staking';
+                    if (!ready && performance.now() - t0 < (window.__tnWorld ? 4000 : 800)) { setTimeout(go, 60); return; }
+                    if (window.__tnShell && typeof window.__tnShell.navigate === 'function') window.__tnShell.navigate(to);
+                    else location.assign(to);
+                };
+                setTimeout(go, 240);
+            }
+            {
+                const q = new URLSearchParams(location.search);
+                if (q.has('stake') || location.hash === '#staking') enterStaking(q.get('stake'));
             }
             // Shareable bounty URLs: /eco#bounties and /eco?bounty=TB-… enter /bounties the way the
             // navigation does: select the "Community bounties" light (its page of the catalog shows),
@@ -1557,6 +1559,7 @@
                 window.__tnEcoBountiesHash = true;
                 addEventListener('hashchange', () => {
                     if (location.pathname === '/eco' && location.hash === '#bounties' && document.getElementById('eco-catalog-host')) enterBounties(null);
+                    if (location.pathname === '/eco' && location.hash === '#staking' && document.getElementById('eco-catalog-host')) enterStaking(null);
                 });
             }
         } catch (e) {

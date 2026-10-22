@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="670" viewBox="0 0 720 670" role="img" aria-labelledby="fig-stack-title fig-stack-desc">
+  <title id="fig-stack-title">The Terp stack: eight parts from validators to wallets</title>
+  <desc id="fig-stack-desc">A layered plate of eight parts, numbered top to bottom: validators and nodes (CometBFT); two tokens (TERP and THIOL); governance; CosmWasm contracts; smart accounts; IBC; public APIs and archives; and wallets and apps. Each part is public and can be used directly.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg">
+    <defs>
+      <pattern id="fig-stack-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="7" x2="7" y2="0" stroke="currentColor" stroke-opacity=".16" stroke-width=".5"/>
+      </pattern>
+    </defs>
+
+    <text x="24" y="27" font-size="11" letter-spacing="1.8" class="tf-mono tf-accent-fill">FIG. 1</text>
+    <text x="696" y="27" text-anchor="end" font-size="11" letter-spacing="1.2" class="tf-mono tf-dim">MOROCCO-1 · 120U-1</text>
+    <line x1="24" y1="39" x2="696" y2="39" stroke="currentColor" stroke-opacity=".32" stroke-width=".6"/>
+
+    <line x1="80" y1="82" x2="80" y2="576" stroke="currentColor" stroke-opacity=".28" stroke-width=".6" stroke-dasharray="1 4"/>
+
+    <g class="tf-layer" data-tf="consensus">
+      <circle cx="80" cy="96" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 100 L470 100 L498 82 L178 82 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 100 L470 100 L470 114 L150 114 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 100 L498 82 L498 96 L470 114 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="96" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">01</text>
+      <text x="194" y="94" font-size="17">Validators and nodes</text>
+      <text x="194" y="128" font-size="10.5" class="tf-mono tf-dim">CometBFT · replay · serve</text>
+    </g>
+
+    <g class="tf-layer" data-tf="tokens">
+      <circle cx="80" cy="162" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 166 L470 166 L498 148 L178 148 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 166 L470 166 L470 180 L150 180 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 166 L498 148 L498 162 L470 180 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="162" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">02</text>
+      <text x="194" y="160" font-size="17">Two tokens</text>
+      <text x="194" y="194" font-size="10.5" class="tf-mono tf-dim">TERP · THIOL · stake and fees</text>
+    </g>
+
+    <g class="tf-layer" data-tf="governance">
+      <circle cx="80" cy="228" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 232 L470 232 L498 214 L178 214 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 232 L470 232 L470 246 L150 246 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 232 L498 214 L498 228 L470 246 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="228" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">03</text>
+      <text x="194" y="226" font-size="17">Governance</text>
+      <text x="194" y="260" font-size="10.5" class="tf-mono tf-dim">proposals · votes · upgrades</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cosmwasm">
+      <circle cx="80" cy="294" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 298 L470 298 L498 280 L178 280 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 298 L470 298 L470 312 L150 312 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 298 L498 280 L498 294 L470 312 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="294" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">04</text>
+      <text x="194" y="292" font-size="17">CosmWasm contracts</text>
+      <text x="194" y="326" font-size="10.5" class="tf-mono tf-dim">Rust → Wasm · native tokens</text>
+    </g>
+
+    <g class="tf-layer" data-tf="accounts">
+      <circle cx="80" cy="360" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 364 L470 364 L498 346 L178 346 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 364 L470 364 L470 378 L150 378 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 364 L498 346 L498 360 L470 378 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="360" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">05</text>
+      <text x="194" y="358" font-size="17">Smart accounts</text>
+      <text x="194" y="392" font-size="10.5" class="tf-mono tf-dim">extra keys · contract checks · send limits</text>
+    </g>
+
+    <g class="tf-layer" data-tf="ibc">
+      <circle cx="80" cy="426" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 430 L470 430 L498 412 L178 412 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 430 L470 430 L470 444 L150 444 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 430 L498 412 L498 426 L470 444 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="426" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">06</text>
+      <text x="194" y="424" font-size="17">IBC</text>
+      <text x="194" y="458" font-size="10.5" class="tf-mono tf-dim">light clients · tokens · messages</text>
+    </g>
+
+    <g class="tf-layer" data-tf="apis">
+      <circle cx="80" cy="492" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 496 L470 496 L498 478 L178 478 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 496 L470 496 L470 510 L150 510 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 496 L498 478 L498 492 L470 510 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="492" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">07</text>
+      <text x="194" y="490" font-size="17">Public APIs and archives</text>
+      <text x="194" y="524" font-size="10.5" class="tf-mono tf-dim">api.terp.network · rpc.terp.network · snapshots</text>
+    </g>
+
+    <g class="tf-layer" data-tf="apps">
+      <circle cx="80" cy="558" r="1.4" fill="currentColor" opacity=".55"/>
+      <path d="M150 562 L470 562 L498 544 L178 544 Z" fill="currentColor" fill-opacity=".035" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <path d="M150 562 L470 562 L470 576 L150 576 Z" fill="url(#fig-stack-hatch)" stroke="currentColor" stroke-opacity=".45" stroke-width=".7"/>
+      <path d="M470 562 L498 544 L498 558 L470 576 Z" fill="currentColor" fill-opacity=".06" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <text x="118" y="558" text-anchor="end" font-size="12" class="tf-mono tf-accent-fill">08</text>
+      <text x="194" y="556" font-size="17">Wallets and apps</text>
+      <text x="194" y="590" font-size="10.5" class="tf-mono tf-dim">wallet connect · apps under Eco</text>
+    </g>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width=".7">
+      <path d="M545 82 L553 82 L553 180 L545 180"/>
+      <path d="M545 214 L553 214 L553 444 L545 444"/>
+      <path d="M545 478 L553 478 L553 576 L545 576"/>
+    </g>
+    <text x="560" y="131" font-size="13" class="tf-italic tf-dim">foundation</text>
+    <text x="560" y="329" font-size="13" class="tf-italic tf-dim">chain modules</text>
+    <text x="560" y="527" font-size="13" class="tf-italic tf-dim">public surface</text>
+
+    <line x1="24" y1="610" x2="696" y2="610" stroke="currentColor" stroke-opacity=".32" stroke-width=".6"/>
+    <text x="24" y="630" font-size="13" class="tf-italic tf-dim">Each part is public: any node can verify it, and anyone can use it.</text>
+    <text x="24" y="647" font-size="12" class="tf-italic tf-faint">Layers are grouped by role, not a strict dependency.</text>
+  </g>
+</svg>

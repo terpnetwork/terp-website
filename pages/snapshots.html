@@ -217,6 +217,13 @@ body.graphs-open { overflow: hidden; }
     background: rgb(var(--tn-canvas-rgb, var(--tn-shade-rgb)) / 0.55);
 }
 .res-info-overlay.open { display: flex; }
+/* Details show in place, under the control that opened them (no overlay over the other resources). */
+.res-info-overlay.is-inline { position: static; inset: auto; z-index: auto; display: none; padding: 0; background: none; margin: 0.5rem 0 1rem; }
+.res-info-overlay.is-inline.open { display: block; }
+.res-info-overlay.is-inline .res-info-modal { max-width: 40rem; max-height: none; overflow: visible; border: 1px solid rgb(var(--tn-teal-rgb) / 0.25); border-radius: var(--tn-radius-ctl, 2px); padding: 0.75rem 0.95rem 0.6rem; }
+.res-side .res-info-overlay.is-inline { margin: 0.35rem 0 0.6rem; }
+.res-side .res-info-overlay.is-inline .res-info-modal { font-size: 0.9rem; }
+.res-info[aria-expanded="true"] { color: var(--tn-mint); border-color: var(--tn-teal); background: rgb(var(--tn-teal-rgb) / 0.08); }
 .res-info-modal {
     max-width: 32rem; width: 100%;
     max-height: calc(100vh - 2.5rem); max-height: calc(100dvh - 2.5rem); overflow-y: auto; overscroll-behavior: contain;
@@ -557,8 +564,8 @@ details.upg-plan > summary:focus-visible { outline: 2px solid var(--tn-teal); ou
 <main class="main">
     <div class="res-title-row" data-tn-head>
         <h1 class="page-title" id="res-title" style="margin:0;">Resources</h1>
-        <button type="button" class="res-info" id="res-info-current" data-info="page" aria-label="About the Resources page" aria-haspopup="dialog" aria-controls="res-info-modal">?</button>
-        <button type="button" id="res-info-section" data-info="install" aria-label="Install details" aria-haspopup="dialog" aria-controls="res-info-modal" hidden>Section details</button>
+        <button type="button" class="res-info" id="res-info-current" data-info="page" aria-label="About the Resources page" aria-expanded="false" aria-controls="res-info-modal">?</button>
+        <button type="button" id="res-info-section" data-info="install" aria-label="Install details" aria-expanded="false" aria-controls="res-info-modal" hidden>Section details</button>
     </div>
     <div class="res-head">
         <p class="page-subtitle" id="res-sub" style="margin-bottom:0.35rem;">Join the network</p>
@@ -567,7 +574,7 @@ details.upg-plan > summary:focus-visible { outline: 2px solid var(--tn-teal); ou
         </p>
     </div>
 
-    <div class="res-info-overlay" id="res-info-modal" role="dialog" aria-modal="true" aria-labelledby="res-info-title">
+    <div class="res-info-overlay is-inline" id="res-info-modal" role="region" aria-labelledby="res-info-title">
         <div class="res-info-modal">
             <div class="ri-head">
                 <h3 id="res-info-title">Resources</h3>
@@ -581,27 +588,27 @@ details.upg-plan > summary:focus-visible { outline: 2px solid var(--tn-teal); ou
     <nav class="res-side" id="res-subtabs" role="tablist" aria-label="Resource sections">
         <div class="res-side-item" data-kind="install">
             <a href="#install">Install</a>
-            <button type="button" class="res-info" data-info="install" aria-label="Install details">?</button>
+            <button type="button" class="res-info" data-info="install" aria-expanded="false" aria-controls="res-info-modal" aria-label="Install details">?</button>
         </div>
         <div class="res-side-item" data-kind="app-state">
             <a href="#app-state">App state</a>
-            <button type="button" class="res-info" data-info="app-state" aria-label="App state details">?</button>
+            <button type="button" class="res-info" data-info="app-state" aria-expanded="false" aria-controls="res-info-modal" aria-label="App state details">?</button>
         </div>
         <div class="res-side-item" data-kind="graphs">
             <a href="#graphs">Graphs</a>
-            <button type="button" class="res-info" data-info="graphs" aria-label="Graphs details">?</button>
+            <button type="button" class="res-info" data-info="graphs" aria-expanded="false" aria-controls="res-info-modal" aria-label="Graphs details">?</button>
         </div>
         <div class="res-side-item" data-kind="releases">
             <a href="#releases">Releases</a>
-            <button type="button" class="res-info" data-info="releases" aria-label="Releases details">?</button>
+            <button type="button" class="res-info" data-info="releases" aria-expanded="false" aria-controls="res-info-modal" aria-label="Releases details">?</button>
         </div>
         <div class="res-side-item" data-kind="upgrades">
             <a href="#upgrades">Upgrades</a>
-            <button type="button" class="res-info" data-info="upgrades" aria-label="Upgrades details">?</button>
+            <button type="button" class="res-info" data-info="upgrades" aria-expanded="false" aria-controls="res-info-modal" aria-label="Upgrades details">?</button>
         </div>
         <div class="res-side-item" data-kind="snapshots">
             <a href="#snapshots">Snapshot</a>
-            <button type="button" class="res-info" data-info="snapshots" aria-label="Snapshot details">?</button>
+            <button type="button" class="res-info" data-info="snapshots" aria-expanded="false" aria-controls="res-info-modal" aria-label="Snapshot details">?</button>
         </div>
     </nav>
     <div class="res-main">
@@ -624,7 +631,7 @@ details.upg-plan > summary:focus-visible { outline: 2px solid var(--tn-teal); ou
             <p class="res-kicker">Install</p>
             <h3>One-liner</h3>
             <p class="res-note">Paste in a terminal on Linux or macOS. Downloads <code>terpd</code>, then can walk you through joining a network.</p>
-            <pre class="snap-code" id="install-cmd" data-lang="bash" data-copy="row">curl -sL https://terp.network/get/terp-installer.sh | bash</pre>
+            <pre class="snap-code" id="install-cmd" data-lang="bash" data-copy="row">curl -fsSL https://terp.network/get/terp-installer.sh | bash</pre>
             <div class="snap-actions">
                 <button type="button" class="snap-btn primary" id="copy-install">Copy</button>
                 <a class="snap-btn" href="/get" target="_blank" rel="noopener">View installer script</a>
@@ -689,11 +696,11 @@ async function copyText(text) {
 }
 
 function installCmd(net) {
-  if (!net) return 'curl -sL https://terp.network/get/terp-installer.sh | bash';
+  if (!net) return 'curl -fsSL https://terp.network/get/terp-installer.sh | bash';
   if (net.kind === 'testnet') {
-    return `curl -sL https://terp.network/get/terp-installer.sh | bash -s -- --network ${net.chainId}`;
+    return `curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --network ${net.chainId}`;
   }
-  return `curl -sL https://terp.network/get/terp-installer.sh | bash -s -- --network ${net.chainId}`;
+  return `curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --network ${net.chainId}`;
 }
 
 async function main() {
@@ -782,13 +789,32 @@ async function main() {
     },
   };
 
+  // Details open in place under their trigger; one at a time. Another trigger
+  // switches them, another section (hash), Escape or a click outside closes them,
+  // and closing with Escape or Close returns focus to the trigger.
   const modal = document.getElementById('res-info-modal');
+  let infoOpener = null;
+  const expand = (btn, on) => btn?.setAttribute('aria-expanded', on ? 'true' : 'false');
+  function closeInfo(returnFocus) {
+    if (!modal?.classList.contains('open')) return;
+    modal.classList.remove('open');
+    const o = infoOpener; infoOpener = null;
+    expand(o, false);
+    if (returnFocus && o && o.isConnected && !o.hidden) o.focus({ preventScroll: true });
+  }
   function openInfo(kind, opener) {
+    if (!modal) return;
     const pack = info[kind] || info.install;
-    if (modal) modal.__opener = opener || document.activeElement;
+    if (modal.classList.contains('open') && infoOpener === opener && modal.dataset.kind === kind) { closeInfo(true); return; }
+    if (infoOpener && infoOpener !== opener) expand(infoOpener, false);
+    infoOpener = opener || null;
+    modal.dataset.kind = kind;
     document.getElementById('res-info-title').textContent = pack.title;
     document.getElementById('res-info-body').innerHTML = pack.html;
-    modal?.classList.add('open');
+    const host = opener?.closest('.res-side-item, .res-title-row') || opener;
+    if (host && host.nextElementSibling !== modal) host.after(modal);
+    modal.classList.add('open');
+    expand(opener, true);
   }
   document.getElementById('res-subtabs')?.addEventListener('click', (e) => {
     const infoBtn = e.target.closest('[data-info]');
@@ -796,21 +822,29 @@ async function main() {
       e.preventDefault();
       e.stopPropagation();
       openInfo(infoBtn.dataset.info, infoBtn);
-    }
+    } else if (e.target.closest('a')) closeInfo(false);
   });
   document.getElementById('res-info-current')?.addEventListener('click', (e) => openInfo('page', e.currentTarget));
-  document.getElementById('res-info-section')?.addEventListener('click', (e) => openInfo(e.currentTarget.dataset.info, document.activeElement));
-  document.getElementById('res-info-close')?.addEventListener('click', () => modal?.classList.remove('open'));
+  document.getElementById('res-info-section')?.addEventListener('click', (e) => openInfo(e.currentTarget.dataset.info, e.currentTarget));
+  document.getElementById('res-info-close')?.addEventListener('click', () => closeInfo(true));
   addEventListener('tn:theme', (ev) => {
     const theme = (ev && ev.detail && ev.detail.theme) || localStorage.getItem('tn-theme') || 'default';
     const frame = document.getElementById('graph-frame');
     if (!document.body.classList.contains('graphs-open')) return;
     try { frame?.contentWindow?.postMessage({ type: 'tn-theme', theme }, '*'); } catch (e) { /* ignore */ }
   });
-  modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') modal?.classList.remove('open');
-  });
+  const outside = (e) => {
+    if (!modal?.isConnected) { document.removeEventListener('pointerdown', outside, true); return; }
+    if (!modal.classList.contains('open')) return;
+    if (modal.contains(e.target) || e.target.closest?.('[data-info]')) return;
+    closeInfo(false);
+  };
+  document.addEventListener('pointerdown', outside, true);
+  const onKey = (e) => {
+    if (!modal?.isConnected) { document.removeEventListener('keydown', onKey); return; }
+    if (e.key === 'Escape' && modal.classList.contains('open')) { e.stopPropagation(); closeInfo(true); }
+  };
+  document.addEventListener('keydown', onKey);
 
   function parseResHash(raw) {
     const h = String(raw || location.hash || '').replace(/^#/, '');
@@ -917,7 +951,7 @@ async function main() {
     }
   }
 
-  window.addEventListener('hashchange', () => showKind(location.hash));
+  window.addEventListener('hashchange', () => { closeInfo(false); showKind(location.hash); });
   await showKind(location.hash || 'install');
 }
 

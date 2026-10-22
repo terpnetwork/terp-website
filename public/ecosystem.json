@@ -55,8 +55,12 @@
       ],
       "status": "beta",
       "relevance": 97,
-      "component": "staking",
+      "component": null,
       "links": [
+        {
+          "label": "Open staking",
+          "url": "/staking"
+        },
         {
           "label": "Validators",
           "url": "https://ping.pub/terp/staking"

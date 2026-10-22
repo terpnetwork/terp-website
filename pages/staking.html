@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<!-- app shell: load once, reuse across routes (must stay first) -->
+<script src="/lib/shell/shell.js"></script>
+<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
+<link rel="modulepreload" href="/lib/config.js">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <!-- WIP gate: default OFF. Flip WIP_GATE_ENABLED in /lib/wip-gate.js or use ?wip=1 -->
+  <script src="/lib/wip-gate.js"></script>
+  <title>Staking | Terp Network</title>
+  <meta name="description" content="Delegate TERP, claim rewards, move or unbond stake. Every transaction is simulated first.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
+  <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+  <link rel="stylesheet" href="/public/global.css">
+<link rel="stylesheet" href="/public/world.css">
+<link rel="modulepreload" href="/lib/fractal/routes.js">
+<link rel="modulepreload" href="/lib/fractal/world.js">
+<script type="module" src="/lib/fractal/world.js"></script>
+<script type="module" src="/lib/ui/select.js"></script>
+  <!--
+    Standalone Staking page (was the Eco "Staking" card plane). Entered from Eco
+    through the fractal zoom (lib/fractal/routes.js → '/staking'); lib/staking.js
+    reads LCD and signs with the shared Connect session.
+  -->
+  <style>
+    :root {
+      --eco-text: 1rem;
+      --eco-text-sm: 0.9375rem;
+      --eco-label: 0.8125rem;
+      --eco-title: clamp(1.95rem, 4vw, 2.35rem);
+    }
+    body {
+      font-weight: var(--tn-font-weight-body, 400);
+      font-size: var(--tn-text-base, 17px);
+    }
+    .main {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .page-title {
+      font-size: var(--tn-size-display);
+      font-weight: var(--tn-weight-display);
+      color: var(--tn-mint);
+      text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
+      text-align: center;
+      margin-bottom: 0.35rem;
+      letter-spacing: var(--tn-track-display);
+      font-family: var(--tn-font-display);
+    }
+    html[data-theme="permissionless"] .page-title { text-shadow: 0 0 9.2px rgb(var(--tn-glow-rgb) / calc(0.070 * var(--tn-glow-tk))), 0 0 30px rgb(var(--tn-glow-rgb) / calc(0.084 * var(--tn-glow-tk))); }
+    .page-subtitle {
+      font-size: var(--tn-size-kicker);
+      color: var(--tn-kicker);
+      text-transform: uppercase;
+      letter-spacing: var(--tn-track-label);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      line-height: 1.45;
+      font-weight: var(--tn-font-weight-medium);
+    }
+    .stk-page { width: 100%; }
+    .stk-page-links { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; justify-content: center; margin-top: 1.5rem; font-size: var(--eco-text-sm); }
+    .stk-page-links a { color: rgb(var(--tn-text-rgb) / max(0.8, var(--tn-alpha-floor))); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: var(--tn-radius-ctl); }
+    .stk-page-links a:hover, .stk-page-links a:focus-visible { color: var(--tn-teal); }
+    .stk-page-links a:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <script src="/lib/fab.js"></script>
+
+  <main class="main">
+    <h1 class="page-title" data-tn-head>Staking</h1>
+    <p class="page-subtitle">Delegate · claim · redelegate · unbond</p>
+
+    <section class="stk-page" aria-label="Staking">
+      <div id="staking-mount" style="min-height: min(34rem, 70vh)"></div>
+    </section>
+
+    <nav class="stk-page-links" aria-label="Staking references">
+      <a href="https://docs.cosmos.network/main/build/modules/staking" target="_blank" rel="noopener">How staking works ↗</a>
+      <a href="https://ping.pub/terp/staking" target="_blank" rel="noopener">Validators on ping.pub ↗</a>
+    </nav>
+  </main>
+
+  <script type="module">
+    import { loadSiteConfig, useBrowserSafeChainEndpoints } from '/lib/config.js';
+    import { applyNavGuard } from '/lib/nav-guard.js';
+
+    applyNavGuard();
+    const CONFIG = {
+      pageId: 'staking',
+      chainId: 'morocco-1',
+      chainName: 'Terp Network',
+      rpc: 'https://rpc.terp.network',
+      rest: 'https://api.terp.network',
+      explorerBase: 'https://ping.pub/terp',
+      bech32Prefix: 'terp',
+      denom: 'uthiol',
+      denomDisplay: 'THIOL',
+      denomDecimals: 6,
+    };
+    await loadSiteConfig(CONFIG, { pageId: 'staking', chainId: 'morocco-1' });
+    useBrowserSafeChainEndpoints(CONFIG);
+    if (!CONFIG.rest) CONFIG.rest = 'https://api.terp.network';
+    window.__TERP_CONFIG = CONFIG;
+    const { mountStaking } = await import('/lib/staking.js');
+    mountStaking(document.getElementById('staking-mount'), CONFIG).catch((e) => console.error('[staking] mount', e));
+  </script>
+</body>
+</html>

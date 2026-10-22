@@ -1,0 +1,21 @@
+/* Stack figures on /about (Overview + Network → Two tokens). Scoped to .tf-* */
+.tf-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem 2rem; align-items: start; }
+.tf-pair > * { min-width: 0; }
+.tf-pair > dl.ov-stack { margin-bottom: 0; }
+.tf-pair:not(.tf-pair--wide) > .tf-fig { order: -1; } /* plate sits right under the intro line, list follows */
+
+.tf-fig { margin: 0.5rem 0 1.5rem; max-width: 52rem; }
+.tf-fig-scroll { overflow-x: auto; padding-bottom: 0.2rem; }
+.tf-fig svg { display: block; width: 100%; height: auto; }
+.tf-fig figcaption { margin-top: 0.55rem; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; font-size: 0.78rem; font-style: italic; line-height: 1.5; color: var(--tnw-ink-dim, var(--tn-text-muted)); }
+.tf-fig figcaption b { font-style: normal; font-weight: 600; letter-spacing: 0.04em; color: var(--tnw-ink, var(--tn-text)); }
+@media (max-width: 599px) { .tf-fig-scroll svg { min-width: 30rem; } }
+/* label ↔ text link */
+.tf-layer path, .tf-layer rect, .tf-layer circle, .tf-layer text { transition: stroke-opacity .15s, fill-opacity .15s, fill .15s, stroke .15s; }
+.tf-layer.tf-on path, .tf-layer.tf-on rect, .tf-layer.tf-on circle:first-of-type { stroke: var(--tn-teal); stroke-opacity: 1; }
+.tf-layer.tf-on text { fill: var(--tn-teal); opacity: 1; }
+.tf-scope [data-tf]:not(.tf-layer) { transition: background-color .15s, box-shadow .15s; border-radius: 2px; }
+.tf-scope [data-tf].tf-on:not(.tf-layer) { background-color: rgb(var(--tn-teal-rgb) / 0.1); box-shadow: 0 0 0 2px rgb(var(--tn-teal-rgb) / 0.1); }
+@media (prefers-reduced-motion: reduce) {
+  .tf-layer path, .tf-layer rect, .tf-layer circle, .tf-layer text, .tf-scope [data-tf] { transition: none; }
+}

@@ -143,11 +143,9 @@
         .eco-card.is-clickable:hover .eco-open { background: rgb(var(--tn-teal-rgb) / 0.22); border-color: rgb(var(--tn-teal-rgb) / 0.6); }
         .eco-card.is-clickable .eco-open:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
         .eco-card.is-clickable:has(.eco-open:focus-visible) { box-shadow: 0 0 0 1px rgb(var(--tn-teal-rgb) / 0.5); }
-        /* In the world panel cards have no surface ("no surfaces inside pages"), so the highlight is the same
-           left rule the navigation uses for the selected card, plus the title in the section tint. */
+        /* In the world panel the whole card highlights on hover / keyboard focus (wash + ring from
+           public/world.css tokens --tnw-hover-*), plus the title in the section tint. */
         .eco-card.is-clickable:is(:hover, :has(.eco-open:focus-visible)) .eco-title { color: rgb(var(--tnw-tint, 152, 232, 193)); }
-        html[data-tn-world="panel"] .eco-card.is-clickable:is(:hover, :has(.eco-open:focus-visible)) { border-left-color: rgba(var(--tnw-tint), .6) !important; }
-        html[data-tn-world="panel"] .eco-card.is-clickable:has(.eco-open:focus-visible) { border-left-color: rgb(var(--tnw-tint)) !important; }
         @media (prefers-reduced-motion: reduce) { .eco-card { transition: none; } }
         .eco-card .eco-status--live { color: var(--tn-teal); border-color: rgb(var(--tn-teal-rgb) / 0.5); background: rgb(var(--tn-teal-rgb) / 0.2); }
         .eco-card .eco-status--beta { color: var(--tn-amber); border-color: rgb(var(--tn-amber-rgb) / 0.5); background: rgb(var(--tn-amber-rgb) / 0.2); }

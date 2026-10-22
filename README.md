@@ -53,34 +53,17 @@ just serve          # local :3000
 curl -fsSL https://terp.network/get/terp-installer.sh | bash
 ```
 
-Ask **network first**, then download the matching ELF: morocco-1 → **v6.0.1**, 120u-1 → **v6.2.0**. Darwin builds must link `libwasmvmstatic_darwin.a` (`make build-darwin-arm64`); a dylib rpath into this clone will abort on anyone else's Mac.
-
-The installer will automatically:
-
-1. Check/install Python 3.6+
-2. Guide you through selecting installation type (node/client/localterp)
-3. Help you choose network (mainnet/testnet)
-4. Configure your node settings
-5. Optionally install cosmovisor and systemd service
+The installer resolves the terpd version from terp-core `versions.json` at fetch time (last `recommended_version` for the network; testnet uses the release channel until `versions.json` has 120u-1 entries), prints it, downloads the matching build and verifies it against the release `sha256sum.txt`. With no published build for your platform (e.g. darwin) it builds from source. Then it runs `terpd bootstrap` (init, genesis, state-sync or snapshot, pruning, cosmovisor, systemd).
 
 ### Command-Line Options
 
-You can also use flags to skip certain prompts:
-
 ```bash
-curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --install node --network morocco-1 --moniker "my-node"
+curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --help
+curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --dry-run --network 120u-1
+curl -fsSL https://terp.network/get/terp-installer.sh | bash -s -- --network morocco-1 --version vX.Y.Z
 ```
 
-**Available flags:**
-
-- `--install <node|client|localterp>` - Installation type
-- `--network <morocco-1|120u-1>` - morocco-1 installs terpd v6.0.1; 120u-1 installs terpd v6.2.0
-- `--home <path>` - Installation directory (default: ~/.terp)
-- `--moniker <name>` - Node moniker (default: terp)
-- `--pruning <default|nothing|everything>` - Pruning settings
-- `--cosmovisor` - Install with cosmovisor
-- `--service` - Setup systemd service (Linux only)
-- `--overwrite` - Overwrite existing installation
+**Installer flags:** `--network <morocco-1|120u-1>`, `--version <x.y.z>`, `--dry-run`, `-y/--yes`, `--non-interactive`, `-h/--help`. All other flags (`--home`, `--moniker`, `--sync-mode`, `--pruning`, `--cosmovisor`, `--service`, `--setup-only`, ...) are passed to `terpd bootstrap`.
 
 ### Alternative: UV Tool
 
@@ -96,8 +79,7 @@ uvx --from terp-core terpd
   
 ## Installation Script Endpoints
 
-- `/get` - Shell wrapper script (downloads and runs Python installer)
-- `/run` - Python installer script (main installation logic)
+- `/get/terp-installer.sh` - The installer (`curl -fsSL https://terp.network/get/terp-installer.sh | bash`)
 - `/get/` - Directory access for individual files and checksum verification
 
 ## Development

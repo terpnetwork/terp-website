@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="506" viewBox="0 0 720 506" role="img" aria-labelledby="fig-cosmwasm-title fig-cosmwasm-desc">
+  <title id="fig-cosmwasm-title">CosmWasm: off-chain build, on-chain module, code ids and instances</title>
+  <desc id="fig-cosmwasm-desc">Off-chain, Rust source compiles to a Wasm build. An upload crosses the chain boundary into the CosmWasm module and receives a code id; each code id stores the code hash and owns its own instances, and every instance has its own short params tick, address, funds and state. CosmWasm is one module inside morocco-1 alongside IBC and other modules, and every validator runs it. A dashed off-chain verification path recomputes the checksum from the Wasm build and compares it with the on-chain code hash for that code id. Contracts can hold funds, call other contracts and send IBC messages; tokenfactory lets any account create a native token.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg">
+    <defs>
+      <pattern id="fig-cosmwasm-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="7" x2="7" y2="0" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      </pattern>
+      <pattern id="fig-cosmwasm-stipple" width="7" height="7" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r=".7" fill="currentColor" opacity=".3"/>
+        <circle cx="5" cy="4.5" r=".5" fill="currentColor" opacity=".2"/>
+      </pattern>
+      <marker id="fig-cosmwasm-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L8 4 L0 8 Z" fill="currentColor"/>
+      </marker>
+    </defs>
+
+    <text x="24" y="36" font-size="11" letter-spacing="1.2" class="tf-mono tf-dim">OFF-CHAIN</text>
+    <text x="696" y="36" text-anchor="end" font-size="11" letter-spacing="1.2" class="tf-mono tf-dim">ON-CHAIN</text>
+
+    <g class="tf-layer" data-tf="cw-chain">
+      <rect x="260" y="52" width="436" height="430" rx="24" fill="currentColor" fill-opacity=".015" stroke="currentColor" stroke-opacity=".5" stroke-width=".7" stroke-dasharray="6 4"/>
+      <rect x="266" y="58" width="424" height="418" rx="20" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      <text x="280" y="78" font-size="10.5" class="tf-mono tf-dim">morocco-1</text>
+      <text x="680" y="78" text-anchor="end" font-size="10.5" class="tf-italic tf-dim">every validator runs CosmWasm</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-source">
+      <circle cx="120" cy="140" r="44" fill="url(#fig-cosmwasm-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".9"/>
+      <circle cx="120" cy="140" r="37" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="120" y="136" text-anchor="middle" font-size="16">Rust</text>
+      <text x="120" y="151" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">source</text>
+      <text x="132" y="216" font-size="10.5" class="tf-mono tf-dim">compile</text>
+      <line x1="120" y1="184" x2="120" y2="232" stroke="currentColor" stroke-opacity=".6" stroke-width=".8" marker-end="url(#fig-cosmwasm-arrow)"/>
+      <circle cx="120" cy="282" r="46" fill="url(#fig-cosmwasm-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".9"/>
+      <circle cx="120" cy="282" r="39" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="120" y="278" text-anchor="middle" font-size="16">Wasm</text>
+      <text x="120" y="293" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">build</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-verify">
+      <g data-tf="cw-checksum">
+        <path d="M152 252 C240 180 330 168 420 218" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="3 4" marker-start="url(#fig-cosmwasm-arrow)" marker-end="url(#fig-cosmwasm-arrow)"/>
+        <text x="272" y="166" text-anchor="middle" font-size="10.5" class="tf-italic tf-dim">recompute checksum ↔ code hash</text>
+      </g>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-upload">
+      <path d="M166 282 C240 282 320 258 388 250" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-width=".8" marker-end="url(#fig-cosmwasm-arrow)"/>
+      <text x="215" y="266" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">upload</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-ibc">
+      <circle cx="300" cy="300" r="27" fill="currentColor" fill-opacity=".03" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="300" cy="300" r="22" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      <text x="300" y="304" text-anchor="middle" font-size="11">IBC</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-modules">
+      <circle cx="648" cy="136" r="28" fill="currentColor" fill-opacity=".02" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+      <circle cx="648" cy="136" r="22" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      <text x="648" y="132" text-anchor="middle" font-size="10.5">other</text>
+      <text x="648" y="145" text-anchor="middle" font-size="10.5">modules</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-module">
+      <circle cx="480" cy="300" r="150" fill="currentColor" fill-opacity=".02" stroke="currentColor" stroke-opacity=".7" stroke-width=".9"/>
+      <circle cx="480" cy="300" r="141" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width=".5"/>
+      <text x="480" y="182" text-anchor="middle" font-size="16">CosmWasm</text>
+      <text x="480" y="198" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">module</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-code-id">
+      <circle cx="420" cy="250" r="30" fill="url(#fig-cosmwasm-hatch)" stroke="currentColor" stroke-opacity=".65" stroke-width=".8"/>
+      <circle cx="420" cy="250" r="24" fill="currentColor" fill-opacity=".015" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="420" y="247" text-anchor="middle" font-size="10.5" class="tf-mono">code id</text>
+      <text x="420" y="260" text-anchor="middle" font-size="10" class="tf-mono tf-dim">hash</text>
+      <circle cx="555" cy="250" r="30" fill="url(#fig-cosmwasm-hatch)" stroke="currentColor" stroke-opacity=".65" stroke-width=".8"/>
+      <circle cx="555" cy="250" r="24" fill="currentColor" fill-opacity=".015" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="555" y="247" text-anchor="middle" font-size="10.5" class="tf-mono">code id</text>
+      <text x="555" y="260" text-anchor="middle" font-size="10" class="tf-mono tf-dim">hash</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-instance">
+      <g data-tf="cw-contract">
+        <path d="M420 280 L372 322 M420 280 L425 339 M555 280 L540 334 M555 280 L594 319" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width=".6"/>
+        <circle cx="370" cy="335" r="16" fill="currentColor" fill-opacity=".03" stroke="currentColor" stroke-opacity=".6" stroke-width=".7"/>
+        <circle cx="370" cy="335" r="11" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width=".5"/>
+        <path d="M354 335 L348 335" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+        <circle cx="425" cy="355" r="16" fill="currentColor" fill-opacity=".03" stroke="currentColor" stroke-opacity=".6" stroke-width=".7"/>
+        <circle cx="425" cy="355" r="11" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width=".5"/>
+        <path d="M425 371 L425 377" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+        <circle cx="540" cy="350" r="16" fill="currentColor" fill-opacity=".03" stroke="currentColor" stroke-opacity=".6" stroke-width=".7"/>
+        <circle cx="540" cy="350" r="11" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width=".5"/>
+        <path d="M540 366 L540 372" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+        <circle cx="595" cy="335" r="16" fill="currentColor" fill-opacity=".03" stroke="currentColor" stroke-opacity=".6" stroke-width=".7"/>
+        <circle cx="595" cy="335" r="11" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width=".5"/>
+        <path d="M611 335 L617 335" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      </g>
+      <text x="480" y="404" text-anchor="middle" font-size="10.5" class="tf-italic tf-dim">tick = instance params</text>
+      <text x="480" y="420" text-anchor="middle" font-size="10.5" class="tf-dim">each instance: own address · funds · state</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cw-tokenfactory">
+      <circle cx="302" cy="405" r="34" fill="url(#fig-cosmwasm-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="302" cy="405" r="27" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      <text x="302" y="401" text-anchor="middle" font-size="16">token</text>
+      <text x="302" y="417" text-anchor="middle" font-size="16">factory</text>
+      <text x="302" y="458" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">any account</text>
+    </g>
+  </g>
+</svg>

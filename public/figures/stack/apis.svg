@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="700" viewBox="0 0 720 700" role="img" aria-labelledby="fig-apis-title fig-apis-desc">
+  <title id="fig-apis-title">Public APIs and archives</title>
+  <desc id="fig-apis-desc">A client reaches the public chain through two endpoints. The REST API at api.terp.network answers module state queries. The RPC endpoint at rpc.terp.network reports block height and reaches the application through an ABCI query. Inside morocco-1, the application layer holds module state and the consensus layer holds blocks and validators. Public archive snapshots answer historical queries for older heights.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg">
+    <defs>
+      <pattern id="fig-apis-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="7" x2="7" y2="0" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      </pattern>
+      <pattern id="fig-apis-stipple" width="7" height="7" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r=".7" fill="currentColor" opacity=".3"/>
+        <circle cx="5" cy="4.5" r=".5" fill="currentColor" opacity=".2"/>
+      </pattern>
+      <marker id="fig-apis-arrow" markerWidth="7" markerHeight="7" refX="6.5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+        <path d="M0 0 L7 3.5 L0 7 Z" fill="currentColor" opacity=".5"/>
+      </marker>
+    </defs>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".42" stroke-width=".6">
+      <path d="M334 92 L290 125" marker-end="url(#fig-apis-arrow)"/>
+      <path d="M386 92 L430 125" marker-end="url(#fig-apis-arrow)"/>
+      <path d="M288 222 L307 272" marker-end="url(#fig-apis-arrow)"/>
+      <path d="M490 234 L554 268" marker-end="url(#fig-apis-arrow)"/>
+      <path d="M526 303 L420 330" marker-end="url(#fig-apis-arrow)"/>
+      <path d="M532 214 C640 270 650 390 530 445 L420 470" marker-end="url(#fig-apis-arrow)"/>
+    </g>
+
+    <g class="tf-layer" data-tf="api-history" tabindex="0" role="button" aria-label="Historical queries for older heights">
+      <path d="M360 572 L360 562" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width=".7" stroke-dasharray="3 3" marker-end="url(#fig-apis-arrow)"/>
+      <text x="420" y="600" font-size="10.5" class="tf-mono tf-dim tf-italic">historical queries</text>
+      <text x="420" y="614" font-size="10.5" class="tf-mono tf-dim tf-italic">older heights</text>
+    </g>
+
+    <circle cx="360" cy="400" r="160" fill="none" stroke="currentColor" stroke-opacity=".26" stroke-width=".7" stroke-dasharray="4 4"/>
+
+    <g class="tf-layer" data-tf="api-client" tabindex="0" role="button" aria-label="Client, any app">
+      <circle cx="360" cy="55" r="44" fill="url(#fig-apis-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="360" cy="55" r="36" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="360" y="51" text-anchor="middle" font-size="16">client</text>
+      <text x="360" y="67" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">any app</text>
+    </g>
+
+    <g class="tf-layer" data-tf="api-rest" tabindex="0" role="button" aria-label="REST API at api.terp.network">
+      <circle cx="240" cy="170" r="64" fill="url(#fig-apis-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="240" cy="170" r="56" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="240" y="166" text-anchor="middle" font-size="16">REST</text>
+      <text x="240" y="182" text-anchor="middle" font-size="10" class="tf-mono tf-dim">api.terp.network</text>
+      <text x="240" y="197" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">module state</text>
+    </g>
+
+    <g class="tf-layer" data-tf="api-rpc" tabindex="0" role="button" aria-label="RPC at rpc.terp.network">
+      <circle cx="480" cy="170" r="64" fill="url(#fig-apis-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="480" cy="170" r="56" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="480" y="166" text-anchor="middle" font-size="16">RPC</text>
+      <text x="480" y="182" text-anchor="middle" font-size="10" class="tf-mono tf-dim">rpc.terp.network</text>
+      <text x="480" y="197" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">block height</text>
+    </g>
+
+    <g class="tf-layer" data-tf="api-abci" tabindex="0" role="button" aria-label="ABCI query">
+      <circle cx="560" cy="300" r="34" fill="url(#fig-apis-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="560" cy="300" r="27" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="560" y="297" text-anchor="middle" font-size="10.5" class="tf-mono">ABCI</text>
+      <text x="560" y="310" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">query</text>
+    </g>
+
+    <g class="tf-layer" data-tf="api-app" tabindex="0" role="button" aria-label="Application layer, module state">
+      <circle cx="350" cy="335" r="68" fill="url(#fig-apis-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="350" cy="335" r="60" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="350" y="325" text-anchor="middle" font-size="16">application</text>
+      <text x="350" y="341" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">module state</text>
+      <text x="350" y="357" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">staking · bank</text>
+      <text x="350" y="372" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">gov · wasm · …</text>
+    </g>
+
+    <g class="tf-layer" data-tf="api-consensus" tabindex="0" role="button" aria-label="Consensus layer on morocco-1">
+      <text x="360" y="258" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">morocco-1</text>
+      <circle cx="350" cy="480" r="62" fill="url(#fig-apis-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="350" cy="480" r="54" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="350" y="476" text-anchor="middle" font-size="16">consensus</text>
+      <text x="350" y="492" text-anchor="middle" font-size="8.5" class="tf-mono tf-dim">blocks · validators</text>
+    </g>
+
+    <g class="tf-layer" data-tf="api-archive" tabindex="0" role="button" aria-label="Public archive snapshots">
+      <circle cx="360" cy="620" r="48" fill="url(#fig-apis-hatch)" stroke="currentColor" stroke-opacity=".55" stroke-width=".8"/>
+      <circle cx="360" cy="620" r="40" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="360" y="616" text-anchor="middle" font-size="16">archives</text>
+      <text x="360" y="632" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">snapshots</text>
+      <text x="360" y="646" text-anchor="middle" font-size="10" class="tf-mono tf-dim">by height</text>
+    </g>
+  </g>
+</svg>

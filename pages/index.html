@@ -1347,7 +1347,7 @@
             inlineChecksumDiv.style.display = 'flex';
 
             try {
-                let shellScript, pythonScript;
+                let shellScript;
 
                 // Fetch on-chain checksums in parallel with local computation
                 const onChainPromise = window._fetchOfficialTextRecords
@@ -1372,56 +1372,18 @@
                     shellScript = await fallbackResponse.text();
                 }
 
-                // Fetch Python script with multiple fallback attempts
-                let pythonFetchError = null;
-                const pythonPaths = [
-                    '/run',
-                    'get/terp-installer.py',
-                    '/get/terp-installer.py'
-                ];
-
-                for (const path of pythonPaths) {
-                    try {
-                        console.log(`Attempting to fetch Python script from: ${path}`);
-                        const pyResponse = await fetch(path);
-                        if (pyResponse.ok) {
-                            pythonScript = await pyResponse.text();
-                            console.log(`Successfully fetched Python script from: ${path}`);
-                            break;
-                        } else {
-                            console.log(`Failed to fetch from ${path}: HTTP ${pyResponse.status}`);
-                        }
-                    } catch (error) {
-                        console.log(`Error fetching from ${path}:`, error);
-                        pythonFetchError = error.message;
-                    }
-                }
-
-                if (!pythonScript) {
-                    pythonFetchError = pythonFetchError || 'File not accessible from web server';
-                }
-
-                // Calculate SHA-256 for both scripts
+                // Calculate SHA-256 of the installer
                 const shellSha256 = await calculateSHA256(shellScript);
-                let output = `# terp-installer.sh (Shell Wrapper)\n${shellSha256}`;
-
-                if (pythonScript) {
-                    const pythonSha256 = await calculateSHA256(pythonScript);
-                    output += `\n\n# terp-installer.py (Python Installer)\n${pythonSha256}`;
-                } else {
-                    output += `\n\n# terp-installer.py (Python Installer)\n# Error: Could not fetch - ${pythonFetchError || 'Unknown error'}`;
-                }
+                let output = `# terp-installer.sh\n${shellSha256}`;
 
                 // Compare with on-chain text-record checksums if available
                 const records = await onChainPromise;
                 let comparedShell = false;
-                let comparedPy = false;
 
                 if (records) {
                     const onChainShellChecksum = window._getTextRecord(records, "install-sh-checksum");
-                    const onChainPyChecksum = window._getTextRecord(records, "install-py-checksum");
 
-                    if (onChainShellChecksum || onChainPyChecksum) {
+                    if (onChainShellChecksum) {
                         output += `\n\n# ── On-Chain Verification (dao/account TextRecords) ──`;
                     }
 
@@ -1432,34 +1394,20 @@
                         comparedShell = true;
                     }
 
-                    if (onChainPyChecksum && pythonScript) {
-                        const pythonSha256 = await calculateSHA256(pythonScript);
-                        const pyMatch = pythonSha256 === onChainPyChecksum;
-                        output += `\n# install-py-checksum: ${pyMatch ? "MATCH" : "MISMATCH"}`;
-                        output += `\n${onChainPyChecksum}`;
-                        comparedPy = true;
-                    }
                 }
 
                 // Fallback: static config.json checksums (signed site publish / build-config.sh)
-                if ((!comparedShell || !comparedPy) && window._fetchConfigChecksums) {
+                if (!comparedShell && window._fetchConfigChecksums) {
                     const cfg = await window._fetchConfigChecksums();
                     if (cfg) {
                         const cfgShell = cfg['get/terp-installer.sh'];
-                        const cfgPy = cfg['get/terp-installer.py'];
-                        if (cfgShell || cfgPy) {
+                        if (cfgShell) {
                             output += `\n\n# ── Static config.json Verification ──`;
                         }
                         if (cfgShell && !comparedShell) {
                             const shellMatch = shellSha256 === cfgShell;
                             output += `\n# get/terp-installer.sh: ${shellMatch ? "MATCH" : "MISMATCH"}`;
                             output += `\n${cfgShell}`;
-                        }
-                        if (cfgPy && pythonScript && !comparedPy) {
-                            const pythonSha256 = await calculateSHA256(pythonScript);
-                            const pyMatch = pythonSha256 === cfgPy;
-                            output += `\n# get/terp-installer.py: ${pyMatch ? "MATCH" : "MISMATCH"}`;
-                            output += `\n${cfgPy}`;
                         }
                     }
                 }

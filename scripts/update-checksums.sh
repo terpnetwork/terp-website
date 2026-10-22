@@ -29,22 +29,17 @@ cd "$INSTALL_DIR"
 # Generate SHA256 checksums
 echo "📝 Generating SHA256 checksums..."
 if command -v sha256sum &> /dev/null; then
-    SHA256_PY=$(sha256sum terp-installer.py | awk '{print $1}')
     SHA256_SH=$(sha256sum terp-installer.sh | awk '{print $1}')
 else
-    SHA256_PY=$(shasum -a 256 terp-installer.py | awk '{print $1}')
     SHA256_SH=$(shasum -a 256 terp-installer.sh | awk '{print $1}')
 fi
 
-echo "   terp-installer.py: $SHA256_PY"
 echo "   terp-installer.sh: $SHA256_SH"
 
 # Generate BLAKE3 checksums if available
 if [ "$BLAKE3_AVAILABLE" = true ]; then
     echo "📝 Generating BLAKE3 checksums..."
-    BLAKE3_PY=$(b3sum terp-installer.py | awk '{print $1}')
     BLAKE3_SH=$(b3sum terp-installer.sh | awk '{print $1}')
-    echo "   terp-installer.py: $BLAKE3_PY"
     echo "   terp-installer.sh: $BLAKE3_SH"
 fi
 
@@ -74,7 +69,6 @@ while IFS= read -r line; do
         SKIP_NEXT_LINE=true  # Skip the next ``` line
         echo "$line" >> "$TEMP_FILE"
         echo '```' >> "$TEMP_FILE"
-        echo "$SHA256_PY  terp-installer.py" >> "$TEMP_FILE"
         echo "$SHA256_SH  terp-installer.sh" >> "$TEMP_FILE"
         continue
     fi
@@ -86,7 +80,6 @@ while IFS= read -r line; do
         echo "$line" >> "$TEMP_FILE"
         echo '```' >> "$TEMP_FILE"
         if [ "$BLAKE3_AVAILABLE" = true ]; then
-            echo "$BLAKE3_PY  terp-installer.py" >> "$TEMP_FILE"
             echo "$BLAKE3_SH  terp-installer.sh" >> "$TEMP_FILE"
         else
             echo "# BLAKE3 checksums not available - install b3sum" >> "$TEMP_FILE"
@@ -100,7 +93,7 @@ while IFS= read -r line; do
             echo "$line" >> "$TEMP_FILE"
             IN_SHA256_SECTION=false
             continue
-        elif [[ "$line" =~ ^[0-9a-f]{64}[[:space:]]+terp-installer\.(py|sh)$ ]]; then
+        elif [[ "$line" =~ ^[0-9a-f]{64}[[:space:]]+terp-installer\.sh$ ]]; then
             # Skip old checksum
             continue
         fi
@@ -112,7 +105,7 @@ while IFS= read -r line; do
             echo "$line" >> "$TEMP_FILE"
             IN_BLAKE3_SECTION=false
             continue
-        elif [[ "$line" =~ ^[0-9a-f]{64}[[:space:]]+terp-installer\.(py|sh)$ ]] || [[ "$line" =~ ^#.*BLAKE3 ]]; then
+        elif [[ "$line" =~ ^[0-9a-f]{64}[[:space:]]+terp-installer\.sh$ ]] || [[ "$line" =~ ^#.*BLAKE3 ]]; then
             # Skip old checksum
             continue
         fi

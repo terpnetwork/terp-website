@@ -13,6 +13,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
 <link rel="stylesheet" href="/public/global.css">
 <link rel="stylesheet" href="/public/world.css">
+<link rel="stylesheet" href="/public/figures/stack/figs.css">
+<script src="/public/figures/stack/figs.js" defer></script>
 <link rel="modulepreload" href="/lib/fractal/routes.js">
 <link rel="modulepreload" href="/lib/fractal/world.js">
 <script type="module" src="/lib/fractal/world.js"></script>
@@ -20,6 +22,7 @@
 <script type="module" src="/lib/fractal/about-network.js"></script>
 <script type="module" src="/lib/fractal/about-people.js"></script>
 <script type="module" src="/lib/section-shield.js"></script>
+<script type="module" src="/lib/about-unified.js"></script>
 <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
 <style>
 .main { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 3.5rem; min-height: 40vh; }
@@ -47,14 +50,49 @@ html[data-theme="permissionless"] :is(.about-cta a, .nw .nw-btn):hover { box-sha
   .ov dl.ov-stack { grid-template-columns: 1fr; gap: 0.1rem; }
   .ov dl.ov-stack dd { margin-bottom: 0.7rem; }
 }
+/* unified Overview + Network: one category set, one orb each (section-shield). Selected
+   category: its overview line, then its network details with its figure on top. The centre
+   orb (all) lists every overview line. */
+.about-anchor { display: block; height: 0; }
+.cat-shield .cat-h { margin-top: 2rem; }
+.cat-shield .cat-fig, .cat-shield #fig-value { margin: 0.5rem 0 1rem; }
+.cat-shield .cat-fig[hidden] { display: none; }
+.cat-shield .cat-fig { max-width: 52rem; }
+.cat-shield .cat-fig svg { display: block; width: 100%; height: auto; }
+.cat-shield .cat-fig-overview { max-width: 34rem; }
+.cat-shield[data-cat]:not([data-cat="network"]) .cat-fig-overview { display: none; }
+.cat-fig [data-cat-go] { cursor: pointer; }
+.cat-fig [data-cat-go]:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 2px; }
+/* with the navigation, one part at a time: the About shield's inner orbs are the parts
+   (lib/fractal/routes.js, sections consensus … apps around the overview in the centre).
+   A part shows its title once, its overview line, then its figure and its details. */
+#about-network[data-cat]:not([data-cat="network"]) > :not(.cat-shield):not(.about-anchor) { display: none; }
+.cat-shield[data-cat]:not([data-cat="network"]) :is(.cat-h, .cat-intro) { display: none; }
+.cat-shield[data-cat]:not([data-cat="network"]) dl.ov-stack { display: block; margin: 0 0 0.5rem; }
+.cat-shield[data-cat]:not([data-cat="network"]) dl.ov-stack > dt,
+.cat-shield[data-cat]:not([data-cat="network"]) dl.ov-stack > dd:not(.is-cat) { display: none; }
+.cat-shield .cat-title { margin: 0.25rem 0 0.4rem; }
+.cat-shield[data-cat] .cat-details > [data-cat-panel] { display: none; }
+.cat-shield[data-cat] .cat-details > [data-cat-panel].is-cat { display: block; }
+.cat-shield[data-cat] .cat-details > .is-cat > h3:first-child { display: none; }
+.cat-shield .cat-details > .is-entering { animation: shield-in 220ms var(--tnw-ease, ease) both; }
+@media (prefers-reduced-motion: reduce) { .cat-shield .cat-details > .is-entering { animation: none; } }
 /* tabs: the page shows one at a time with the navigation (html[data-tn-section]); without it, both, one after the other */
 .about-tabs { display: flex; gap: 1.25rem; margin: 0 0 1.5rem; font-size: 0.9rem; }
 .about-tabs a { color: var(--tn-teal); }
 html[data-tn-world] .about-tabs { display: none; }
 html[data-tn-world="panel"][data-tn-section] .about-tab { display: none; }
-html[data-tn-world="panel"][data-tn-section="overview"] #about-overview,
 html[data-tn-world="panel"][data-tn-section="genesis"] #about-genesis,
 html[data-tn-world="panel"][data-tn-section="network"] #about-network,
+html[data-tn-world="panel"][data-tn-section="consensus"] #about-network,
+html[data-tn-world="panel"][data-tn-section="tokens"] #about-network,
+html[data-tn-world="panel"][data-tn-section="governance"] #about-network,
+html[data-tn-world="panel"][data-tn-section="cosmwasm"] #about-network,
+html[data-tn-world="panel"][data-tn-section="accounts"] #about-network,
+html[data-tn-world="panel"][data-tn-section="ibc"] #about-network,
+html[data-tn-world="panel"][data-tn-section="apis"] #about-network,
+html[data-tn-world="panel"][data-tn-section="apps"] #about-network,
+
 html[data-tn-world="panel"][data-tn-section="people"] #about-people { display: block; }
 .about-tab + .about-tab { margin-top: 3rem; }
 html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
@@ -174,37 +212,12 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 <script src="/lib/fab.js"></script>
 <main class="main">
 <p class="muted" data-tn-head style="font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;">About</p>
-<nav class="about-tabs" aria-label="About sections"><a href="#about-overview">Overview</a><a href="#about-network">Network</a><a href="#about-genesis">Genesis &amp; distribution</a><a href="#about-people">People</a></nav>
-<section class="about-tab ov" id="about-overview" aria-labelledby="ov-title">
-<h2 id="ov-title" class="sr-only">Overview</h2>
+<nav class="about-tabs" aria-label="About sections"><a href="#about-network">Overview</a><a href="#about-genesis">Genesis &amp; distribution</a><a href="#about-people">People</a></nav>
+<section class="about-tab ov nw" id="about-network" aria-labelledby="nw-title">
+<span id="about-overview" class="about-anchor" aria-hidden="true"></span>
+<h2 id="nw-title">The network</h2>
 <p class="about-lede">Terp Network is a public <strong>proof-of-stake</strong> blockchain built with the Cosmos SDK. Anyone can run a node, verify the history, stake, vote, deploy CosmWasm contracts, or move tokens over IBC — without an account with us and without a bridge operator in the middle.</p>
 <p>It uses two tokens: <strong>TERP</strong> to secure the chain and carry the vote, and <strong>THIOL</strong>, minted every block, to pay for transactions. Mainnet is <code>morocco-1</code>; the testnet is <code>120u-1</code>. Source is public.</p>
-
-<h3>The stack</h3>
-<p>Eight parts, each open to inspect and use directly.</p>
-<dl class="ov-stack">
-<dt><a href="#network/consensus">Validators and nodes</a></dt><dd>Validators agree on each block with CometBFT. Any node can join, replay every block and serve the chain.</dd>
-<dt><a href="#network/tokens">Two tokens</a></dt><dd>TERP secures the chain and carries the vote. THIOL is minted every block and pays for transactions.</dd>
-<dt><a href="#network/governance">Governance</a></dt><dd>Stakers vote in public on parameters, community-pool spending and software upgrades.</dd>
-<dt><a href="#network/cosmwasm">CosmWasm contracts</a></dt><dd>Rust programs compiled to WebAssembly and run by every validator, plus native tokens anyone can create.</dd>
-<dt><a href="#network/accounts">Smart accounts</a></dt><dd>An account can set its own signing rules: extra keys, contract checks, limits on what it may send.</dd>
-<dt><a href="#network/ibc">IBC</a></dt><dd>Light clients move tokens and messages between chains, with no bridge operator to trust.</dd>
-<dt><a href="/resources">Public APIs and archives</a></dt><dd><code>api.terp.network</code> and <code>rpc.terp.network</code> answer any query. Node snapshots and their history are published for anyone.</dd>
-<dt><a href="/eco">Wallets and apps</a></dt><dd>Connect a wallet from the top of any page. The apps under Eco run on the same public chain.</dd>
-</dl>
-<p class="ov-ids">Mainnet <code>morocco-1</code> · testnet <code>120u-1</code> · source at <a href="https://github.com/terpnetwork">github.com/terpnetwork</a></p>
-
-<div class="about-cta">
-<a href="/eco">Use the network</a>
-<a href="/resources">Run a node</a>
-<a href="https://docs.terp.network">Read the docs</a>
-<a href="https://discord.terp.network">Join the discussion</a>
-</div>
-</section>
-
-<section class="about-tab nw" id="about-network" aria-labelledby="nw-title">
-<h2 id="nw-title">The network</h2>
-<p class="nw-lede">Terp Network is a proof-of-stake blockchain built with the Cosmos SDK. Validators agree on each block with CometBFT, programs run as CosmWasm contracts, and IBC connects it to other chains. Here is what it can do, with live figures from mainnet <code>morocco-1</code>.</p>
 
 <div class="nw-live">
 <div><b data-live="height">—</b><span>Block height</span></div>
@@ -216,11 +229,31 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 </div>
 <p class="nw-status" data-live="status" aria-live="polite">Live figures load from api.terp.network.</p>
 
-<div class="nw-shield" data-shield data-shield-hash="network" data-shield-label="Network topics">
-<div data-shield-orbs></div>
+<div class="nw-shield cat-shield">
+<h3 class="cat-h">The stack</h3>
+<figure class="cat-fig cat-fig-overview tf-scope" data-cat-fig="/public/figures/stack/overview.svg" hidden></figure>
+<p class="cat-intro">Eight parts, each open to inspect and use directly.</p>
+<div class="tf-scope cat-overview">
+<div class="cat-summary">
+<h3 class="cat-title" hidden></h3>
+<dl class="ov-stack">
+<dt data-tf="consensus"><a href="#consensus">Validators and nodes</a></dt><dd data-tf="consensus">Validators agree on each block with CometBFT. Any node can join, replay every block and serve the chain.</dd>
+<dt data-tf="tokens"><a href="#tokens">Two tokens</a></dt><dd data-tf="tokens">TERP secures the chain and carries the vote. THIOL is minted every block and pays for transactions.</dd>
+<dt data-tf="governance"><a href="#governance">Governance</a></dt><dd data-tf="governance">Stakers vote in public on parameters, community-pool spending and software upgrades.</dd>
+<dt data-tf="cosmwasm"><a href="#cosmwasm">CosmWasm contracts</a></dt><dd data-tf="cosmwasm">Rust programs compiled to WebAssembly and run by every validator, plus native tokens anyone can create.</dd>
+<dt data-tf="accounts"><a href="#accounts">Smart accounts</a></dt><dd data-tf="accounts">An account can set its own signing rules: extra keys, contract checks, limits on what it may send.</dd>
+<dt data-tf="ibc"><a href="#ibc">IBC</a></dt><dd data-tf="ibc">Light clients move tokens and messages between chains, with no bridge operator to trust.</dd>
+<dt data-tf="apis"><a href="#apis">Public APIs and archives</a></dt><dd data-tf="apis"><code>api.terp.network</code> and <code>rpc.terp.network</code> answer any query. Node snapshots and their history are published for anyone.</dd>
+<dt data-tf="apps"><a href="#apps">Wallets and apps</a></dt><dd data-tf="apps">Connect a wallet from the top of any page. The apps under Eco run on the same public chain.</dd>
+</dl>
+</div>
+</div>
+<div class="cat-details">
 
-<section data-shield-panel="consensus" data-shield-title="Consensus" id="nw-consensus" aria-label="Consensus and staking">
+
+<section data-cat-panel="consensus" id="nw-consensus" aria-label="Consensus and staking">
 <h3>Consensus and staking</h3>
+<figure class="cat-fig tf-scope" data-cat-fig="/public/figures/stack/consensus.svg" hidden></figure>
 <p>Validators propose blocks and vote on them in two rounds. A block is final once validators holding more than two-thirds of the staked TERP have signed it, so the chain stays safe as long as less than one-third of that stake misbehaves. A validator caught signing two different blocks at the same height is jailed and slashed.</p>
 <p>Anyone holding TERP can delegate it to a validator and share in its rewards. Staked TERP is also voting weight in governance.</p>
 <dl class="nw-facts">
@@ -235,16 +268,139 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 <p class="nw-more"><a class="nw-btn" href="/resources#snapshot-history">Snapshot history</a></p>
 </section>
 
-<section data-shield-panel="tokens" data-shield-title="Two tokens" id="nw-tokens" aria-label="Two tokens">
+<section data-cat-panel="tokens" id="nw-tokens" aria-label="Two tokens">
 <h3>Two tokens</h3>
-<p><strong>TERP</strong> (<code>uterp</code>) secures the chain: validators bond it, delegators stake it, and governance deposits are paid in it. <strong>THIOL</strong> (<code>uthiol</code>) is the working token: the chain mints it every block and it pays for transactions. How both started is on the <a href="#genesis">Genesis</a> tab.</p>
+<div class="tf-pair tf-pair--wide tf-scope">
+<figure class="tf-fig" id="fig-value" aria-labelledby="fig-value-cap">
+<div class="tf-fig-scroll">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="610" viewBox="0 0 720 610" role="img" aria-labelledby="fig-value-title fig-value-desc">
+  <title id="fig-value-title">Value design: TERP secures and votes, THIOL works and pays</title>
+  <desc id="fig-value-desc">TERP is bonded by validators or delegated by holders, and staked TERP is voting weight in governance. Governance changes parameters, community-pool spending and software upgrades. The chain mints THIOL every block, and THIOL pays transaction fees. A block is final once validators holding more than two-thirds of staked TERP have signed it.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg">
+    <defs>
+      <pattern id="fig-value-hatch" width="6" height="6" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="6" x2="6" y2="0" stroke="currentColor" stroke-opacity=".22" stroke-width=".5"/>
+      </pattern>
+      <pattern id="fig-value-stipple" width="7" height="7" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r=".7" fill="currentColor" opacity=".35"/>
+        <circle cx="5" cy="4.5" r=".5" fill="currentColor" opacity=".25"/>
+      </pattern>
+      <marker id="fig-value-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L8 4 L0 8 Z" fill="currentColor"/>
+      </marker>
+      <marker id="fig-value-arrow-accent" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L8 4 L0 8 Z" class="tf-accent-fill"/>
+      </marker>
+    </defs>
+    <text x="696" y="27" text-anchor="end" font-size="11" letter-spacing="1.2" class="tf-mono tf-dim">MOROCCO-1</text>
+    <line x1="24" y1="39" x2="696" y2="39" stroke="currentColor" stroke-opacity=".32" stroke-width=".6"/>
+
+    <g class="tf-layer" data-tf="v-terp">
+      <circle cx="130" cy="100" r="36" fill="url(#fig-value-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".9"/>
+      <circle cx="130" cy="100" r="30" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      <text x="130" y="98" text-anchor="middle" font-size="15" letter-spacing=".5">TERP</text>
+      <text x="130" y="113" text-anchor="middle" font-size="10" class="tf-mono tf-dim">uterp</text>
+      <text x="116" y="158" text-anchor="end" font-size="11.5" class="tf-italic tf-dim">stake and voice</text>
+    </g>
+
+    <g class="tf-layer" data-tf="v-thiol">
+      <circle cx="590" cy="100" r="36" fill="url(#fig-value-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".9"/>
+      <circle cx="590" cy="100" r="30" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      <text x="590" y="98" text-anchor="middle" font-size="16" letter-spacing=".3">THIOL</text>
+      <text x="590" y="113" text-anchor="middle" font-size="10" class="tf-mono tf-dim">uthiol</text>
+      <text x="604" y="158" font-size="11.5" class="tf-italic tf-dim">work and fees</text>
+    </g>
+
+    <g fill="currentColor" fill-opacity=".03" stroke="currentColor" stroke-width=".8">
+      <rect x="298" y="180" width="20" height="20"/>
+      <rect x="324" y="180" width="20" height="20"/>
+      <rect x="350" y="180" width="20" height="20"/>
+      <rect x="376" y="180" width="20" height="20"/>
+      <rect x="402" y="180" width="20" height="20"/>
+    </g>
+    <g stroke="currentColor" stroke-opacity=".45" stroke-width=".5">
+      <line x1="303" y1="186" x2="313" y2="186"/>
+      <line x1="303" y1="191" x2="310" y2="191"/>
+      <line x1="329" y1="186" x2="339" y2="186"/>
+      <line x1="329" y1="191" x2="336" y2="191"/>
+      <line x1="355" y1="186" x2="365" y2="186"/>
+      <line x1="355" y1="191" x2="362" y2="191"/>
+      <line x1="381" y1="186" x2="391" y2="186"/>
+      <line x1="381" y1="191" x2="388" y2="191"/>
+      <line x1="407" y1="186" x2="417" y2="186"/>
+      <line x1="407" y1="191" x2="414" y2="191"/>
+    </g>
+    <text x="360" y="166" text-anchor="middle" font-size="11.5" class="tf-italic tf-dim">final above two-thirds of staked TERP</text>
+    <text x="360" y="222" text-anchor="middle" font-size="11.5" class="tf-mono tf-dim">morocco-1</text>
+
+    <g class="tf-layer" data-tf="v-stake">
+    <rect x="44" y="330" width="216" height="62" fill="currentColor" fill-opacity=".025" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+    <text x="62" y="352" font-size="16">Staking</text>
+    <text x="62" y="370" font-size="11.5" class="tf-dim">validators bond TERP</text>
+    <text x="62" y="383" font-size="11.5" class="tf-dim">holders delegate it</text>
+    <text x="62" y="408" font-size="11.5" class="tf-italic tf-dim">rewards shared with delegators</text>
+    </g>
+
+    <g class="tf-layer" data-tf="v-tx">
+    <rect x="460" y="330" width="216" height="62" fill="currentColor" fill-opacity=".025" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+    <text x="478" y="352" font-size="16">Transactions</text>
+    <text x="478" y="370" font-size="11.5" class="tf-dim">paid in THIOL</text>
+    <text x="478" y="383" font-size="11.5" class="tf-dim">the working token</text>
+    </g>
+
+    <g class="tf-layer" data-tf="v-gov">
+    <rect x="230" y="462" width="260" height="76" fill="currentColor" fill-opacity=".025" stroke="currentColor" stroke-opacity=".5" stroke-width=".7"/>
+    <text x="248" y="484" font-size="16">Governance</text>
+    <text x="248" y="502" font-size="11.5" class="tf-dim">staked TERP is voting weight</text>
+    <text x="248" y="515" font-size="11.5" class="tf-dim">deposits are paid in TERP</text>
+    <text x="248" y="528" font-size="11.5" class="tf-dim">parameters · community pool · upgrades</text>
+    </g>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".6" stroke-width=".9">
+      <line x1="130" y1="136" x2="130" y2="330" marker-end="url(#fig-value-arrow)"/>
+      <path d="M260 361 L280 361 L280 200 L298 200" marker-end="url(#fig-value-arrow)"/>
+      <path d="M422 188 L500 188 L500 100 L554 100" marker-end="url(#fig-value-arrow)"/>
+      <line x1="590" y1="136" x2="590" y2="330" marker-end="url(#fig-value-arrow)"/>
+      <path d="M460 361 L440 361 L440 200 L422 200" marker-end="url(#fig-value-arrow)"/>
+      <path d="M420 462 L420 200" marker-end="url(#fig-value-arrow)"/>
+    </g>
+    <path d="M200 392 L200 430 L280 430 L280 462" fill="none" class="tf-accent" stroke-width="1.1" marker-end="url(#fig-value-arrow-accent)"/>
+
+    <text x="142" y="240" font-size="11.5" class="tf-italic tf-dim">bond / delegate</text>
+    <text x="288" y="300" font-size="11.5" class="tf-italic tf-dim">secures</text>
+    <text x="510" y="180" font-size="11.5" class="tf-italic tf-dim">minted each block</text>
+    <text x="600" y="240" font-size="11.5" class="tf-italic tf-dim">pays fees</text>
+    <text x="448" y="300" font-size="11.5" class="tf-italic tf-dim">transactions</text>
+    <text x="210" y="423" font-size="11.5" class="tf-italic tf-dim">voting weight</text>
+    <text x="402" y="335" text-anchor="middle" font-size="11.5" class="tf-italic tf-dim" transform="rotate(-90 402 335)">params · community pool · upgrades</text>
+
+    <line x1="24" y1="566" x2="696" y2="566" stroke="currentColor" stroke-opacity=".32" stroke-width=".6"/>
+    <text x="24" y="586" font-size="12.5" class="tf-italic tf-dim">TERP secures the chain and carries the vote; THIOL is minted each block and pays for transactions.</text>
+  </g>
+</svg>
+</div>
+<figcaption id="fig-value-cap"><b>The value design.</b> TERP is bonded or delegated; staked TERP is voting weight. The chain mints THIOL every block, and THIOL pays transaction fees.</figcaption>
+</figure>
+<p><strong data-tf="v-terp">TERP</strong> (<code>uterp</code>) secures the chain: <span data-tf="v-stake">validators bond it, delegators stake it</span>, and <span data-tf="v-gov">governance deposits are paid in it</span>. <strong data-tf="v-thiol">THIOL</strong> (<code>uthiol</code>) is the working token: the chain mints it every block and <span data-tf="v-tx">it pays for transactions</span>. How both started is on the <a href="#genesis">Genesis</a> tab.</p>
+</div>
 <dl class="nw-facts">
 <dt>THIOL inflation now</dt><dd><span data-live="inflation">—</span><br><small>Adjusts between <span data-live="inflation-range">—</span> a year with the share of TERP staked.</small></dd>
 </dl>
+
 </section>
 
-<section data-shield-panel="governance" data-shield-title="Governance" id="nw-governance" aria-label="Governance">
+<section data-cat-panel="governance" id="nw-governance" aria-label="Governance">
 <h3>Governance</h3>
+<figure class="cat-fig tf-scope" data-cat-fig="/public/figures/stack/governance.svg" hidden></figure>
 <p>Changes to the chain are proposed and voted on openly. TERP stakers vote Yes, No, Abstain or No with veto on parameter changes, community-pool spending and software upgrades; a validator's vote counts for its delegators unless they vote themselves. A passed upgrade names a halt height, and node operators switch binaries there, often automatically with Cosmovisor.</p>
 <dl class="nw-facts">
 <dt>Deposit to open voting</dt><dd><span data-live="gov-deposit">—</span></dd>
@@ -256,8 +412,9 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 <p class="nw-more"><a class="nw-btn" href="/resources#upgrades">Every upgrade by halt height</a></p>
 </section>
 
-<section data-shield-panel="cosmwasm" data-shield-title="CosmWasm" id="nw-cosmwasm" aria-label="CosmWasm smart contracts">
+<section data-cat-panel="cosmwasm" id="nw-cosmwasm" aria-label="CosmWasm smart contracts">
 <h3>CosmWasm smart contracts</h3>
+<figure class="cat-fig tf-scope" data-cat-fig="/public/figures/stack/cosmwasm.svg" hidden></figure>
 <p>Programs are written in Rust, compiled to WebAssembly and run by every validator. A contract can hold funds, call other contracts and send IBC messages. Any account can also create its own native token with <strong>tokenfactory</strong>; it behaves like any other coin in balances, transfers and IBC.</p>
 <dl class="nw-facts">
 <dt>Who can upload code</dt><dd><span data-live="wasm-upload">—</span></dd>
@@ -267,8 +424,9 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 </dl>
 </section>
 
-<section data-shield-panel="accounts" data-shield-title="Smart accounts" id="nw-accounts" aria-label="Smart accounts and authenticators">
+<section data-cat-panel="accounts" id="nw-accounts" aria-label="Smart accounts and authenticators">
 <h3>Smart accounts and authenticators</h3>
+<figure class="cat-fig tf-scope" data-cat-fig="/public/figures/stack/accounts.svg" hidden></figure>
 <p>Any account can register <strong>authenticators</strong>: rules that decide which signatures and which messages the account accepts. A transaction names the authenticator it wants checked. The building blocks are:</p>
 <ul>
 <li><strong>SignatureVerification</strong>: a public key that may sign for the account, such as a second device key.</li>
@@ -283,8 +441,9 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 </dl>
 </section>
 
-<section data-shield-panel="ibc" data-shield-title="IBC" id="nw-ibc" aria-label="IBC">
+<section data-cat-panel="ibc" id="nw-ibc" aria-label="IBC">
 <h3>IBC</h3>
+<figure class="cat-fig tf-scope" data-cat-fig="/public/figures/stack/ibc.svg" hidden></figure>
 <p>The Inter-Blockchain Communication protocol moves tokens and messages between chains. Each side runs a light client of the other and checks its consensus proofs, so there is no bridge operator to trust. Tokens arriving from another chain appear as <code>ibc/…</code> denoms. With <strong>Interchain Accounts</strong>, an account or contract on one chain can control an account on another.</p>
 <dl class="nw-facts">
 <dt>Open transfer channels</dt><dd><span data-live="channels">—</span></dd>
@@ -293,10 +452,32 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 </dl>
 <p class="nw-more"><a class="nw-btn" href="/ibc">Move tokens over IBC</a></p>
 </section>
+
+<section data-cat-panel="apis" id="nw-apis" aria-label="Public APIs and archives">
+<h3>Public APIs and archives</h3>
+<figure class="cat-fig tf-scope" data-cat-fig="/public/figures/stack/apis.svg" hidden></figure>
+<p class="nw-more"><a class="nw-btn" href="/resources">Run a node</a> <a class="nw-btn" href="/resources#snapshot-history">Snapshot history</a></p>
+</section>
+
+<section data-cat-panel="apps" id="nw-apps" aria-label="Wallets and apps">
+<h3>Wallets and apps</h3>
+<figure class="cat-fig tf-scope" data-cat-fig="/public/figures/stack/wallets.svg" hidden></figure>
+<p class="nw-more"><a class="nw-btn" href="/eco">Use the network</a></p>
+</section>
+</div>
 </div>
 
 <p class="nw-src">Live figures: <code>api.terp.network</code> (staking, bank, mint, gov, IBC, wasm and smart-account queries) with <code>rpc.terp.network</code> as the fallback for the block height.</p>
+<p class="ov-ids">Mainnet <code>morocco-1</code> · testnet <code>120u-1</code> · source at <a href="https://github.com/terpnetwork">github.com/terpnetwork</a></p>
+
+<div class="about-cta">
+<a href="/eco">Use the network</a>
+<a href="/resources">Run a node</a>
+<a href="https://docs.terp.network">Read the docs</a>
+<a href="https://discord.terp.network">Join the discussion</a>
+</div>
 </section>
+
 
 <section class="about-tab gd" id="about-genesis" aria-labelledby="gd-title">
 <h2 id="gd-title">Genesis &amp; distribution</h2>

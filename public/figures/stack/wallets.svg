@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="600" viewBox="0 0 720 600" role="img" aria-labelledby="fig-wallets-title fig-wallets-desc">
+  <title id="fig-wallets-title">Wallets, self custody, and open access</title>
+  <desc id="fig-wallets-desc">Keys are generated on any device and stay with the user. Your key signs actions, and apps authenticate the signature without an account approval. Signed transactions settle on morocco-1. Front ends read public queries from the chain. Anyone can connect, and any front end or any node can serve the network.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg">
+    <defs>
+      <pattern id="fig-wallets-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="7" x2="7" y2="0" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      </pattern>
+      <pattern id="fig-wallets-stipple" width="7" height="7" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r=".7" fill="currentColor" opacity=".3"/>
+        <circle cx="5" cy="4.5" r=".5" fill="currentColor" opacity=".2"/>
+      </pattern>
+      <marker id="fig-wallets-arrow" markerWidth="7" markerHeight="7" refX="6.5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+        <path d="M0 0 L7 3.5 L0 7 Z" fill="currentColor" opacity=".5"/>
+      </marker>
+    </defs>
+
+    <g fill="none" stroke="currentColor" stroke-opacity=".42" stroke-width=".6">
+      <path d="M105 140 L206 163" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M157 95 L209 141" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M175 205 L209 198" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M332 170 L377 170" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M491 170 L533 170" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M595 230 L595 338" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M495 440 L454 440" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M270 232 L270 246" marker-end="url(#fig-wallets-arrow)"/>
+      <path d="M642 338 L634 352" marker-end="url(#fig-wallets-arrow)"/>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-device" tabindex="0" role="button" aria-label="Keys generated on any device">
+      <text x="100" y="24" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">keys generated</text>
+      <text x="100" y="38" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">on any device</text>
+      <circle cx="75" cy="140" r="30" fill="url(#fig-wallets-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="75" cy="140" r="23" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="75" y="144" text-anchor="middle" font-size="10.5" class="tf-mono">phone</text>
+      <circle cx="125" cy="85" r="32" fill="url(#fig-wallets-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="125" cy="85" r="24" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="125" y="89" text-anchor="middle" font-size="10.5" class="tf-mono">laptop</text>
+      <circle cx="145" cy="205" r="30" fill="url(#fig-wallets-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="145" cy="205" r="23" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="145" y="208" text-anchor="middle" font-size="8.5" class="tf-mono">hardware</text>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-key" tabindex="0" role="button" aria-label="Your key, self custody">
+      <circle cx="270" cy="170" r="62" fill="url(#fig-wallets-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="270" cy="170" r="54" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="270" y="166" text-anchor="middle" font-size="16">your key</text>
+      <text x="270" y="182" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">held by you</text>
+      <text x="270" y="197" text-anchor="middle" font-size="10" class="tf-mono tf-dim">on your device</text>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-custody" tabindex="0" role="button" aria-label="Self custody, key stays with the user">
+      <circle cx="270" cy="294" r="46" fill="url(#fig-wallets-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="270" cy="294" r="39" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="270" y="291" text-anchor="middle" font-size="9.5" class="tf-mono">self custody</text>
+      <text x="270" y="305" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">key stays</text>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-sign" tabindex="0" role="button" aria-label="Your key signs actions">
+      <circle cx="435" cy="170" r="56" fill="url(#fig-wallets-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="435" cy="170" r="48" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="435" y="166" text-anchor="middle" font-size="16">signs</text>
+      <text x="435" y="182" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">actions · tx</text>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-app" tabindex="0" role="button" aria-label="Apps authenticate the signature">
+      <circle cx="595" cy="170" r="60" fill="url(#fig-wallets-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="595" cy="170" r="52" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="595" y="166" text-anchor="middle" font-size="16">apps</text>
+      <text x="595" y="182" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">authenticate</text>
+      <text x="595" y="197" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">signature</text>
+      <text x="595" y="212" text-anchor="middle" font-size="8.5" class="tf-mono tf-dim">no approval</text>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-chain" tabindex="0" role="button" aria-label="morocco-1 public chain">
+      <circle cx="595" cy="440" r="100" fill="currentColor" fill-opacity=".02" stroke="currentColor" stroke-opacity=".4" stroke-width=".7" stroke-dasharray="4 4"/>
+      <text x="595" y="430" text-anchor="middle" font-size="16">morocco-1</text>
+      <text x="595" y="446" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">public chain</text>
+      <text x="595" y="461" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">no gatekeeper</text>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-read" tabindex="0" role="button" aria-label="Front ends read public queries from the chain">
+      <circle cx="390" cy="440" r="60" fill="url(#fig-wallets-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="390" cy="440" r="52" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="390" y="436" text-anchor="middle" font-size="16">front ends</text>
+      <text x="390" y="452" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">public queries</text>
+      <text x="390" y="467" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">any node</text>
+      <text x="474" y="430" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">reads</text>
+    </g>
+
+    <g class="tf-layer" data-tf="wa-open" tabindex="0" role="button" aria-label="Permissionless access and censorship resistance">
+      <text x="664" y="238" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">permissionless</text>
+      <circle cx="664" cy="296" r="48" fill="url(#fig-wallets-stipple)" stroke="currentColor" stroke-opacity=".55" stroke-width=".7"/>
+      <circle cx="664" cy="296" r="41" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="664" y="293" text-anchor="middle" font-size="10.5" class="tf-mono">anyone</text>
+      <text x="664" y="307" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">can connect</text>
+      <text x="595" y="558" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">censorship resistant</text>
+      <text x="595" y="572" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">any front end / any node</text>
+    </g>
+  </g>
+</svg>

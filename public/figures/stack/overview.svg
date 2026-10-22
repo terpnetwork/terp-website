@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="640" viewBox="0 0 720 640" role="img" aria-labelledby="fig-overview-title fig-overview-desc">
+  <title id="fig-overview-title">The Terp stack as an eight-orb shield</title>
+  <desc id="fig-overview-desc">Eight orbs trace a shield diamond from users at the top to nodes at the bottom. Wallets and apps sit at the top point. Smart accounts and public APIs and archives sit on the next row. CosmWasm and IBC sit in the wide middle. Governance and the two tokens sit below them. Validators and nodes sit at the bottom point. Faint hairlines link the outline and each row.</desc>
+  <style>
+    .tf-svg { color: var(--tn-text, CanvasText); fill: currentColor; font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif; }
+    .tf-mono { font-family: var(--tn-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); }
+    .tf-dim { opacity: .58; }
+    .tf-faint { opacity: .36; }
+    .tf-accent { stroke: var(--tn-teal, currentColor); }
+    .tf-accent-fill { fill: var(--tn-teal, currentColor); }
+    .tf-italic { font-style: italic; }
+  </style>
+  <g class="tf-svg">
+    <defs>
+      <pattern id="fig-overview-hatch" width="7" height="7" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="7" x2="7" y2="0" stroke="currentColor" stroke-opacity=".18" stroke-width=".5"/>
+      </pattern>
+      <pattern id="fig-overview-stipple" width="7" height="7" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r=".7" fill="currentColor" opacity=".3"/>
+        <circle cx="5" cy="4.5" r=".5" fill="currentColor" opacity=".2"/>
+      </pattern>
+    </defs>
+
+    <path d="M360 14 C500 64 646 184 646 310 C646 462 520 580 360 620 C200 580 74 462 74 310 C74 184 220 64 360 14 Z" fill="none" stroke="currentColor" stroke-opacity=".16" stroke-width=".6"/>
+    <g fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width=".6">
+      <path d="M320.9 114.2 L280.6 149.4 M399.1 114.2 L439.4 149.4"/>
+      <path d="M208.4 228.8 L183.9 262.9 M511.6 228.8 L536.1 262.9"/>
+      <path d="M183.9 357.1 L208.4 391.2 M536.1 357.1 L511.6 391.2"/>
+      <path d="M280.6 470.6 L320.9 505.8 M439.4 470.6 L399.1 505.8"/>
+      <path d="M294 185 L426 185 M208 310 L512 310 M294 435 L426 435"/>
+    </g>
+
+    <text x="268" y="76" text-anchor="end" font-size="10.5" class="tf-mono tf-dim" aria-hidden="true">users</text>
+    <text x="268" y="544" text-anchor="end" font-size="10.5" class="tf-mono tf-dim" aria-hidden="true">nodes</text>
+
+    <g class="tf-layer" data-tf="apps" data-cat-go="apps" tabindex="0" role="link" aria-label="Wallets and apps">
+      <circle cx="360" cy="80" r="52" fill="url(#fig-overview-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="360" cy="80" r="44" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="360" y="76" text-anchor="middle" font-size="16">Wallets</text>
+      <text x="360" y="92" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">and apps</text>
+    </g>
+
+    <g class="tf-layer" data-tf="accounts" data-cat-go="accounts" tabindex="0" role="link" aria-label="Smart accounts">
+      <circle cx="240" cy="185" r="54" fill="url(#fig-overview-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="240" cy="185" r="46" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="240" y="181" text-anchor="middle" font-size="16">Smart</text>
+      <text x="240" y="197" text-anchor="middle" font-size="16">accounts</text>
+    </g>
+
+    <g class="tf-layer" data-tf="apis" data-cat-go="apis" tabindex="0" role="link" aria-label="Public APIs and archives">
+      <circle cx="480" cy="185" r="54" fill="url(#fig-overview-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="480" cy="185" r="46" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="480" y="181" text-anchor="middle" font-size="16">APIs</text>
+      <text x="480" y="197" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">and archives</text>
+    </g>
+
+    <g class="tf-layer" data-tf="cosmwasm" data-cat-go="cosmwasm" tabindex="0" role="link" aria-label="CosmWasm contracts">
+      <circle cx="150" cy="310" r="58" fill="url(#fig-overview-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="150" cy="310" r="50" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="150" y="306" text-anchor="middle" font-size="16">CosmWasm</text>
+      <text x="150" y="322" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">contracts</text>
+    </g>
+
+    <g class="tf-layer" data-tf="ibc" data-cat-go="ibc" tabindex="0" role="link" aria-label="IBC">
+      <circle cx="570" cy="310" r="58" fill="url(#fig-overview-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="570" cy="310" r="50" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="570" y="306" text-anchor="middle" font-size="16">IBC</text>
+      <text x="570" y="322" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">light clients</text>
+    </g>
+
+    <g class="tf-layer" data-tf="governance" data-cat-go="governance" tabindex="0" role="link" aria-label="Governance">
+      <circle cx="240" cy="435" r="54" fill="url(#fig-overview-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="240" cy="435" r="46" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="240" y="431" text-anchor="middle" font-size="16">Governance</text>
+      <text x="240" y="447" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">gov module</text>
+    </g>
+
+    <g class="tf-layer" data-tf="tokens" data-cat-go="tokens" tabindex="0" role="link" aria-label="Two tokens">
+      <circle cx="480" cy="435" r="54" fill="url(#fig-overview-stipple)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="480" cy="435" r="46" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="480" y="431" text-anchor="middle" font-size="16">Two tokens</text>
+      <text x="480" y="447" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">TERP · THIOL</text>
+    </g>
+
+    <g class="tf-layer" data-tf="consensus" data-cat-go="consensus" tabindex="0" role="link" aria-label="Validators and nodes">
+      <circle cx="360" cy="540" r="52" fill="url(#fig-overview-hatch)" stroke="currentColor" stroke-opacity=".6" stroke-width=".8"/>
+      <circle cx="360" cy="540" r="44" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width=".5"/>
+      <text x="360" y="536" text-anchor="middle" font-size="16">Validators</text>
+      <text x="360" y="552" text-anchor="middle" font-size="10.5" class="tf-mono tf-dim">and nodes</text>
+    </g>
+  </g>
+</svg>

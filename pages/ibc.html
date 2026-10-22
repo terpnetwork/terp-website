@@ -146,12 +146,16 @@
       font-weight: 500;
       border-radius: var(--tn-radius-ctl);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background-color var(--tnw-hover-dur, 140ms) linear, border-color var(--tnw-hover-dur, 140ms) linear, color var(--tnw-hover-dur, 140ms) linear;
     }
-    .plane-tab:hover {
-      border-color: rgb(var(--tn-teal-rgb) / 0.4);
+    /* Whole tab highlights; keyboard focus matches hover (tokens in public/world.css). */
+    .plane-tab:is(:hover, :focus-visible) {
+      background: var(--tnw-hover-wash, rgb(var(--tn-teal-rgb) / 0.1));
+      border-color: var(--tnw-hover-ring, rgb(var(--tn-teal-rgb) / 0.45));
       color: var(--tn-teal);
     }
+    .plane-tab:focus-visible { outline: 1px solid var(--tnw-focus-ring, var(--tn-teal)); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { .plane-tab { transition: none; } }
     .plane-tab.active {
       background: rgb(var(--tn-teal-rgb) / 0.14);
       border-color: rgb(var(--tn-teal-rgb) / 0.45);
