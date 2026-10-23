@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Front-end JS packages · Terp Network</title>
+<link rel="stylesheet" href="/public/global.css"/>
+<script>
+/* Theme before first paint: the parent page's theme, ?theme=, or the saved choice.
+   Old ids (default, light, sandman) map to their WD names. */
+(function () {
+  var OLD = { 'default': 'pale-lithium-green', light: 'coral-ember', sandman: 'apricot-glow' };
+  var t = '';
+  try { t = window.parent !== window ? window.parent.document.documentElement.getAttribute('data-theme') : ''; } catch (e) {}
+  try { t = t || new URLSearchParams(location.search).get('theme') || localStorage.getItem('tn-theme') || ''; } catch (e) {}
+  t = OLD[t] || t || 'pale-lithium-green';
+  var L = { 'coral-ember': 1, 'apricot-glow': 1, 'lime-chiffon': 1, 'pearl-white': 1 };
+  var r = document.documentElement;
+  r.setAttribute('data-theme', t);
+  r.setAttribute('data-tn-mode', L[t] ? 'light' : 'dark');
+  // Match the frame's colour scheme, or the browser paints an opaque backdrop behind the page.
+  r.style.colorScheme = L[t] ? 'light' : 'dark';
+  try { if (window.self !== window.top || /[?&]embed=1/.test(location.search)) r.classList.add('is-embed'); } catch (e) { r.classList.add('is-embed'); }
+})();
+</script>
+<style>
+html, body { height: 100%; }
+body { margin: 0; font-family: var(--tn-font); font-size: var(--tn-size-small); color: var(--tn-text); background: var(--tn-canvas); overflow: hidden; }
+html.is-embed, html.is-embed body { background: transparent; }
+.rc { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; grid-template-rows: auto minmax(0, 1fr); height: 100%; gap: 0 1rem; padding: 0.5rem; box-sizing: border-box; }
+.rc-bar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; padding-bottom: 0.5rem; }
+.rc-depth { display: inline-flex; align-items: center; gap: 0.25rem; }
+.rc-roots { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.rc-bar .snap-btn { gap: 0.4rem; }
+.rc-root { padding-left: 0.4rem; }
+.rc-dot { width: 1.05rem; height: 1.05rem; border-radius: var(--tn-radius-ctl); display: grid; place-items: center; font-size: 0.6rem; font-family: var(--tn-font-mono); color: var(--tn-on-accent); background: var(--tn-teal); }
+.rc-root[aria-checked="false"] .rc-dot { background: rgb(var(--tn-tint-rgb) / 0.18); color: var(--tn-text); }
+.rc-n { color: var(--tn-text-dim); font-family: var(--tn-font-mono); }
+.rc-ctl { font: inherit; font-size: var(--tn-size-label); color: var(--tn-text); background: transparent; border: 1px solid rgb(var(--tn-tint-rgb) / 0.16); border-radius: var(--tn-radius-ctl); padding: 0.3rem 0.55rem; }
+input.rc-ctl { width: 12rem; min-height: 2.25rem; box-sizing: border-box; background: rgb(var(--tn-shade-rgb) / 0.4); }
+.rc-stage { position: relative; min-height: 0; }
+#rcCanvas { width: 100%; height: 100%; display: block; border-radius: var(--tn-radius); }
+.rc-side { min-height: 0; overflow: auto; border-left: 1px solid rgb(var(--tn-tint-rgb) / 0.1); padding: 0 0 0 0.9rem; }
+.rc-side h2 { font-size: var(--tn-size-heading); color: var(--tn-mint); font-weight: var(--tn-font-weight-medium); margin: 0.2rem 0 0.4rem; word-break: break-word; }
+.rc-side h3 { font-size: var(--tn-size-label); text-transform: uppercase; letter-spacing: var(--tn-track-label); color: var(--tn-text-dim); font-weight: var(--tn-font-weight-medium); margin: 0.9rem 0 0.3rem; }
+.rc-side p { margin: 0 0 0.5rem; line-height: var(--tn-line-body); }
+.rc-side code { font-family: var(--tn-font-mono); font-size: 0.92em; }
+.rc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.rc-hit { font: inherit; font-family: var(--tn-font-mono); font-size: 0.74rem; color: var(--tn-text); background: rgb(var(--tn-tint-rgb) / 0.05); border: 1px solid transparent; border-radius: var(--tn-radius-ctl); padding: 0.1rem 0.5rem; cursor: pointer; }
+.rc-hit:hover { background: var(--tnw-hover-wash, rgb(var(--tn-teal-rgb) / 0.07)); border-color: var(--tnw-hover-ring, rgb(var(--tn-teal-rgb) / 0.45)); }
+.rc-hit.is-shared { border-color: rgb(var(--tn-amber-rgb) / 0.55); }
+table.rc-t { border-collapse: collapse; width: 100%; font-size: 0.76rem; }
+.rc-t th, .rc-t td { text-align: left; padding: 0.18rem 0.3rem; border-bottom: 1px solid rgb(var(--tn-tint-rgb) / 0.08); }
+.rc-t td.num, .rc-t th.num { text-align: right; font-family: var(--tn-font-mono); }
+.rc-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; font-size: var(--tn-size-label); color: var(--tn-text-dim); margin: 0.2rem 0 0.6rem; }
+.rc-legend i { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 50%; vertical-align: -0.1rem; margin-right: 0.3rem; }
+.rc-meta { font-size: var(--tn-size-label); color: var(--tn-text-dim); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 760px) {
+  body { overflow: auto; }
+  .rc { grid-template-columns: 1fr; grid-template-rows: auto 26rem auto; height: auto; }
+  .rc-side { border-left: 0; border-top: 1px solid rgb(var(--tn-tint-rgb) / 0.1); padding: 0.6rem 0 0; }
+  input.rc-ctl { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="rc">
+  <div class="rc-bar">
+    <div class="rc-roots" id="rcRoots" role="radiogroup" aria-label="Root"></div>
+    <input class="rc-ctl" id="rcSearch" type="search" placeholder="Find a package…" aria-label="Find a package" autocomplete="off" list="rcNames"/>
+    <datalist id="rcNames"></datalist>
+    <button type="button" class="snap-btn small" id="rcShared" aria-pressed="false">Shared only</button>
+    <button type="button" class="snap-btn small" id="rcDev" aria-pressed="false">Hide dev-only</button>
+    <div class="rc-depth" id="rcDepth" role="group" aria-label="Collapse depth"><span class="rc-meta">Depth</span><button type="button" class="snap-btn small" data-cap="2" aria-pressed="false">2</button><button type="button" class="snap-btn small" data-cap="3" aria-pressed="true">3</button><button type="button" class="snap-btn small" data-cap="5" aria-pressed="false">5</button><button type="button" class="snap-btn small" data-cap="99" aria-pressed="false">All</button></div>
+  </div>
+  <div class="rc-stage">
+    <canvas id="rcCanvas" tabindex="0" aria-label="Package rings: the front end in the centre, direct dependencies on the first ring, deeper levels further out. Use the search box or the lists to the right to select a package."></canvas>
+  </div>
+  <aside class="rc-side" id="rcSide" aria-live="polite"></aside>
+</div>
+<script>
+(async function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const root = document.documentElement;
+  const OLD = { 'default': 'pale-lithium-green', light: 'coral-ember', sandman: 'apricot-glow' };
+  let D;
+  try { D = await (await fetch('/public/graphs/js-deps.json', { cache: 'no-cache' })).json(); }
+  catch (e) { $('rcSide').innerHTML = '<p>Could not load js-deps.json. Run <code>node scripts/gen-js-deps.mjs</code>.</p>'; return; }
+  const C = D.packages, E = D.edges, R = D.roots;
+  const nShared = (c) => Object.keys(c.r).length;
+  C.forEach((c, i) => { c.i = i; c.k = nShared(c); });
+  // Adjacency per root bit.
+  const out = C.map(() => []), inn = C.map(() => []);
+  for (const [a, b, m] of E) { out[a].push([b, m]); inn[b].push([a, m]); }
+  const params = new URLSearchParams(location.search);
+  let cur = R.find((r) => r.id === params.get('root')) || R[0];
+  let sel = null, query = '', sharedOnly = false, hideDev = false, cap = 3;
+  let layout = [];
+
+  /* ── palette from the live tokens ── */
+  let P = {};
+  function rgbVar(cs, n, fb) { const a = cs.getPropertyValue(n).trim().split(/[\s,/]+/).map(Number).filter((x) => !Number.isNaN(x)); return a.length >= 3 ? a.slice(0, 3) : fb; }
+  function readPalette() {
+    const cs = getComputedStyle(root);
+    P = {
+      accent: rgbVar(cs, '--tn-teal-rgb', [152, 232, 193]), mint: rgbVar(cs, '--tn-mint-rgb', [207, 255, 207]),
+      amber: rgbVar(cs, '--tn-amber-rgb', [255, 184, 108]), purple: rgbVar(cs, '--tn-purple-rgb', [189, 147, 249]),
+      tint: rgbVar(cs, '--tn-tint-rgb', [255, 255, 255]), text: rgbVar(cs, '--tn-text-rgb', [210, 211, 216]),
+      bright: rgbVar(cs, '--tn-text-bright-rgb', [248, 248, 242]), dim: rgbVar(cs, '--tn-text-dim-rgb', [125, 139, 186]),
+      canvas: rgbVar(cs, '--tn-canvas-rgb', [11, 15, 13]),
+      font: cs.getPropertyValue('--tn-font').trim() || 'system-ui', mono: cs.getPropertyValue('--tn-font-mono').trim() || 'monospace',
+    };
+  }
+  const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const LIGHT = { 'coral-ember': 1, 'apricot-glow': 1, 'lime-chiffon': 1, 'pearl-white': 1 };
+  function setTheme(t) {
+    t = OLD[t] || t;
+    if (!t) return;
+    root.setAttribute('data-theme', t);
+    root.setAttribute('data-tn-mode', LIGHT[t] ? 'light' : 'dark');
+    root.style.colorScheme = LIGHT[t] ? 'light' : 'dark';
+    requestAnimationFrame(() => { readPalette(); draw(); });
+  }
+
+  /* ── controls ── */
+  const rootsEl = $('rcRoots');
+  rootsEl.innerHTML = R.map((r) => `<button type="button" class="snap-btn small rc-root" role="radio" data-root="${esc(r.id)}" aria-checked="${r === cur}" tabindex="${r === cur ? 0 : -1}"><span class="rc-dot" aria-hidden="true">${esc(r.label[0].toUpperCase())}</span>${esc(r.label)} <span class="rc-n">${r.counts.total}</span></button>`).join('');
+  const rootBtns = [...rootsEl.querySelectorAll('.rc-root')];
+  function pickRoot(id, focus) {
+    cur = R.find((r) => r.id === id) || cur;
+    rootBtns.forEach((b) => { const on = b.dataset.root === cur.id; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+    if (sel && C[sel].r[cur.id] == null) sel = null;
+    build(); side(); draw();
+  }
+  rootsEl.addEventListener('click', (e) => { const b = e.target.closest('.rc-root'); if (b) pickRoot(b.dataset.root); });
+  rootsEl.addEventListener('keydown', (e) => {
+    const i = rootBtns.findIndex((b) => b.dataset.root === cur.id);
+    const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+    if (d) { e.preventDefault(); pickRoot(rootBtns[(i + d + rootBtns.length) % rootBtns.length].dataset.root, true); }
+  });
+  $('rcNames').innerHTML = [...new Set(C.map((c) => c.n))].sort().map((n) => `<option value="${esc(n)}">`).join('');
+  $('rcSearch').addEventListener('input', (e) => {
+    query = e.target.value.trim().toLowerCase();
+    const exact = layout.find((n) => C[n.i].n.toLowerCase() === query);
+    if (exact) sel = exact.i;
+    side(); draw();
+  });
+  $('rcShared').addEventListener('click', (e) => { sharedOnly = !sharedOnly; e.currentTarget.setAttribute('aria-pressed', String(sharedOnly)); build(); draw(); });
+  $('rcDev').addEventListener('click', (e) => { hideDev = !hideDev; e.currentTarget.setAttribute('aria-pressed', String(hideDev)); build(); draw(); });
+  $('rcDepth').addEventListener('click', (e) => { const b = e.target.closest('[data-cap]'); if (!b) return; cap = +b.dataset.cap; $('rcDepth').querySelectorAll('[data-cap]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); build(); draw(); });
+  $('rcSide').addEventListener('click', (e) => { const b = e.target.closest('[data-pkg]'); if (b) select(+b.dataset.pkg); const r = e.target.closest('[data-goroot]'); if (r) pickRoot(r.dataset.goroot); });
+
+  /* ── layout: rings by depth, each node placed near its parents' angle ── */
+  let W = 0, H = 0, dpr = 1, cx = 0, cy = 0, rings = [];
+  const cv = $('rcCanvas'), ctx = cv.getContext('2d');
+  function build() {
+    const bit = 1 << cur.bit;
+    const inRoot = C.filter((c) => c.r[cur.id] != null);
+    const maxD = Math.max(...inRoot.map((c) => c.r[cur.id]));
+    const ringOf = (c) => Math.min(c.r[cur.id], cap);
+    const nR = Math.min(maxD, cap);
+    rings = [];
+    for (let d = 0; d <= nR; d++) rings.push({ d, label: d === 0 ? 'workspace' : d === 1 ? 'direct' : (d === cap && maxD > cap ? `depth ${d}–${maxD}` : `depth ${d}`), nodes: [] });
+    for (const c of inRoot) { if (sharedOnly && c.k < 2 && c.r[cur.id] > 0) continue; if (hideDev && c.x && c.x[cur.id]) continue; rings[ringOf(c)].nodes.push(c.i); }
+    const ang = new Map();
+    rings.forEach((rg, ri) => {
+      if (ri === 0) { rg.nodes.sort((a, b) => C[a].n.localeCompare(C[b].n)); }
+      else {
+        const key = (i) => { const ps = inn[i].filter(([p, m]) => (m & bit) && ang.has(p)).map(([p]) => ang.get(p)); if (!ps.length) return 9; let sx = 0, sy = 0; ps.forEach((a) => { sx += Math.cos(a); sy += Math.sin(a); }); return (Math.atan2(sy, sx) + Math.PI * 2.5) % (Math.PI * 2); };
+        const ks = new Map(rg.nodes.map((i) => [i, key(i)]));
+        rg.nodes.sort((a, b) => ks.get(a) - ks.get(b) || C[a].n.localeCompare(C[b].n));
+      }
+      rg.nodes.forEach((i, j) => ang.set(i, -Math.PI / 2 + (j + 0.5) / rg.nodes.length * Math.PI * 2));
+    });
+    // dependents within this root → size
+    layout = [];
+    rings.forEach((rg, ri) => rg.nodes.forEach((i) => {
+      const deg = inn[i].filter(([, m]) => m & bit).length;
+      layout.push({ i, ring: ri, a: ang.get(i), deg });
+    }));
+    resize();
+  }
+  function resize() {
+    const r = cv.getBoundingClientRect(); dpr = window.devicePixelRatio || 1;
+    W = Math.max(200, r.width); H = Math.max(200, r.height);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cx = W / 2; cy = H / 2;
+    const Rmax = Math.min(W, H) / 2 - 18, R0 = Math.max(26, Rmax * 0.16), n = rings.length - 1;
+    rings.forEach((rg, ri) => { rg.r = ri === 0 ? R0 * 0.62 : R0 + (Rmax - R0) * (n <= 1 ? 1 : Math.pow((ri - 1) / (n - 1), 0.85)); if (ri > 0 && n === 1) rg.r = Rmax; });
+    const maxDeg = Math.max(1, ...layout.map((n) => n.deg));
+    for (const n of layout) {
+      const rg = rings[n.ring], circ = 2 * Math.PI * rg.r, slot = circ / Math.max(1, rg.nodes.length);
+      n.x = cx + Math.cos(n.a) * rg.r; n.y = cy + Math.sin(n.a) * rg.r;
+      n.s = Math.max(1.4, Math.min(slot * 0.48 + 1.2, 2 + 7 * Math.sqrt(n.deg / maxDeg)));
+    }
+    draw();
+  }
+  const byIdx = () => new Map(layout.map((n) => [n.i, n]));
+  function matches(i) { return query && C[i].n.toLowerCase().includes(query); }
+
+  function draw() {
+    if (!W || !P.accent) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const bit = 1 << cur.bit, M = byIdx();
+    // rings
+    rings.forEach((rg, ri) => {
+      ctx.beginPath(); ctx.arc(cx, cy, rg.r, 0, Math.PI * 2);
+      ctx.strokeStyle = rgba(P.tint, ri === 0 ? 0.0 : 0.08); ctx.lineWidth = 1; ctx.stroke();
+      if (ri > 0) { ctx.font = `10px ${P.font}`; ctx.fillStyle = rgba(P.dim, 0.95); ctx.textAlign = 'center'; ctx.fillText(`${rg.label} · ${rg.nodes.length}`, cx, cy - rg.r - 5); }
+    });
+    // centre
+    ctx.beginPath(); ctx.arc(cx, cy, rings[0].r + 10, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(P.accent, 0.1); ctx.fill(); ctx.strokeStyle = rgba(P.accent, 0.55); ctx.stroke();
+    ctx.fillStyle = rgba(P.bright, 1); ctx.textAlign = 'center'; ctx.font = `600 13px ${P.font}`; ctx.fillText(cur.label, cx, cy - 2);
+    ctx.font = `10px ${P.mono}`; ctx.fillStyle = rgba(P.dim, 1); ctx.fillText(`${cur.counts.total} packages`, cx, cy + 12);
+    // edges for the selection
+    const hot = new Set();
+    if (sel != null && M.has(sel)) {
+      const s = M.get(sel);
+      ctx.lineWidth = 1;
+      for (const [b, m] of out[sel]) if ((m & bit) && M.has(b)) { const t = M.get(b); hot.add(b); ctx.strokeStyle = rgba(P.accent, 0.55); line(s, t); }
+      for (const [a, m] of inn[sel]) if ((m & bit) && M.has(a)) { const t = M.get(a); hot.add(a); ctx.strokeStyle = rgba(P.purple, 0.5); line(t, s); }
+    }
+    const dimAll = sel != null || query;
+    for (const n of layout) {
+      const c = C[n.i], shared = c.k >= 2, m = matches(n.i), on = n.i === sel || hot.has(n.i) || m, dev = !!(c.x && c.x[cur.id]);
+      const a = (dimAll && !on ? 0.22 : 0.9) * (dev && !on ? 0.55 : 1);
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.s, 0, Math.PI * 2);
+      ctx.fillStyle = rgba(n.ring === 0 ? P.mint : shared ? P.amber : P.accent, a * (n.ring === 0 ? 0.9 : 0.75)); ctx.fill();
+      if (shared && n.s > 2.2) { ctx.lineWidth = 1; ctx.strokeStyle = rgba(P.amber, a); ctx.beginPath(); ctx.arc(n.x, n.y, n.s + 1.6, 0, Math.PI * 2); ctx.stroke(); }
+      if (n.i === sel || m) { ctx.lineWidth = 2; ctx.strokeStyle = rgba(P.bright, 1); ctx.beginPath(); ctx.arc(n.x, n.y, n.s + 3, 0, Math.PI * 2); ctx.stroke(); }
+    }
+    // labels: selection, hits (first 24), and the most-used crates when idle
+    const lab = [];
+    if (sel != null && M.has(sel)) lab.push(M.get(sel));
+    if (query) layout.filter((n) => matches(n.i)).slice(0, 24).forEach((n) => lab.push(n));
+    if (!dimAll) layout.filter((n) => n.ring > 0).sort((a, b) => b.deg - a.deg).slice(0, 14).forEach((n) => lab.push(n));
+    ctx.font = `11px ${P.mono}`; ctx.textBaseline = 'middle';
+    const boxes = [];
+    for (const n of lab) {
+      const t = C[n.i].n, w = ctx.measureText(t).width, right = n.x >= cx;
+      const x = right ? n.x + n.s + 4 : n.x - n.s - 4 - w, y = n.y;
+      if (boxes.some((b) => x < b[2] && x + w > b[0] && Math.abs(y - b[1]) < 12)) continue;
+      boxes.push([x, y, x + w]);
+      ctx.fillStyle = rgba(P.canvas, 0.8); ctx.fillRect(x - 2, y - 7, w + 4, 14);
+      ctx.fillStyle = rgba(n.i === sel ? P.bright : P.text, 1); ctx.textAlign = 'left'; ctx.fillText(t, x, y);
+    }
+    ctx.textBaseline = 'alphabetic';
+  }
+  function line(s, t) { ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.quadraticCurveTo(cx + (s.x + t.x - 2 * cx) * 0.25, cy + (s.y + t.y - 2 * cy) * 0.25, t.x, t.y); ctx.stroke(); }
+
+  function select(i) { sel = i; if (C[i].r[cur.id] == null) { const r = R.find((x) => C[i].r[x.id] != null); if (r) return pickRoot(r.id); } side(); draw(); }
+  cv.addEventListener('click', (e) => {
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    let best = null, bd = 14 * 14;
+    for (const n of layout) { const d = (n.x - x) ** 2 + (n.y - y) ** 2; if (d < bd) { bd = d; best = n; } }
+    sel = best ? best.i : null; side(); draw();
+  });
+  cv.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sel = null; side(); draw(); } });
+
+  /* ── side panel ── */
+  const chip = (i) => `<li><button type="button" class="rc-hit${C[i].k >= 2 ? ' is-shared' : ''}" data-pkg="${i}" title="${esc(C[i].n)} ${esc(C[i].v)}">${esc(C[i].n)}</button></li>`;
+  function side() {
+    const el = $('rcSide'), bit = 1 << cur.bit;
+    const legend = `<div class="rc-legend"><span><i style="background:rgb(var(--tn-mint-rgb))"></i>workspace</span><span><i style="background:rgb(var(--tn-teal-rgb))"></i>only here</span><span><i style="background:rgb(var(--tn-amber-rgb))"></i>shared with another front end</span><span><i style="background:rgb(var(--tn-teal-rgb) / 0.4)"></i>dev-only (faded)</span></div>`;
+    if (sel != null) {
+      const c = C[sel];
+      const deps = out[sel].filter(([, m]) => m & bit).map(([b]) => b), users = inn[sel].filter(([, m]) => m & bit).map(([a]) => a);
+      const where = R.filter((r) => c.r[r.id] != null).map((r) => `<tr><td><button type="button" class="rc-hit" data-goroot="${esc(r.id)}">${esc(r.label)}</button></td><td class="num">${c.r[r.id] === 0 ? 'workspace' : 'depth ' + c.r[r.id]}</td></tr>`).join('');
+      const vers = C.filter((x) => x.n === c.n && x !== c).map((x) => `<code>${esc(x.v)}</code>`);
+      el.innerHTML = `${legend}<h2>${esc(c.n)} <span class="rc-n">${esc(c.v)}</span></h2>
+        ${c.d ? `<p>${esc(c.d)}</p>` : ''}<p class="rc-meta">${c.s === 'registry' ? `<a href="https://www.npmjs.com/package/${c.n.split('/').map(encodeURIComponent).join('/')}" target="_blank" rel="noopener">npm</a>` : c.s === 'workspace' ? 'workspace package' : 'version range only (no lockfile)'}${c.x ? ` · dev-only in ${Object.keys(c.x).map((id) => esc((R.find((r) => r.id === id) || {}).label || id)).join(', ')}` : ''}${vers.length ? ` · other versions in the tree: ${vers.join(', ')}` : ''}</p>
+        <h3>In ${c.k} of ${R.length} front ends</h3><table class="rc-t"><tbody>${where}</tbody></table>
+        <h3>Depends on · ${deps.length}</h3><ul class="rc-list">${deps.slice(0, 60).map(chip).join('')}${deps.length > 60 ? `<li class="rc-meta">and ${deps.length - 60} more</li>` : ''}</ul>
+        <h3>Used by · ${users.length}</h3><ul class="rc-list">${users.slice(0, 60).map(chip).join('')}${users.length > 60 ? `<li class="rc-meta">and ${users.length - 60} more</li>` : ''}</ul>`;
+      return;
+    }
+    if (query) {
+      const hits = C.filter((c) => c.n.toLowerCase().includes(query)).slice(0, 80);
+      el.innerHTML = `${legend}<h3>${hits.length} match${hits.length === 1 ? '' : 'es'}</h3><ul class="rc-list">${hits.map((c) => chip(c.i)).join('')}</ul>`;
+      return;
+    }
+    const pair = R.map((a) => `<tr><th>${esc(a.label)}</th>${R.map((b) => `<td class="num">${C.filter((c) => c.r[a.id] != null && c.r[b.id] != null).length}</td>`).join('')}</tr>`).join('');
+    const most = C.filter((c) => c.s !== 'workspace' && c.k >= Math.min(4, R.length)).sort((a, b) => b.k - a.k || a.n.localeCompare(b.n));
+    const cc = cur.counts;
+    el.innerHTML = `${legend}<h2>${esc(cur.label)}</h2>
+      <p>${cc.total} packages: ${cc.members} workspace ${cc.members === 1 ? 'package' : 'packages'}, ${cc.direct} direct, ${cc.transitive} transitive; ${cc.devOnly} only through dev dependencies.</p>
+      <p class="rc-meta">${cur.url ? `<a href="${esc(cur.url)}" target="_blank" rel="noopener">${esc(cur.url.replace('https://', ''))}</a> · ` : ''}${esc(cur.lockfile)}</p>
+      <h3>Shared packages (rows ∩ columns)</h3>
+      <table class="rc-t"><thead><tr><th></th>${R.map((r) => `<th class="num" title="${esc(r.label)}">${esc(r.label[0].toUpperCase())}</th>`).join('')}</tr></thead><tbody>${pair}</tbody></table>
+      <h3>In ${Math.min(4, R.length)}+ front ends · ${most.length}</h3><ul class="rc-list">${most.slice(0, 60).map((c) => chip(c.i)).join('')}</ul>
+      <p class="rc-meta" style="margin-top:.8rem">${D.counts.packages} unique packages across all front ends, ${D.counts.shared} in two or more. Generated ${esc(D.generated_at)} by <code>scripts/gen-js-deps.mjs</code> from package.json and lockfiles.</p>`;
+  }
+
+  /* ── host page ── */
+  window.addEventListener('message', (ev) => { if (ev.source && ev.source !== window.parent) return; const d = ev.data; if (!d || typeof d !== 'object') return; if (d.theme) setTheme(d.theme); if (d.type === 'graph-refit') resize(); });
+  window.addEventListener('storage', (e) => { if (e.key === 'tn-theme') setTheme(e.newValue); });
+  try { window.parent.addEventListener('tn:theme', (e) => setTheme(e.detail && e.detail.theme)); } catch (e) { /* not same-origin */ }
+  try { if (window.parent !== window) new window.parent.MutationObserver(() => { const pt = window.parent.document.documentElement.getAttribute('data-theme'); if (pt) setTheme(pt); }).observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) { /* not same-origin */ }
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => resize()).observe(cv);
+  readPalette(); build(); side();
+  if (params.get('pkg')) { const c = C.find((x) => x.n === params.get('pkg') && x.r[cur.id] != null); if (c) select(c.i); }
+  window.__jsdeps = { state: () => ({ root: cur.id, cap, rings: rings.map((r) => r.nodes.length), sel: sel != null ? C[sel].n : null, theme: root.getAttribute('data-theme') }) };
+})();
+</script>
+</body>
+</html>

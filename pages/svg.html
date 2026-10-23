@@ -68,7 +68,7 @@
             font-size: var(--tn-size-display);
             font-weight: var(--tn-weight-display);
             color: var(--tn-mint);
-            text-shadow: 0 0 30px rgba(183, 255, 183, 0.07);
+            text-shadow: 0 0 30px rgb(var(--tn-halo-rgb) / 0.07);
             text-align: center;
             margin-bottom: 0.5rem;
             letter-spacing: var(--tn-track-display);
@@ -79,7 +79,7 @@
         .page-subtitle {
             font-size: var(--tn-size-kicker);
             color: var(--tn-kicker);
-            text-shadow: 0 0 3px rgba(71, 50, 102, 0.9);
+            text-shadow: 0 0 3px rgb(var(--tnw-title-shade-rgb) / 0.9);
             text-transform: uppercase;
             letter-spacing: var(--tn-track-label);
             text-align: center;
@@ -643,7 +643,7 @@
         }
 
         .chip-insufficient {
-            color: rgba(255, 120, 120, 0.8);
+            color: rgb(var(--tn-coral-rgb) / 0.8);
             font-size: 0.78rem;
         }
 
@@ -4310,14 +4310,14 @@
                             const d = s.token.native;
                             const bal = BigInt(state.walletBalances?.[d] || "0");
                             const youHave = bal > 0n;
-                            return `<span title="${d}" style="display:inline-block;margin:0.1rem 0.2rem 0.1rem 0;padding:0.12rem 0.4rem;border-radius: var(--tn-radius-ctl);border:1px solid ${youHave ? "rgba(152,232,193,0.45)" : "rgba(255,255,255,0.1)"};background:${youHave ? "rgba(152,232,193,0.12)" : "rgba(0,0,0,0.25)"};font-size:0.68rem;color:${youHave ? "#98e8c1" : "#d2d3d8"};">${denomLabel(d)}${youHave ? " · in wallet" : ""}</span>`;
+                            return `<span title="${d}" style="display:inline-block;margin:0.1rem 0.2rem 0.1rem 0;padding:0.12rem 0.4rem;border-radius: var(--tn-radius-ctl);border:1px solid ${youHave ? "rgb(var(--tn-teal-rgb) / 0.45)" : "rgb(var(--tn-tint-rgb, 255 255 255) / 0.1)"};background:${youHave ? "rgb(var(--tn-teal-rgb) / 0.12)" : "rgb(var(--tn-shade-rgb) / 0.25)"};font-size:0.68rem;color:${youHave ? "var(--tn-teal)" : "var(--tn-text)"};">${denomLabel(d)}${youHave ? " · in wallet" : ""}</span>`;
                         })
                         .join("")
                     : `<span style="color:var(--tn-text-dim);font-size:0.68rem;">no native slop</span>`;
                 return `<div style="padding:0.45rem 0;border-bottom:1px solid rgb(var(--tn-tint-rgb) / 0.05);">
                     <div style="display:flex;justify-content:space-between;gap:0.5rem;align-items:baseline;">
                         <span style="font-family:var(--tn-font-mono);color:var(--tn-teal);font-size:0.72rem;" title="${ss.contract}">${short}</span>
-                        <span style="color:${low ? "#ffb86c" : "#d2d3d8"};font-size:0.72rem;white-space:nowrap;">
+                        <span style="color:${low ? "var(--tn-warn)" : "var(--tn-text)"};font-size:0.72rem;white-space:nowrap;">
                             capacity ${formatCoin(cap, ss.shit || CONFIG.denom)}${low ? " · low" : ""}
                         </span>
                     </div>

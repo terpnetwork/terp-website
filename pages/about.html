@@ -117,7 +117,7 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 .gd .gd-key { list-style: none; margin: 0.25rem 0 0; padding: 0; font-size: 0.9rem; }
 .gd .gd-key li { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.3rem 0; }
 .gd .gd-key i { flex: none; width: 10px; height: 10px; border-radius: 2px; transform: translateY(1px); }
-.gd .gd-key .hatch { background: repeating-linear-gradient(135deg, var(--tn-canvas) 0 2px, var(--tn-success) 2px 4px); }
+.gd .gd-key .hatch { background: repeating-linear-gradient(135deg, var(--tn-canvas) 0 2px, var(--tnw-orb-2, var(--tn-success)) 2px 4px); }
 .gd .gd-scroll { overflow-x: auto; margin: 0.5rem 0; }
 .gd table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .gd th { text-align: left; font-weight: 500; color: var(--tnw-ink-dim, var(--tn-text-muted)); padding: 0.4rem 0.75rem 0.4rem 0; border-bottom: 1px solid rgba(var(--tnw-tint, 152, 232, 193), .25); white-space: nowrap; }
@@ -126,8 +126,8 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 .gd .gd-addr { font-family: var(--tn-font-mono, ui-monospace, monospace); font-size: 0.78rem; overflow-wrap: anywhere; }
 .gd .gd-hist td.bars { width: 38%; min-width: 120px; }
 .gd .gd-hist .b { display: block; height: 6px; margin: 3px 0; min-width: 0; }
-.gd .gd-hist .b.acc { background: #78dcc4; }
-.gd .gd-hist .b.sup { background: var(--tn-success); }
+.gd .gd-hist .b.acc { background: var(--tnw-orb-4, #78dcc4); }
+.gd .gd-hist .b.sup { background: var(--tnw-orb-2, var(--tn-success)); }
 .gd ol.gd-time { list-style: none; margin: 0.75rem 0; padding: 0 0 0 1.1rem; border-left: 1px dashed rgba(var(--tnw-tint, 152, 232, 193), .45); }
 .gd ol.gd-time li { position: relative; padding: 0 0 1rem; font-size: 0.9rem; }
 .gd ol.gd-time li::before { content: ""; position: absolute; left: calc(-1.1rem - 5px); top: 0.45em; width: 9px; height: 9px; border-radius: 50%; background: rgb(var(--tnw-tint, 152, 232, 193)); }
@@ -555,15 +555,15 @@ html[data-tn-world="panel"] .about-tab + .about-tab { margin-top: 0; }
 <h3>Where the supply started</h3>
 <p>One account, the treasury, held <span class="n">82.63%</span> of each token at launch. A second account held <span class="n">8.76%</span>. The other <span class="n">160,814</span> accounts shared the remaining <span class="n">8.62%</span>.</p>
 <div class="gd-bar" role="img" aria-label="Genesis supply: treasury 82.63%, second account 8.76%, 160,814 other accounts 8.62% of 420,000,000 of each token.">
-<span style="width:82.625167%;background:var(--tn-success)" title="Treasury: 347,025,702.544547 (82.63%)"><span class="gd-vest" style="width:13.3131%"></span></span>
-<span style="width:8.756888%;background:#78dcc4" title="Second account: 36,778,930.043588 (8.76%)"></span>
-<span style="width:8.617945%;background:#e8d08a" title="160,814 other accounts: 36,195,367.411865 (8.62%)"></span>
+<span style="width:82.625167%;background:var(--tnw-orb-2, var(--tn-success))" title="Treasury: 347,025,702.544547 (82.63%)"><span class="gd-vest" style="width:13.3131%"></span></span>
+<span style="width:8.756888%;background:var(--tnw-orb-4, #78dcc4)" title="Second account: 36,778,930.043588 (8.76%)"></span>
+<span style="width:8.617945%;background:var(--tnw-orb-5, #e8d08a)" title="160,814 other accounts: 36,195,367.411865 (8.62%)"></span>
 </div>
 <ul class="gd-key">
-<li><i style="background:var(--tn-success)"></i><span>Treasury · <span class="n">347,025,702.544547</span> of each token</span></li>
+<li><i style="background:var(--tnw-orb-2, var(--tn-success))"></i><span>Treasury · <span class="n">347,025,702.544547</span> of each token</span></li>
 <li><i class="hatch"></i><span>of which <span class="n">46,200,000</span> TERP vesting until <span class="n">2030-04-20</span>.</span></li>
-<li><i style="background:#78dcc4"></i><span>Second account · <span class="n">36,778,930.043588</span> of each token</span></li>
-<li><i style="background:#e8d08a"></i><span><span class="n">160,814</span> other accounts · <span class="n">36,195,367.411865</span> of each token</span></li>
+<li><i style="background:var(--tnw-orb-4, #78dcc4)"></i><span>Second account · <span class="n">36,778,930.043588</span> of each token</span></li>
+<li><i style="background:var(--tnw-orb-5, #e8d08a)"></i><span><span class="n">160,814</span> other accounts · <span class="n">36,195,367.411865</span> of each token</span></li>
 </ul>
 <details>
 <summary>Show the numbers</summary>

@@ -9,11 +9,15 @@
 <script>
 /* Theme before first paint: ?theme= or the site's saved choice (localStorage "tn-theme"). */
 (function () {
-  var T = ['default', 'light', 'permissionless', 'sandman'], t = 'default';
-  try { t = new URLSearchParams(location.search).get('theme') || localStorage.getItem('tn-theme') || 'default'; } catch (e) {}
-  if (T.indexOf(t) < 0) t = 'default';
+  /* Old ids map to the WD names: default → pale-lithium-green, light → coral-ember, sandman → apricot-glow. */
+  var T = ['pale-lithium-green', 'azure-calcium', 'sirius-blue', 'carbon-pink', 'coral-ember', 'apricot-glow', 'lime-chiffon', 'pearl-white', 'permissionless'], A = { 'default': 'pale-lithium-green', light: 'coral-ember', sandman: 'apricot-glow' }, L = { 'coral-ember': 1, 'apricot-glow': 1, 'lime-chiffon': 1, 'pearl-white': 1 }, t = '';
+  /* Embedded: follow the parent page's theme. */
+  try { t = window.parent !== window ? window.parent.document.documentElement.getAttribute('data-theme') || '' : ''; } catch (e) {}
+  try { t = t || new URLSearchParams(location.search).get('theme') || localStorage.getItem('tn-theme') || ''; } catch (e) {}
+  t = A[t] || t;
+  if (T.indexOf(t) < 0) t = 'pale-lithium-green';
   var r = document.documentElement;
-  r.setAttribute('data-theme', t); r.setAttribute('data-g-theme', t);
+  r.setAttribute('data-theme', t); r.setAttribute('data-g-theme', t); r.setAttribute('data-tn-mode', L[t] ? 'light' : 'dark');
   try { if (window.self !== window.top || /[?&]embed=1/.test(location.search)) r.classList.add('is-embed'); } catch (e) { r.classList.add('is-embed'); }
 })();
 </script>
@@ -51,7 +55,7 @@
   --tn-success: #55efc4;       --tn-success-rgb: 85 239 196;
   --tnw-strong: #ffffff;
 }
-html[data-theme="light"] {
+html[data-theme="light"], html[data-tn-mode="light"] {
   --tn-bg: #f6f7f5;
   --tn-canvas: #f3f5f2;        --tn-canvas-rgb: 243 245 242;
   --tn-tint-rgb: 20 26 24;
@@ -83,7 +87,7 @@ html[data-theme="permissionless"] {
   --tn-glow-2-rgb: 187 145 255;  /* oklch(.74 .17 300) */
   --tnw-strong: #ffffff;
 }
-html[data-theme="sandman"] {
+html[data-theme="sandman"], html[data-theme="apricot-glow"] {
   --tn-font: 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif;
   --tn-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --tn-text-base: 1.02rem;
@@ -116,14 +120,14 @@ html[data-theme="sandman"] {
   --g-halo: 0 0 10px rgb(var(--tn-canvas-rgb) / .9), 0 0 2px rgb(var(--tn-canvas-rgb) / .85);
 }
 /* Paper themes: the accent is orange / rust, so "aligned" takes the theme's green. */
-html[data-theme="light"], html[data-theme="sandman"] { --g-aligned-rgb: var(--tn-success-rgb); }
+html[data-tn-mode="light"] { --g-aligned-rgb: var(--tn-success-rgb); }
 /* Permissionless: the theme's two OKLCH hues. */
 html[data-theme="permissionless"] { --g-aligned-rgb: var(--tn-glow-rgb, 84 226 231); --g-app-rgb: var(--tn-glow-2-rgb, 187 145 255); }
 
 /* The frame and its page must share a colour scheme, or Chrome paints the
    frame opaque. The script copies the host frame's value when embedded. */
 html { color-scheme: dark; }
-html[data-theme="light"], html[data-theme="sandman"] { color-scheme: light; }
+html[data-tn-mode="light"] { color-scheme: light; }
 
 /* ── Base ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -237,7 +241,7 @@ html[data-theme="permissionless"] .g-pill:hover { box-shadow: 0 0 0 1px rgb(var(
 .g-node { display: flex; align-items: center; gap: .45rem; width: 100%; min-height: 32px; padding: .15rem 0; background: none; border: 0; border-radius: 0; text-align: left; cursor: pointer; color: var(--tn-text); font-size: .9rem; line-height: 1.3; text-shadow: var(--g-halo); transition: color .15s; overflow-wrap: anywhere; }
 .g-node:hover { color: var(--tn-mint); }
 .g-node:hover .g-dot { filter: brightness(1.18); }
-html[data-theme="light"] .g-node:hover .g-dot, html[data-theme="sandman"] .g-node:hover .g-dot { filter: brightness(1.1) saturate(1.15); }
+html[data-tn-mode="light"] .g-node:hover .g-dot { filter: brightness(1.1) saturate(1.15); }
 .g-col.is-focus .g-node { color: var(--tn-text-bright); font-size: var(--tn-size-heading); font-weight: 600; }
 .g-detail { margin-top: 1.5rem; max-width: 46rem; font-size: var(--tn-size-small); color: var(--tn-text); }
 .g-detail dl { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: .3rem .75rem; }
@@ -292,6 +296,8 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 </style>
+<!-- Full token set for every theme (generated from global.css); wins over the mirror above. -->
+<link rel="stylesheet" href="/public/graphs/graph-tokens.css"/>
 </head>
 <body>
 <div class="g-app" id="gApp">
@@ -380,7 +386,9 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
   let EMBED = params.get('embed') === '1';
   try { EMBED = EMBED || window.self !== window.top; } catch (e) { EMBED = true; }
   root.classList.toggle('is-embed', EMBED);
-  const THEMES = ['default', 'light', 'permissionless', 'sandman'];
+  const THEMES = ['pale-lithium-green', 'azure-calcium', 'sirius-blue', 'carbon-pink', 'coral-ember', 'apricot-glow', 'lime-chiffon', 'pearl-white', 'permissionless'];
+  const THEME_ALIAS = { 'default': 'pale-lithium-green', light: 'coral-ember', sandman: 'apricot-glow' };
+  const THEME_LIGHT = { 'coral-ember': 1, 'apricot-glow': 1, 'lime-chiffon': 1, 'pearl-white': 1 };
   const RM = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const reduced = () => !!RM.matches;
   const $ = (id) => document.getElementById(id);
@@ -445,7 +453,8 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
       const fe = window.frameElement;
       if (fe) root.style.colorScheme = window.parent.getComputedStyle(fe).colorScheme || '';
       const pr = window.parent.document.documentElement;
-      if ((pr.getAttribute('data-theme') || 'default') !== t) return;
+      const pt = pr.getAttribute('data-theme') || 'pale-lithium-green';
+      if ((THEME_ALIAS[pt] || pt) !== t) return;
       const cs = window.parent.getComputedStyle(pr);
       for (const n of TOKENS) { const v = cs.getPropertyValue(n).trim(); if (v) root.style.setProperty(n, v); }
     } catch (e) { /* cross-origin or no parent: keep the CSS copy */ }
@@ -457,10 +466,19 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
     const a = v.split(/[\s,/]+/).map(Number).filter((x) => !Number.isNaN(x));
     return a.length >= 3 ? a.slice(0, 3) : fb;
   }
+  // Any CSS colour token (#hex, rgb(), named) → [r, g, b] via the canvas parser.
+  const cvt = document.createElement('canvas').getContext('2d');
+  function colorVar(cs, name, fb) {
+    const v = cs.getPropertyValue(name).trim(); if (!v) return fb;
+    cvt.fillStyle = '#010203'; cvt.fillStyle = v; const c = cvt.fillStyle;
+    if (c === '#010203' && v !== '#010203') return fb;
+    if (c[0] === '#') return [1, 3, 5].map((k) => parseInt(c.slice(k, k + 2), 16));
+    const a = c.match(/[\d.]+/g); return a && a.length >= 3 ? a.slice(0, 3).map(Number) : fb;
+  }
   function readPalette() {
     const cs = getComputedStyle(root);
     const t = root.getAttribute('data-theme') || 'default';
-    const paper = t === 'light' || t === 'sandman';
+    const paper = root.getAttribute('data-tn-mode') === 'light';
     const bg = rgbVar(cs, '--tn-canvas-rgb', [11, 15, 13]);
     P = {
       theme: t, paper, bg,
@@ -469,7 +487,7 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
       text: rgbVar(cs, '--tn-text-rgb', [210, 211, 216]),
       bright: rgbVar(cs, '--tn-text-bright-rgb', [248, 248, 242]),
       dim: rgbVar(cs, '--tn-text-dim-rgb', [125, 139, 186]),
-      strong: paper ? [0, 0, 0] : [255, 255, 255],
+      strong: colorVar(cs, '--tnw-strong', paper ? [0, 0, 0] : [255, 255, 255]),
       st: {
         aligned: rgbVar(cs, '--g-aligned-rgb', [152, 232, 193]),
         drifted: rgbVar(cs, '--g-drifted-rgb', [255, 184, 108]),
@@ -482,8 +500,10 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
     discCache.clear();
   }
   function applyTheme(theme) {
-    const t = THEMES.includes(theme) ? theme : 'default';
+    const n = THEME_ALIAS[theme] || theme;
+    const t = THEMES.includes(n) ? n : 'pale-lithium-green';
     root.setAttribute('data-theme', t);
+    root.setAttribute('data-tn-mode', THEME_LIGHT[t] ? 'light' : 'dark');
     root.setAttribute('data-g-theme', t);
     syncTokens(t);
     readPalette();
@@ -1038,7 +1058,7 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
     if (d.theme) applyTheme(d.theme);
     if (d.type === 'graph-refit' || d.type === 'pm-graph-refit') refit();
   });
-  window.addEventListener('storage', (e) => { if (e.key === 'tn-theme') applyTheme(e.newValue || 'default'); });
+  window.addEventListener('storage', (e) => { if (e.key === 'tn-theme' && !parentTheme()) applyTheme(e.newValue || 'default'); });
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => { if (view === 'map') refit(); }).observe($('gStage'));
   window.addEventListener('resize', () => { if (view === 'map') refit(); if (selId) renderInfo(); });
   if (RM.addEventListener) RM.addEventListener('change', () => { simFrames = 0; requestDraw(); });
@@ -1053,8 +1073,17 @@ tr.clickable:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 
     },
   };
 
-  const t0 = (function () { try { return params.get('theme') || localStorage.getItem('tn-theme') || 'default'; } catch (e) { return 'default'; } })();
+  const parentTheme = () => { try { return EMBED && window.parent !== window ? window.parent.document.documentElement.getAttribute('data-theme') || '' : ''; } catch (e) { return ''; } };
+  const t0 = (function () { try { return parentTheme() || params.get('theme') || localStorage.getItem('tn-theme') || 'default'; } catch (e) { return 'default'; } })();
   applyTheme(t0);
+  // Live theme switches on the parent page (same origin): attribute changes and the shell's tn:theme event.
+  try {
+    if (EMBED && window.parent !== window) {
+      const pr = window.parent.document.documentElement;
+      new window.parent.MutationObserver(() => { const pt = parentTheme(); if (pt && (THEME_ALIAS[pt] || pt) !== root.getAttribute('data-theme')) applyTheme(pt); }).observe(pr, { attributes: true, attributeFilter: ['data-theme'] });
+      window.parent.addEventListener('tn:theme', () => { const pt = parentTheme(); if (pt) applyTheme(pt); });
+    }
+  } catch (e) { /* cross-origin parent: postMessage covers it */ }
   renderLegend();
   renderFilters();
   applyFilters();

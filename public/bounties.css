@@ -230,15 +230,15 @@ dl.bx3-escrow dd[data-k="Status"] { color: rgb(var(--tnw-tint)); font-weight: 60
 .bx3-bytes.is-over { color: var(--tnw-amber, #e8b86a); font-weight: 600; }
 .bx3-cid { font-size: var(--eco-text-xs, .82rem); margin: .4rem 0; overflow-wrap: anywhere; }
 .bx3-cid code { font-size: .95em; }
-.bx3-cid.is-ok { color: #8fdcb0; }
-.bx3-cid.is-err { color: #ff9b8a; }
+.bx3-cid.is-ok { color: var(--tn-success); }
+.bx3-cid.is-err { color: var(--tn-danger); }
 .bx3-template { max-height: 16rem; }
-.bx3-gate { font-size: var(--eco-text-xs, .82rem); margin: .4rem 0; padding: .45rem .6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,.14); overflow-wrap: anywhere; }
-.bx3-gate.is-ok { color: #8fdcb0; border-color: rgba(143,220,176,.55); background: rgba(143,220,176,.07); }
-.bx3-gate.is-warn { color: #ff9b8a; border-color: rgba(255,155,138,.6); background: rgba(255,155,138,.08); }
+.bx3-gate { font-size: var(--eco-text-xs, .82rem); margin: .4rem 0; padding: .45rem .6rem; border-radius: 6px; border: 1px solid rgb(var(--tn-tint-rgb, 255 255 255) / .14); overflow-wrap: anywhere; }
+.bx3-gate.is-ok { color: var(--tn-success); border-color: rgb(var(--tn-success-rgb) / .55); background: rgb(var(--tn-success-rgb) / .07); }
+.bx3-gate.is-warn { color: var(--tn-danger); border-color: rgb(var(--tn-danger-rgb) / .6); background: rgb(var(--tn-danger-rgb) / .08); }
 .bx3-gate[data-gate]::before { display: inline-block; margin-right: .5rem; padding: 0 .4rem; border-radius: 4px; font-weight: 700; font-size: .72rem; letter-spacing: .04em; }
-.bx3-gate[data-gate="pass"]::before { content: "PASS"; background: #8fdcb0; color: #0b1410; }
-.bx3-gate[data-gate="blocked"]::before { content: "BLOCKED"; background: #ff9b8a; color: #1a0b08; }
+.bx3-gate[data-gate="pass"]::before { content: "PASS"; background: var(--tn-success); color: var(--tn-canvas); }
+.bx3-gate[data-gate="blocked"]::before { content: "BLOCKED"; background: var(--tn-danger); color: var(--tn-canvas); }
 /* v3.3 create modal: Form / Import JSON tabs, import errors, CID storage line */
 .bx3-tabs { display: flex; gap: .25rem; border-bottom: 1px solid rgba(var(--tnw-tint), .25); margin: .2rem 0 .7rem; }
 .bx3-tab { font: 600 var(--eco-text-sm, .88rem)/1.2 var(--tn-font, system-ui, sans-serif); color: var(--tnw-ink-dim, var(--tn-text-muted)); background: none; border: 0; border-bottom: 2px solid transparent; padding: .45rem .8rem; min-height: 32px; cursor: pointer; margin-bottom: -1px; }

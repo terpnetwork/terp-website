@@ -15,9 +15,14 @@ function hashFile(filePath) {
 const CONTRACT_SRC = path.join('lib', 'contracts', 'src');
 const ESBUILD_VERSION = '0.28.2';
 
+// Never ship editor/OS leftovers: *.bak, *.bak-*, *.bak*, AppleDouble ._* and .DS_Store.
+const isJunk = (name) => /\.bak/i.test(name) || name.startsWith('._') || name === '.DS_Store';
+const notJunk = (src) => !isJunk(path.basename(src));
+
 function copyJsTree(srcDir, destDir) {
   fs.mkdirSync(destDir, { recursive: true });
   for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
+    if (isJunk(entry.name)) continue;
     const from = path.join(srcDir, entry.name);
     const to = path.join(destDir, entry.name);
     if (entry.isDirectory() && from === CONTRACT_SRC) continue;
@@ -253,18 +258,20 @@ async function build() {
 
   copyJsTree('lib', path.join(outdir, 'lib'));
   const contracts = await buildContracts(outdir);
-  fs.cpSync('public', path.join(outdir, 'public'), { recursive: true, force: true });
+  // Graph pages read their theme tokens from this generated copy of global.css.
+  execFileSync(process.execPath, ['scripts/gen-graph-tokens.mjs'], { stdio: 'inherit' });
+  fs.cpSync('public', path.join(outdir, 'public'), { recursive: true, force: true, filter: notJunk });
 
   if (fs.existsSync('get')) {
     const getOut = path.join(outdir, 'get');
     fs.mkdirSync(getOut, { recursive: true });
     for (const file of fs.readdirSync('get')) {
       const src = path.join('get', file);
-      if (fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(getOut, file));
+      if (!isJunk(file) && fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(getOut, file));
     }
   }
   if (fs.existsSync('pkg')) {
-    fs.cpSync('pkg', path.join(outdir, 'pkg'), { recursive: true, force: true });
+    fs.cpSync('pkg', path.join(outdir, 'pkg'), { recursive: true, force: true, filter: notJunk });
     // Also expose passkey wasm under public/wasm for alternate load path
     const pkJs = path.join('pkg', 'passkey_wasm.js');
     const pkWasm = path.join('pkg', 'passkey_wasm_bg.wasm');

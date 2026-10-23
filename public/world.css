@@ -78,7 +78,7 @@ body.has-site-chrome { padding-top: calc(var(--tn-chrome-h) + 12px); }
 .tnw-portal.is-external .tnw-label::after { content: " ↗"; color: var(--tnw-amber); }
 /* Controls drawn as the centre of their own light (install, category, previous/next): label inside. */
 .tnw-portal.is-inset .tnw-label { left: 50% !important; top: 50% !important; right: auto !important; bottom: auto !important; transform: translate(-50%, -50%) !important; background: none; padding: 0; color: var(--tn-canvas); font-weight: 600; text-shadow: 0 0 6px rgb(var(--tn-tint-rgb) / .55); }
-html:is([data-theme="light"], [data-theme="sandman"]) .tnw-portal.is-inset .tnw-label { color: var(--tn-text-bright); text-shadow: 0 0 3px var(--tn-canvas), 0 0 8px var(--tn-canvas), 0 0 14px var(--tn-canvas); }
+html[data-tn-mode="light"] .tnw-portal.is-inset .tnw-label { color: var(--tn-text-bright); text-shadow: 0 0 3px var(--tn-canvas), 0 0 8px var(--tn-canvas), 0 0 14px var(--tn-canvas); }
 .tnw-portal.is-filter .tnw-label { font-size: 13px; }
 .tnw-portal.is-action .tnw-label { font-size: 15px; }
 .tnw-portal.is-inset.is-small .tnw-label { font-size: 12px; }
@@ -165,8 +165,8 @@ html[data-tn-world="panel"] .modal-content { display: block !important; }
 html[data-tn-world="panel"] .modal-header { padding: 0 0 6px !important; border: 0 !important; background: none !important; }
 html[data-tn-world="panel"] .modal-body { padding: 8px 0 0 !important; overflow: visible !important; }
 html[data-tn-world="panel"] :is(.modal-header h2, .res-info-modal h3, dialog.info-modal h3) { color: rgb(var(--tnw-tint)) !important; }
-html[data-tn-world="panel"] :is(.modal-close, .res-info-modal .close-info, dialog.info-modal .close-info) { background: none !important; border: 0 !important; box-shadow: inset 0 0 0 1px rgba(var(--tnw-tint), .4) !important; border-radius: var(--tn-radius-ctl) !important; color: var(--tnw-ink) !important; width: auto !important; min-width: 36px; min-height: 36px; padding: .35rem .9rem !important; cursor: pointer; font-family: inherit; }
-html[data-tn-world="panel"] :is(.modal-close, .res-info-modal .close-info, dialog.info-modal .close-info):hover { box-shadow: inset 0 0 0 1px rgb(var(--tnw-tint)) !important; color: var(--tnw-strong) !important; }
+html[data-tn-world="panel"] :is(.modal-close, .res-info-modal .close-info, dialog.info-modal .close-info) { color: var(--tnw-close, currentColor) !important; background: none !important; border: 0 !important; box-shadow: inset 0 0 0 1px rgba(var(--tnw-tint), .4) !important; border-radius: var(--tn-radius-ctl) !important; color: var(--tnw-ink) !important; width: auto !important; min-width: 36px; min-height: 36px; padding: .35rem .9rem !important; cursor: pointer; font-family: inherit; }
+html[data-tn-world="panel"] :is(.modal-close, .res-info-modal .close-info, dialog.info-modal .close-info):hover { box-shadow: inset 0 0 0 1px var(--tnw-close-ring, rgb(var(--tnw-tint))) !important; color: var(--tnw-close-hover, var(--tnw-strong)) !important; }
 html[data-tn-world="panel"] .res-info-modal > .close-info { margin-top: .5rem; }
 html[data-tn-world="panel"] dialog.info-modal { position: fixed; margin: 0; inset: auto; top: calc(var(--tn-chrome-h) + 12px); left: calc(var(--tnw-left) + 32px); right: 40px; width: auto !important; max-height: calc(100svh - var(--tn-chrome-h) - 24px) !important; overflow-y: auto !important; }
 html[data-tn-world="panel"] dialog.info-modal::backdrop { background: none; }
@@ -215,7 +215,7 @@ html[data-tn-world="home"] .install-section .tooltip-footer { border: 0; }
 
 .install-close { display: none; }
 html[data-tn-world="home"] .install-section.is-open > .install-close { display: block; position: absolute; z-index: 2; top: 4px; right: 0; width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: var(--tnw-ink-dim); font: 22px/1 var(--tn-font, system-ui, sans-serif); cursor: pointer; }
-html[data-tn-world="home"] .install-section > .install-close:hover { color: var(--tnw-ink); box-shadow: inset 0 0 0 1px rgb(var(--tnw-ink-rgb) / .35); }
+html[data-tn-world="home"] .install-section > .install-close:hover { color: var(--tnw-close-hover, var(--tnw-ink)); box-shadow: inset 0 0 0 1px var(--tnw-close-ring, rgb(var(--tnw-ink-rgb) / .35)); }
 html[data-tn-world="home"] .install-section > .install-close:focus-visible { outline: 1px solid var(--tnw-focus); }
 
 /* Catalog and resources: selection is made from the navigation; the page mirrors it. */
@@ -228,7 +228,7 @@ html[data-tn-world] .eco-card:is(.is-selected, .is-open, .is-active, [aria-curre
 html[data-tn-world="panel"] .eco-card { isolation: isolate; }
 html[data-tn-world="panel"] .eco-card::before { content: ""; position: absolute; z-index: -1; inset: -8px -12px; border-radius: var(--tn-radius-ctl, 2px); pointer-events: none;
   background: transparent; box-shadow: inset 0 0 0 1px transparent; transition: background-color var(--tnw-hover-dur) linear, box-shadow var(--tnw-hover-dur) linear; }
-html[data-tn-world="panel"] .eco-card.is-clickable:hover::before { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-hover-ring); }
+html[data-tn-world="panel"] .eco-card.is-clickable:hover::before { background: var(--tnw-eco-hover-wash, var(--tnw-hover-wash)); box-shadow: inset 0 0 0 1px var(--tnw-eco-hover-ring, var(--tnw-hover-ring)); }
 /* Pressed, selected, open and active states: the same full-object shape as hover (never a side rule). */
 html[data-tn-world="panel"] .eco-card:is(.is-selected, .is-open, .is-active, [aria-current], [aria-selected="true"], [aria-pressed="true"], :active, :focus-within)::before { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-hover-ring); }
 html[data-tn-world="panel"] .eco-card.is-clickable:has(.eco-open:focus-visible)::before { background: var(--tnw-hover-wash); box-shadow: inset 0 0 0 1px var(--tnw-focus-ring); }
@@ -307,7 +307,7 @@ html[data-tn-world="panel"] main :is(h1, h2, h3, h4, p, li, dt, dd, td, th, labe
 }
 .shield-orb[aria-selected="true"] .shield-disc { --body: var(--c); transform: scale(1); }
 .shield-orb:hover .shield-disc { filter: brightness(1.18); }
-html:is([data-theme="light"], [data-theme="sandman"]) .shield-orb:hover .shield-disc { filter: brightness(1.1) saturate(1.15); }
+html[data-tn-mode="light"] .shield-orb:hover .shield-disc { filter: brightness(1.1) saturate(1.15); }
 .shield-label { max-width: 100%; font-size: .8rem; line-height: 1.3; text-align: center; overflow-wrap: anywhere; text-shadow: var(--tnw-halo); }
 .shield-orb:hover .shield-label { color: var(--tnw-ink, var(--tn-text)); }
 .shield-orb[aria-selected="true"] .shield-label { color: var(--tnw-strong, var(--tn-text-bright)); font-weight: 600; }

@@ -60,7 +60,7 @@ def main():
     out = {
         "schema": "terp.go-deps/v1",
         "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
-        "source": {"host": host or "local", "repo": repo, "file": "go.mod", "commit": commit, "commit_date": commit_date},
+        "source": {"file": "go.mod", "commit": commit, "commit_date": commit_date},
         "module": mod["Module"]["Path"], "go": mod.get("Go"), "toolchain": mod.get("Toolchain"),
         "counts": {"direct": sum(d["direct"] for d in deps), "indirect": sum(not d["direct"] for d in deps),
                    "replace": len(replaces), "fork": sum(r["fork"] for r in replaces)},

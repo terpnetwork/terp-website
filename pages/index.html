@@ -1316,11 +1316,11 @@
                 // Visual feedback
                 const originalBg = checksumElement.style.background;
                 const originalBorder = checksumElement.style.borderColor;
-                checksumElement.style.background = 'rgba(152, 232, 193, 0.25)';
-                checksumElement.style.borderColor = 'rgba(152, 232, 193, 0.5)';
+                checksumElement.style.background = 'rgb(var(--tn-teal-rgb) / 0.25)';
+                checksumElement.style.borderColor = 'rgb(var(--tn-teal-rgb) / 0.5)';
                 setTimeout(() => {
-                    checksumElement.style.background = originalBg || 'rgba(0, 0, 0, 0.3)';
-                    checksumElement.style.borderColor = originalBorder || 'rgba(207, 255, 207, 0.15)';
+                    checksumElement.style.background = originalBg || 'rgb(var(--tn-shade-rgb) / 0.3)';
+                    checksumElement.style.borderColor = originalBorder || 'rgb(var(--tn-mint-rgb) / 0.15)';
                 }, 1000);
             }).catch(err => {
                 console.error('Failed to copy checksums:', err);
@@ -1343,7 +1343,7 @@
 
             // Show loading state
             sha256Element.value = 'Calculating...';
-            sha256Element.style.color = '#cfffcf';
+            sha256Element.style.color = 'var(--tn-mint)';
             inlineChecksumDiv.style.display = 'flex';
 
             try {
@@ -1415,17 +1415,17 @@
                 sha256Element.value = output;
 
                 // Highlight the checksum briefly
-                sha256Element.style.background = 'rgba(152, 232, 193, 0.2)';
-                sha256Element.style.borderColor = 'rgba(152, 232, 193, 0.4)';
+                sha256Element.style.background = 'rgb(var(--tn-teal-rgb) / 0.2)';
+                sha256Element.style.borderColor = 'rgb(var(--tn-teal-rgb) / 0.4)';
                 setTimeout(() => {
-                    sha256Element.style.background = 'rgba(0, 0, 0, 0.3)';
-                    sha256Element.style.borderColor = 'rgba(207, 255, 207, 0.15)';
+                    sha256Element.style.background = 'rgb(var(--tn-shade-rgb) / 0.3)';
+                    sha256Element.style.borderColor = 'rgb(var(--tn-mint-rgb) / 0.15)';
                 }, 2000);
 
             } catch (error) {
                 console.error('Failed to verify checksums:', error);
                 sha256Element.value = `Error: ${error.message}`;
-                sha256Element.style.color = '#fe7d7d';
+                sha256Element.style.color = 'var(--tn-coral)';
             }
         }
 

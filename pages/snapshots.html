@@ -54,7 +54,7 @@ body.graphs-open { overflow: hidden; }
 .page-subtitle {
     font-size: var(--tn-size-kicker);
     color: var(--tn-kicker);
-    text-shadow: 0 0 3px rgba(71, 50, 102, 0.9);
+    text-shadow: 0 0 3px rgb(var(--tnw-title-shade-rgb) / 0.9);
     text-transform: uppercase;
     letter-spacing: var(--tn-track-label);
     text-align: center;
@@ -156,13 +156,16 @@ body.graphs-open { overflow: hidden; }
     color-scheme: inherit;
 }
 .dg-bar { display: flex; align-items: center; gap: 0.75rem; margin: 0 0 0.5rem; flex-wrap: wrap; }
-.dg-tabs { display: inline-flex; gap: 0.2rem; padding: 0.2rem; border: 1px solid rgb(var(--tn-teal-rgb) / 0.25); border-radius: var(--tn-radius-ctl); }
+.dg-tabs { display: inline-flex; flex-wrap: wrap; gap: 0.5rem; }
 .dg-tabs[hidden] { display: none; }
-.dg-tab { font: inherit; font-size: var(--tn-size-label); color: var(--tn-text-muted); background: transparent; border: 0; border-radius: var(--tn-radius-ctl); padding: 0.3rem 0.8rem; cursor: pointer; transition: background-color .15s, color .15s; }
-.dg-tab[aria-selected="true"], .dg-tab[aria-pressed="true"] { color: var(--tn-text-bright); background: rgb(var(--tn-teal-rgb) / 0.16); }
-.dg-tab:focus-visible { outline: 2px solid var(--tn-teal); outline-offset: 1px; }
+/* Tabs are the standard rectangular site control (.snap-btn); the selected one uses the shared pressed state. */
 .dg-meta { font-size: var(--tn-size-label); color: var(--tn-text-dim); margin: 0.4rem 0 0; }
 .graph-stage { height: calc(100vh - 14rem); }
+.fe-stack { max-width: 62rem; }
+.fe-stack h3 { font-size: var(--tn-size-label); text-transform: uppercase; letter-spacing: var(--tn-track-label); color: var(--tn-text-dim); font-weight: var(--tn-font-weight-medium); margin: 1.2rem 0 0.2rem; }
+.fe-stack p { line-height: var(--tn-line-body); }
+.fe-lede { color: var(--tn-text); max-width: 46rem; }
+@media (max-width: 560px) { .dg-tabs[role="tablist"] { flex-wrap: wrap; } }
 .res-side {
     display: flex;
     flex-direction: column;
@@ -346,7 +349,7 @@ body.graphs-open { overflow: hidden; }
     background-color: rgb(var(--tn-teal-rgb) / 0.08);
     background-image:
       linear-gradient(45deg, transparent 50%, var(--tn-teal) 50%),
-      linear-gradient(135deg, #98e8c1 50%, transparent 50%);
+      linear-gradient(135deg, var(--tn-teal) 50%, transparent 50%);
     background-position: calc(100% - 16px) calc(50% - 2px), calc(100% - 11px) calc(50% - 2px);
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
@@ -366,7 +369,7 @@ body.graphs-open { overflow: hidden; }
     box-shadow: 0 0 0 2px rgb(var(--tn-teal-rgb) / 0.12);
 }
 .rel-pick select option {
-    background: #0a0c0e;
+    background: var(--tn-panel-solid);
     color: var(--tn-text);
 }
 .res-subhead { color: var(--tn-mint); font-size: 1.02rem; font-weight: 500; margin: 1.15rem 0 0.45rem; }
@@ -464,24 +467,24 @@ body.graphs-open { overflow: hidden; }
 .sh-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; padding: 0; margin: 0 0 0.5rem; font-size: 0.8rem; color: var(--tn-text-muted); }
 .sh-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem; vertical-align: -1px; }
 .sw.full, .sh-pack.full { background: var(--tn-success); fill: var(--tn-success); }
-.sw.live, .sh-pack.live { background: #6ea8ff; fill: #6ea8ff; }
-.sw.upg { background: #c9b8ff; }
-.sw.gap { background: rgba(196,92,74,0.55); }
-.sw.stall { background: #ff7a59; }
+.sw.live, .sh-pack.live { background: var(--tnw-series-live); fill: var(--tnw-series-live); }
+.sw.upg { background: var(--tnw-series-upg); }
+.sw.gap { background: rgb(var(--tnw-series-gap-rgb) / 0.55); }
+.sw.stall { background: var(--tnw-series-stall); }
 .sh-stage { width: 100%; }
 .sh-svg { display: block; width: 100%; height: 330px; background: rgb(var(--tn-shade-rgb) / 0.25); border: 1px solid rgb(var(--tn-teal-rgb) / 0.16); border-radius: 10px; touch-action: pan-y; user-select: none; }
 .sh-svg .sh-lane { fill: var(--tn-text-muted); font-size: 11px; }
 .sh-svg .sh-axis { fill: var(--tn-text-muted); font-size: 10px; }
 .sh-svg .sh-rule { stroke: rgb(var(--tn-teal-rgb) / 0.14); }
-.sh-svg .sh-gap { fill: #c45c4a; opacity: 0.22; cursor: pointer; }
+.sh-svg .sh-gap { fill: var(--tnw-series-gap); opacity: 0.22; cursor: pointer; }
 .sh-svg .sh-pack { cursor: pointer; opacity: 0.9; }
 .sh-svg .sh-pack:hover, .sh-svg .sh-pack:focus { opacity: 1; }
-.sh-svg .sh-upg { stroke: #c9b8ff; stroke-dasharray: 3 4; pointer-events: none; }
-.sh-svg .sh-upg-label { fill: #c9b8ff; font-size: 10px; pointer-events: none; }
+.sh-svg .sh-upg { stroke: var(--tnw-series-upg); stroke-dasharray: 3 4; pointer-events: none; }
+.sh-svg .sh-upg-label { fill: var(--tnw-series-upg); font-size: 10px; pointer-events: none; }
 .sh-svg .sh-hit { fill: transparent; cursor: pointer; }
-.sh-svg .sh-stall { stroke: #ff7a59; stroke-width: 2; pointer-events: none; }
-.sh-svg .sh-stall-label { fill: #ff7a59; font-size: 10px; pointer-events: none; }
-.sh-svg [tabindex]:focus { outline: none; stroke: #fff; stroke-width: 1.5; }
+.sh-svg .sh-stall { stroke: var(--tnw-series-stall); stroke-width: 2; pointer-events: none; }
+.sh-svg .sh-stall-label { fill: var(--tnw-series-stall); font-size: 10px; pointer-events: none; }
+.sh-svg [tabindex]:focus { outline: none; stroke: var(--tn-text-bright); stroke-width: 1.5; }
 .sh-hint { font-size: 0.78rem; color: var(--tn-text-muted); margin: 0.4rem 0 0.75rem; }
 .sh-detail { border: 1px solid rgb(var(--tn-teal-rgb) / 0.16); border-radius: 10px; padding: 0.8rem 0.95rem; margin: 0 0 1rem; min-height: 4.5rem; font-size: 0.9rem; line-height: 1.55; overflow-wrap: anywhere; }
 .sh-detail h4 { margin: 0.3rem 0 0.4rem; color: var(--tn-mint); font-size: 1rem; }
@@ -491,9 +494,9 @@ body.graphs-open { overflow: hidden; }
 .sh-dl dd { margin: 0; }
 .sh-tag { display: inline-block; padding: 0.05rem 0.5rem; border-radius: var(--tn-radius-ctl); font-size: 0.72rem; border: 1px solid rgb(var(--tn-teal-rgb) / 0.3); white-space: nowrap; }
 .sh-tag.full { color: var(--tn-success); border-color: rgb(var(--tn-success-rgb) / 0.45); }
-.sh-tag.live { color: #6ea8ff; border-color: rgba(110,168,255,0.45); }
-.sh-tag.gap { color: #e07a66; border-color: rgba(196,92,74,0.5); }
-.sh-tag.upg { color: #c9b8ff; border-color: rgba(201,184,255,0.5); }
+.sh-tag.live { color: var(--tnw-series-live); border-color: rgb(var(--tnw-series-live-rgb) / 0.45); }
+.sh-tag.gap { color: var(--tnw-series-gap-text); border-color: rgb(var(--tnw-series-gap-rgb) / 0.5); }
+.sh-tag.upg { color: var(--tnw-series-upg); border-color: rgb(var(--tnw-series-upg-rgb) / 0.5); }
 .sh-h { color: var(--tn-mint); margin: 0.5rem 0 0.4rem; font-size: 1rem; }
 .sh-scroll { overflow-x: auto; }
 .sh-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
@@ -649,14 +652,16 @@ details.upg-plan > summary:focus-visible { outline: 2px solid var(--tn-teal); ou
     </section>
     <section class="res-panel" id="panel-graphs" hidden>
         <div class="dg-bar">
-            <div class="dg-tabs" role="tablist" aria-label="Dependency language">
-                <button type="button" class="dg-tab" role="tab" id="dg-tab-rust" aria-controls="dg-rust" aria-selected="true">Rust</button>
-                <button type="button" class="dg-tab" role="tab" id="dg-tab-go" aria-controls="dg-go" aria-selected="false" tabindex="-1">Go</button>
+            <div class="dg-tabs" role="tablist" aria-label="Dependencies">
+                <button type="button" class="snap-btn small dg-tab" role="tab" id="dg-tab-rust" aria-controls="dg-rust" aria-selected="true">Rust</button>
+                <button type="button" class="snap-btn small dg-tab" role="tab" id="dg-tab-crates" aria-controls="dg-crates" aria-selected="false" tabindex="-1">Rust crates</button>
+                <button type="button" class="snap-btn small dg-tab" role="tab" id="dg-tab-go" aria-controls="dg-go" aria-selected="false" tabindex="-1">Go</button>
+                <button type="button" class="snap-btn small dg-tab" role="tab" id="dg-tab-fe" aria-controls="dg-fe" aria-selected="false" tabindex="-1">Front end</button>
             </div>
             <div class="dg-tabs" id="dg-depth" role="group" aria-label="Depth" hidden>
-                <button type="button" class="dg-tab" data-depth="1" aria-pressed="false">Depth 1</button>
-                <button type="button" class="dg-tab" data-depth="2" aria-pressed="true">Depth 2</button>
-                <button type="button" class="dg-tab" data-depth="3" aria-pressed="false">Depth 3</button>
+                <button type="button" class="snap-btn small dg-tab" data-depth="1" aria-pressed="false">Depth 1</button>
+                <button type="button" class="snap-btn small dg-tab" data-depth="2" aria-pressed="true">Depth 2</button>
+                <button type="button" class="snap-btn small dg-tab" data-depth="3" aria-pressed="false">Depth 3</button>
             </div>
         </div>
         <div id="dg-rust" role="tabpanel" aria-labelledby="dg-tab-rust">
@@ -670,6 +675,50 @@ details.upg-plan > summary:focus-visible { outline: 2px solid var(--tn-teal); ou
                 <iframe class="graph-frame" id="go-frame" title="Go module dependency graph" data-src="/public/graphs/go-dependency-map.html?embed=1"></iframe>
             </div>
             <p class="dg-meta" id="dg-go-date"></p>
+        </div>
+        <div id="dg-crates" role="tabpanel" aria-labelledby="dg-tab-crates" hidden>
+            <div class="graph-stage">
+                <iframe class="graph-frame" id="crates-frame" title="Rust crate tree: terp-rs, CosmWasm, wasmvm, wasmer and parity-wasm" data-src="/public/graphs/rust-crates.html?embed=1"></iframe>
+            </div>
+            <p class="dg-meta" id="dg-crates-date"></p>
+        </div>
+        <div id="dg-fe" role="tabpanel" aria-labelledby="dg-tab-fe" hidden>
+            <div class="graph-stage">
+                <iframe class="graph-frame" id="fe-frame" title="Front-end JS package graph" data-src="/public/graphs/js-deps.html?embed=1"></iframe>
+            </div>
+            <p class="dg-meta" id="dg-fe-date"></p>
+            <article class="fe-stack">
+                <p class="fe-lede">What runs in the browser across the Terp front ends, read from each front end's package.json and lockfile. The graph above and the table below come from the same file.</p>
+                <h3>Front ends</h3>
+                <div class="res-table-wrap"><table class="res-table" id="fe-roots">
+                    <thead><tr><th>Front end</th><th class="num">Packages</th><th class="num">Direct</th><th class="num">Dev-only</th><th>Lockfile</th></tr></thead>
+                    <tbody><tr><td colspan="5">Loading…</td></tr></tbody>
+                </table></div>
+                <h3>Wallet and chain clients (terp.network, browser)</h3>
+                <div class="res-table-wrap"><table class="res-table">
+                    <thead><tr><th>Runtime</th><th>Version</th><th>What it does here</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://www.npmjs.com/package/@goblinhunt/cosmes" target="_blank" rel="noopener">cosmes</a> (<code>@goblinhunt/cosmes</code>)</td><td><code>0.0.71-ghunt.21</code></td><td>Wallet connect and signing. Loaded from esm.sh only when you press Connect.</td></tr>
+                        <tr><td><a href="https://github.com/hyperweb-io/interchainjs" target="_blank" rel="noopener">InterchainJS</a></td><td><code>1.11.1</code></td><td>Cosmos queries and encoding, through the import map on every page.</td></tr>
+                        <tr><td><a href="https://github.com/cosmos/cosmjs" target="_blank" rel="noopener">CosmJS</a> + cosmjs-types</td><td><code>0.32.4</code> / <code>0.9.0</code></td><td>Stargate, proto-signing and Tendermint RPC for IBC, smart accounts and device keys.</td></tr>
+                        <tr><td><a href="https://www.npmjs.com/package/@noble/hashes" target="_blank" rel="noopener">@noble/hashes</a></td><td><code>1.7.1</code></td><td>Hashing for bounties and the flock proof worker.</td></tr>
+                        <tr><td>Rust → wasm workers</td><td>built with the site</td><td>norick, passkey and zk-JWT run off the main thread.</td></tr>
+                        <tr><td><a href="https://github.com/cure53/DOMPurify" target="_blank" rel="noopener">DOMPurify</a></td><td><code>3.4.16</code></td><td>Cleans SVG before it reaches the page. Vendored.</td></tr>
+                    </tbody>
+                </table></div>
+                <h3>Storage and serving</h3>
+                <div class="res-table-wrap"><table class="res-table">
+                    <thead><tr><th>Service</th><th>Version</th><th>What it does here</th></tr></thead>
+                    <tbody>
+                        <tr><td><a href="https://hub.docker.com/r/pgsty/silo" target="_blank" rel="noopener">Silo</a> (<code>pgsty/silo</code>)</td><td><code>RELEASE.2026-10-18</code>, pinned by digest</td><td>S3-compatible object store (MinIO drop-in) behind <code>s3.terp.network</code>: snapshots, app state, chain versions, asset registry, IBC and cw-orch state.</td></tr>
+                        <tr><td><a href="https://nginx.org/" target="_blank" rel="noopener">nginx</a></td><td><code>1.25.3-alpine</code></td><td>Serves the built site and the public static bucket, behind Cloudflare.</td></tr>
+                        <tr><td>CDNs</td><td>n/a</td><td>Browser modules come from esm.sh and cdn.jsdelivr.net; nothing is bundled.</td></tr>
+                    </tbody>
+                </table></div>
+                <h3>Build</h3>
+                <p>Node, with html-minifier-terser and eslint. There is no framework and no bundler; pages are plain HTML with ES modules.</p>
+                <p class="dg-meta">Collected from the site source on 2026-10-23. Hosts, ports, file paths, configuration values and keys are not listed here on purpose.</p>
+            </article>
         </div>
     </section>
     </div>
@@ -963,24 +1012,28 @@ main();
   const $ = (id) => document.getElementById(id);
   const esc = (x) => String(x ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const day = (iso) => { const d = new Date(String(iso).replace(/Z$/, ':00Z').replace(/:00:00Z$/, ':00Z')); return isNaN(d) ? String(iso).slice(0, 10) : d.toISOString().slice(0, 10); };
-  const tabs = [$('dg-tab-rust'), $('dg-tab-go')];
-  let goLoaded = false;
+  const tabs = [$('dg-tab-rust'), $('dg-tab-crates'), $('dg-tab-go'), $('dg-tab-fe')];
+  let goLoaded = false, cratesLoaded = false, feLoaded = false;
   function select(t, focus) {
     tabs.forEach((b) => { const on = b === t; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; $(b.getAttribute('aria-controls')).hidden = !on; });
     if (focus) t.focus();
     $('dg-depth').hidden = t.id !== 'dg-tab-go';
-    if (t.id === 'dg-tab-go') { if (!goLoaded) loadGo(); else refit(goFrame); } else refit(frame);
+    if (t.id === 'dg-tab-go') { if (!goLoaded) loadGo(); else refit(goFrame); }
+    else if (t.id === 'dg-tab-crates') { if (!cratesLoaded) loadCrates(); else refit(cratesFrame); }
+    else if (t.id === 'dg-tab-fe') { if (!feLoaded) loadFe(); else refit(feFrame); }
+    else if (t.id === 'dg-tab-rust') refit(frame);
   }
   tabs.forEach((b, i) => {
     b.addEventListener('click', () => select(b));
-    b.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); select(tabs[(i + 1) % 2], true); } });
+    b.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); select(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length], true); }
+      else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); select(tabs[e.key === 'Home' ? 0 : tabs.length - 1], true); } });
   });
   const frame = $('graph-frame');
   const rustDate = () => { try { const el = frame.contentDocument.getElementById('DATA'); const d = JSON.parse(el.textContent); $('dg-rust-date').textContent = `${(d.crates || []).length} crates · Generated ${day(d.generated_at)}`; } catch (e) { /* ignore */ } };
   frame.addEventListener('load', rustDate); rustDate();
   const goFrame = $('go-frame');
   let depth = '2';
-  const theme = () => localStorage.getItem('tn-theme') || document.documentElement.dataset.theme || 'default';
+  const theme = () => document.documentElement.dataset.theme || localStorage.getItem('tn-theme') || 'pale-lithium-green';
   const refit = (f) => { const ping = () => { try { f.contentWindow.postMessage({ type: 'graph-refit', theme: theme() }, '*'); } catch (e) { /* ignore */ } }; ping(); setTimeout(ping, 120); };
   goFrame.addEventListener('load', () => refit(goFrame));
   function setDepth(d) {
@@ -997,7 +1050,29 @@ main();
       $('dg-go-date').textContent = `${d.counts.direct} direct · ${d.counts.indirect} indirect · ${d.counts.fork} forks · Generated ${day(d.generated_at)} · commit ${String(d.source.commit).slice(0, 8)}`;
     } catch (e) { /* date line stays empty */ }
   }
-  addEventListener('tn:theme', () => { if (goLoaded) refit(goFrame); });
+  const cratesFrame = $('crates-frame');
+  function loadCrates() {
+    cratesLoaded = true;
+    cratesFrame.src = cratesFrame.dataset.src;
+    fetch('/public/graphs/rust-crates.json', { cache: 'no-cache' }).then((x) => x.json()).then((d) => {
+      $('dg-crates-date').textContent = `${d.counts.crates} crates across ${d.roots.length} roots · ${d.counts.shared} shared · Generated ${day(d.generated_at)} by scripts/gen-rust-crates.mjs`;
+    }).catch(() => { /* date line stays empty */ });
+  }
+  cratesFrame.addEventListener('load', () => { if (cratesLoaded) refit(cratesFrame); });
+  const feFrame = $('fe-frame');
+  function loadFe() {
+    feLoaded = true;
+    feFrame.src = feFrame.dataset.src;
+    fetch('/public/graphs/js-deps.json', { cache: 'no-cache' }).then((x) => x.json()).then((d) => {
+      $('dg-fe-date').textContent = `${d.counts.packages} packages across ${d.roots.length} front ends · ${d.counts.shared} shared · Generated ${day(d.generated_at)} by scripts/gen-js-deps.mjs`;
+      $('fe-roots').tBodies[0].innerHTML = d.roots.map((r) => `<tr><td>${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.label)}</a>` : esc(r.label)}</td><td class="num">${r.counts.total}</td><td class="num">${r.counts.direct}</td><td class="num">${r.counts.devOnly}</td><td>${esc(r.lockfile)}</td></tr>`).join('');
+    }).catch(() => { $('fe-roots').tBodies[0].innerHTML = '<tr><td colspan="5">Could not load js-deps.json.</td></tr>'; });
+  }
+  feFrame.addEventListener('load', () => { if (feLoaded) refit(feFrame); });
+  const want = new URLSearchParams(location.search).get('dg');
+  const pre = tabs.find((b) => b.id === `dg-tab-${want}`);
+  if (pre) select(pre);
+  addEventListener('tn:theme', () => { if (goLoaded) refit(goFrame); if (cratesLoaded) refit(cratesFrame); if (feLoaded) refit(feFrame); });
 })();
 </script>
 </body>
