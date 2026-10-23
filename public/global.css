@@ -1327,6 +1327,8 @@ html[data-theme="permissionless"] .site-chrome-pill:hover { box-shadow: var(--tn
 .tn-theme-opt[aria-checked="true"] { color: var(--tn-mint); }
 .tn-theme-opt[aria-checked="true"] .tn-theme-chip { box-shadow: 0 0 0 2px var(--tn-panel-solid), 0 0 0 3.5px var(--tn-teal); }
 .tn-theme-opt .tn-theme-name { flex: 1; }
+.tn-theme-menu .tn-theme-link { color: var(--tnw-link); text-decoration: none; border-top: 1px solid rgb(var(--tn-tint-rgb) / 0.1); margin-top: 0.25rem; border-radius: var(--tn-radius-ctl); }
+.tn-theme-menu .tn-theme-link:hover, .tn-theme-menu .tn-theme-link:focus-visible { color: var(--tnw-link-hover); }
 .tn-theme-credit { font-size: 0.7rem; line-height: 1.35; color: var(--tn-text-dim); padding: 0.35rem 0.55rem 0.2rem; margin: 0.2rem 0 0; border-top: 1px solid rgb(var(--tn-tint-rgb) / 0.1); }
 
 .site-chrome-menu {
