@@ -1,0 +1,13 @@
+{
+  "build": "321a87df78",
+  "bundles": {
+    "cw-svg-minter": {
+      "url": "/lib/contracts/cw-svg-minter.js?v=aaefd63f2f",
+      "hash": "aaefd63f2f"
+    },
+    "cw721-svg": {
+      "url": "/lib/contracts/cw721-svg.js?v=94399c2064",
+      "hash": "94399c2064"
+    }
+  }
+}

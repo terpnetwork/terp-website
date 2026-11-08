@@ -1,0 +1,29 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <!-- app shell: load once, reuse across routes (must stay first) --> <script src="/lib/shell/shell.js?v=7750cac23a"></script> <link rel="modulepreload" href="/lib/config.js?v=a177cb9062"> <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes"> <script src="/lib/wip-gate.js?v=d4645557da"></script> <title>Price oracle | Terp Network</title> <meta name="description" content="Prices from Osmosis, delivered to Terp over Polytone."> <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png?v=964c4b5060"> <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi"> <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet"> <link rel="stylesheet" href="/public/global.css?v=964c4b5060"> <link rel="stylesheet" href="/public/world.css?v=6a9ed1343c"> <link rel="modulepreload" href="/lib/fractal/routes.js?v=c884c9e3de"> <link rel="modulepreload" href="/lib/fractal/world.js?v=dc88da8125"> <script type="module" src="/lib/fractal/world.js?v=dc88da8125"></script> <!--
+    Price oracle page. lib/oracle.js reads cw-oracle-registry {latest,history,config} and cw-oracle-aggregator {median} over LCD.
+    Refresh-from-source is gated on open_submit / ibc2_source_client. Entered from Eco.
+  --> <style> body { font-weight: var(--tn-font-weight-body, 400); font-size: var(--tn-text-base, 17px); }
+    .main { position: relative; z-index: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 2rem 1.25rem 4rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .page-title { font-size: var(--tn-size-display); font-weight: var(--tn-weight-display); color: var(--tn-mint); text-shadow: 0 0 30px rgb(var(--tn-halo-rgb) / 0.07); text-align: center; margin-bottom: 0.35rem; letter-spacing: var(--tn-track-display); font-family: var(--tn-font-display); }
+    .page-subtitle { font-size: var(--tn-size-kicker); color: var(--tn-kicker); text-transform: uppercase; letter-spacing: var(--tn-track-label); text-align: center; margin-bottom: 1.5rem; line-height: 1.45; font-weight: var(--tn-font-weight-medium); }
+    .orc { width: 100%; }
+    .orc-links { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; justify-content: center; margin-top: 1.5rem; font-size: var(--tn-size-small); }
+    .orc-links a { color: rgb(var(--tn-text-rgb) / max(0.8, var(--tn-alpha-floor))); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: var(--tn-radius-ctl); }
+    .orc-links a:hover, .orc-links a:focus-visible { color: var(--tn-teal); } </style> <link rel="stylesheet" href="/public/bounties.css?v=8f89a1fe3a"> <link rel="stylesheet" href="/public/oracle.css?v=0041963580"> <meta name="tn-build" content="708e910b53"><script>window.__TN_ASSET_V="964c4b5060";</script></head> <body> <script src="/lib/fab.js?v=29fdf4f1db"></script> <main class="main"> <h1 class="page-title" data-tn-head>Price oracle</h1> <p class="page-subtitle">Osmosis prices · delivered over Polytone · read on Terp</p> <section class="orc" aria-label="Price oracle"> <div id="oracle-mount" style="min-height: min(34rem, 70vh)"></div> </section> <nav class="orc-links" aria-label="Oracle references"> <a href="https://github.com/DA0-DA0/polytone" target="_blank" rel="noopener">How Polytone works ↗</a> <a href="https://app.osmosis.zone/pools" target="_blank" rel="noopener">Source pools on Osmosis ↗</a> </nav> </main> <script type="module"> import { loadSiteConfig, useBrowserSafeChainEndpoints } from '/lib/config.js?v=a177cb9062';
+    import { applyNavGuard } from '/lib/nav-guard.js?v=c2122d8414';
+    applyNavGuard();
+    const CONFIG = {
+      pageId: 'oracle', chainId: 'morocco-1', chainName: 'Terp Network',
+      rpc: 'https://rpc.terp.network', rest: 'https://api.terp.network',
+      explorerBase: 'https://explorer.chaintools.tech/terp', bech32Prefix: 'terp',
+      denom: 'uthiol', denomDisplay: 'THIOL', denomDecimals: 6,
+      // Deployed 2026-11-04 (registry code 108 after Foundation DAO prop 16, aggregator code 89). Read-only page.
+      registryContract: 'terp198ddes0gjrufm4a7csky203fafzk0g69u4w3yuycqnsm7lt30rsq9nyt69',
+      aggregatorContract: 'terp1c6ymqxy0r49uu86qnvdrl6e7456pxhpf8yhu58hc32m8cfu79fsqdg99pr',
+      polytoneNote: 'terp1qxww83x84y8th3gsldqjq2j4haal3awgkr3ce7mut69s39cgaj0s5j4usj',
+    };
+    await loadSiteConfig(CONFIG, { pageId: 'oracle', chainId: 'morocco-1' });
+    useBrowserSafeChainEndpoints(CONFIG);
+    if (!CONFIG.rest) CONFIG.rest = 'https://api.terp.network';
+    window.__TERP_CONFIG = CONFIG;
+    const { mountOracle } = await import('/lib/oracle.js?v=ef47b49e8a');
+    mountOracle(document.getElementById('oracle-mount'), CONFIG).catch((e) => console.error('[oracle] mount', e)); </script> </body> </html> 
