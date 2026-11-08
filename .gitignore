@@ -1,4 +1,6 @@
 # misc
+# dev-only lab/loopback endpoints (see lib/config.js cfg-local1); never commit or ship
+config.local*.json
 .DS_Store
 node_modules
 .env*
