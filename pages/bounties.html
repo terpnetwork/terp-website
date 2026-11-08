@@ -1256,17 +1256,24 @@
     <!-- Bounties (graph v3.1 design): the shield on the left is the site's own navigation
          (lib/fractal/world.js, level /bounties, entered from Eco's "Community bounties" light);
          lib/bounties/ draws the nine categories inside its inner lights and runs the panel and the flows. -->
+    <!-- bounty3 (dev note): permissionless uploads to the S3 static bucket are not built yet. Gaps, the upload
+         stake gate (min_upload_stake / can_upload) and the planned decision-model filter are documented in the
+         DEV NOTES block at the end of lib/bounties/howto.js. Not shown in the UI. -->
+    <!-- live1 (dev note): the list reads the deployed escrow (public/config.json chains["morocco-1"].bounties.escrow,
+         code 104) through lib/bounties/live.js. Stack gaps (no signer for this escrow, details CORS outside
+         terp.network, no upload path for submissions, no create flow) are listed at the top of live.js. -->
     <main class="main bx-main bx3" id="bx">
         <div data-tn-head style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
             <h1 class="page-title" style="margin-bottom:0;">Bounties</h1>
+            <button type="button" class="bx-q bx-q-title" data-how="basics" aria-label="How bounties work" title="How bounties work">?</button>
         </div>
-        <div class="page-subtitle">Paid work on Terp. <strong>First bounties coming soon.</strong></div>
-        <p class="bx-source" id="bx-source" role="status">Loading bounties…</p>
+        <div class="page-subtitle">Paid work on Terp. Every reward is locked in an on-chain escrow until the work is accepted.</div>
+        <p class="bx-source" id="bx-source" role="status" hidden>Loading bounties…</p>
         <div class="bx3-bar">
             <span class="bx-dim" id="bx-wallet"></span>
-            <button type="button" class="plane-link" id="bx-create">Propose a bounty</button>
+            <span class="bx3-bar-acts"><button type="button" class="plane-link secondary bx-how-open" data-how="basics">How it works</button><button type="button" class="plane-link" id="bx-create" hidden>Propose a bounty</button></span>
         </div>
-        <section class="bx3-panel" id="bx-panel" aria-label="Bounty catalog">
+        <section class="bx3-panel" id="bx-panel" aria-label="Bounty catalog" hidden>
             <!-- the selected task opens here, at the top; the Now / Next / Later columns sit underneath -->
             <article class="bx31-detail" id="bx-detail" aria-live="polite" aria-labelledby="bx-detail-title"></article>
             <h2 class="bx31-kh" id="bx-kanban-h">Now · Next · Later</h2>
@@ -1275,7 +1282,29 @@
             <div class="bx3-kanban" id="bx-kanban" aria-labelledby="bx-kanban-h"></div>
         </section>
         <div class="bx-shield" id="bx-shield" aria-label="Bounty categories"></div>
-        <noscript><p>The bounty view needs JavaScript. First bounties coming soon.</p></noscript>
+        <!-- r3: the live view's skeleton (same markup as live.js liveTemplate), so the orb transition lands on a page that
+             only fills in: no board markup flash, no row-height jump. Removed by main.js in board/preview mode. -->
+        <section class="bxl is-skel" id="bx-live" aria-busy="true" aria-label="Bounties">
+    <div class="bxl-tabs" role="tablist" aria-label="Bounty views">
+      <button type="button" role="tab" id="bxl-tab-list" data-view="list" aria-selected="true" aria-controls="bxl-pane-list">Bounties</button>
+      <button type="button" role="tab" id="bxl-tab-feed" data-view="feed" aria-selected="false" aria-controls="bxl-pane-feed" tabindex="-1">Submissions</button>
+      <button type="button" role="tab" id="bxl-tab-desk" data-view="desk" aria-selected="false" aria-controls="bxl-pane-desk" tabindex="-1">Review desk</button>
+    </div>
+    <div class="bxl-sum" id="bxl-sum" role="status" aria-live="polite"><span class="bxl-spin" aria-hidden="true"></span>Reading the bounty escrow…</div>
+    <div role="tabpanel" id="bxl-pane-list" aria-labelledby="bxl-tab-list">
+      <form class="bxl-filters" id="bxl-filters" role="search" aria-label="Filter bounties">
+        <div class="bxl-seg" role="group" aria-label="Status" id="bxl-status"></div>
+        <label class="bxl-q"><span class="bxl-sr">Search</span><input type="search" id="bxl-q" placeholder="Search title, ref or summary" autocomplete="off"></label>
+        <div class="bxl-areas" role="group" aria-label="Category" id="bxl-areas"></div>
+        <p class="bxl-catbar" id="bxl-cat" aria-live="polite" hidden></p>
+      </form>
+      <ol class="bxl-list" id="bxl-list" aria-label="Bounty list"><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li><li class="bxl-row is-ghost" aria-hidden="true"><span class="bxl-open"><span class="bxl-ref">&nbsp;</span><span class="bxl-title">&nbsp;</span><span class="bxl-summary">&nbsp;</span><span class="bxl-meta"><span class="bxl-status">&nbsp;</span></span><span class="bxl-reward">&nbsp;</span></span></li></ol>
+      <nav class="bxl-pager" id="bxl-pager" aria-label="Pages" hidden></nav>
+    </div>
+    <div role="tabpanel" id="bxl-pane-feed" aria-labelledby="bxl-tab-feed" hidden></div>
+    <div role="tabpanel" id="bxl-pane-desk" aria-labelledby="bxl-tab-desk" hidden></div>
+        </section>
+        <noscript><p>The bounty list needs JavaScript.</p></noscript>
     </main>
     <div class="toast-container" id="toasts"></div>
     <script type="module">
