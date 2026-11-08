@@ -16,7 +16,8 @@ const CONTRACT_SRC = path.join('lib', 'contracts', 'src');
 const ESBUILD_VERSION = '0.28.2';
 
 // Never ship editor/OS leftovers: *.bak, *.bak-*, *.bak*, AppleDouble ._* and .DS_Store.
-const isJunk = (name) => /\.bak/i.test(name) || name.startsWith('._') || name === '.DS_Store';
+// cfg-local1: config.local*.json holds lab/loopback endpoints for dev only; it must never reach dist.
+const isJunk = (name) => /\.bak/i.test(name) || name.startsWith('._') || name === '.DS_Store' || /^config\.local.*\.json$/i.test(name);
 const notJunk = (src) => !isJunk(path.basename(src));
 
 function copyJsTree(srcDir, destDir) {

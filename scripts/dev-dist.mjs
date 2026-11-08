@@ -32,6 +32,12 @@ http.createServer((req, res) => {
   let p;
   try { p = decodeURIComponent(u.pathname); } catch { res.writeHead(400); return res.end(); }
   if (p.length > 1 && p.endsWith('/') && pages[p.slice(0, -1)]) p = p.slice(0, -1);
+  // cfg-local1: dev-only overrides from the untracked site-root file (never in dist, never shipped).
+  if (p === '/config.local.json') {
+    const f = path.join(site, 'config.local.json');
+    if (!fs.existsSync(f)) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('404'); }
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-cache' }); return res.end(fs.readFileSync(f));
+  }
   if (redirects[p]) { res.writeHead(301, { Location: redirects[p] + u.search }); return res.end(); }
   const file = path.join(root, pages[p] ? path.join('pages', pages[p] + '.html') : p);
   if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('404'); }
