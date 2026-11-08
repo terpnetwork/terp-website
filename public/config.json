@@ -19,6 +19,11 @@
         "zkWasmvmCodeId": 72,
         "zkWasmvmCircuitId": 1
       },
+      "codeIds": {
+        "_note": "120u-1 lab: SVG codes not deployed/verifiable on testnet-api (contracts 404); left null.",
+        "cw721_svg": null,
+        "svg_minter": null
+      },
       "defaultApps": [
         {
           "disabled": false,
@@ -49,12 +54,10 @@
       "grpc": "https://testnet-grpc.terp.network",
       "rest": "https://testnet-api.terp.network",
       "rpc": "https://testnet-rpc.terp.network",
-      "restLab": "http://192.168.10.101:1617",
-      "rpcLab": "http://192.168.10.101:36657",
       "services": {
         "headstashServer": "",
         "indexer": "",
-        "merkleServer": "http://127.0.0.1:29090",
+        "merkleServer": "",
         "whitelistTreeId": ""
       },
       "bounties": {
@@ -64,8 +67,7 @@
         "proposalModule": "",
         "prePropose": "",
         "cidGateway": [
-          "https://s3.terp.network/static/bounties/cid/",
-          "https://ipfs.terp.network/ipfs/"
+          "https://s3.terp.network/static/bounties/cid/"
         ],
         "codeIds": {
           "board": null,
@@ -81,9 +83,9 @@
       "configAccount": "terp-official",
       "contracts": {
         "accountMinter": "terp1qavmkqwn0qzu5m06a4ryyj5drtc0ujfm4j276axzcfxkglueqgms79cypw",
-        "cw721Svg": "terp1vp7smemrv846hpsyqrzlnqapmu3sv7hyygf4rrnw3ls26ezk864qupr5zt",
+        "cw721Svg": "terp15anc99l7lvk2v2pzjusnmylr3lw3xnpxg89xv8uh0fj6pwrumrksqwzs6x",
         "cwInfusionMinter": "terp1xjgagje7l8qjpv0zgf7zml5qre5mhh29dcwl5f8gf68rz56t9mgqusz8ls",
-        "cwSvgMinter": "terp188jpppxtfpf0vvt5gypdj52hk2xuswwcn38auczzxv20fcxz3kss9fhlru",
+        "cwSvgMinter": "terp1wg5z9rcwpw5kvrl4g78ees2l9ejptrhrx4t2k56nq6t27uly87zssujm80",
         "daoCalendar": "",
         "headstash": "",
         "headstashManifold": "",
@@ -98,6 +100,21 @@
         "passkeyAuthenticator": "",
         "ethAuthenticatorCode": 87,
         "passkeyAuthenticatorCode": 84
+      },
+      "codeIds": {
+        "_note": "Code numbers (not addresses), verified on morocco-1 via contract_info / code_info, 2026-10-31.",
+        "cw721_svg": 98,
+        "svg_minter": 99,
+        "accountMinter": 49,
+        "terp721Account": 48,
+        "cwInfusionMinter": 74,
+        "shitstrapFactory": 76,
+        "abstractRegistry": 66,
+        "abstractAnsHost": 65,
+        "abstractIbcClient": 69,
+        "abstractIbcHost": 82,
+        "abstractModuleFactory": 67,
+        "bountyEscrow": 104
       },
       "defaultApps": [
         {
@@ -157,15 +174,164 @@
         "proposalModule": "",
         "prePropose": "",
         "cidGateway": [
-          "https://s3.terp.network/static/bounties/cid/",
-          "https://ipfs.terp.network/ipfs/"
+          "https://s3.terp.network/static/bounties/cid/"
         ],
         "codeIds": {
           "board": null,
           "escrow": null
         },
-        "escrowChecksum": ""
-      }
+        "escrowChecksum": "",
+        "escrow": "terp19hrlad50vp2dc07cmnd67wtvphcggj3fjaakp2aqg5m7nrj04xpqq2fnxa",
+        "escrowCodeId": 104,
+        "detailsBase": "https://s3.terp.network/static/terp.network/bounties/seed/2026-10-29.1-draft",
+        "silo": "https://s3.terp.network/silo",
+        "siloBucket": "bounties"
+      },
+      "svgCollections": [
+        {
+          "contract": "terp163t2m8aa64d430stzddftqhpk464vzm88j8le9c8dn4gc6jk2m7sppfga0",
+          "name": "Marain Orbs",
+          "key": "marain-orbs",
+          "codeId": 98
+        },
+        {
+          "contract": "terp14h3nj95tatr4f6fc4hqtc7xdhhmkl938smx7cm4d08tsxj82wt2qelc8kv",
+          "name": "Kara & Gippy",
+          "key": "kara-gippy",
+          "codeId": 98
+        },
+        {
+          "contract": "terp12zz8jsjkx0l26334k0kmuk8tywgqy9ndswgkr6kl2f294mqxa65qpntqzu",
+          "name": "Yi Jing Harmony",
+          "key": "yijing-harmony",
+          "codeId": 98
+        },
+        {
+          "contract": "terp13acw7eezjqnv2zru428lgg3dfx5l88lw6st5aemljvnu85c3xqqswlqpud",
+          "name": "Latent Benders 2026-10-28",
+          "key": "latent-benders-2026-10-28",
+          "codeId": 98,
+          "series": "latent-benders"
+        },
+        {
+          "contract": "terp16prlc0v4vtu58djdypvmjsfnx4y2e3g2gjnw2m65qrun4sayufxqrn9j93",
+          "name": "Latent Benders 2026-10-29",
+          "key": "latent-benders-2026-10-29",
+          "codeId": 98,
+          "series": "latent-benders"
+        },
+        {
+          "contract": "terp1y2nfyahzl55tf8jkzz5refqlkhmnflvr8adhk6pch77jrkr6accshgr0wp",
+          "name": "Latent Benders 2026-10-30",
+          "key": "latent-benders-2026-10-30",
+          "codeId": 98,
+          "series": "latent-benders"
+        },
+        {
+          "contract": "terp1cy8jtf0uyz899q5hlh3g2tne4uwctqzhahk7qpyrehw8gtlna0ms4aewjg",
+          "name": "Latent Benders 2026-10-31",
+          "key": "latent-benders-2026-10-31",
+          "codeId": 98,
+          "series": "latent-benders"
+        },
+        {
+          "contract": "terp15anc99l7lvk2v2pzjusnmylr3lw3xnpxg89xv8uh0fj6pwrumrksqwzs6x",
+          "name": "Permissionless Fractals",
+          "key": "fractal",
+          "codeId": 98
+        },
+        {
+          "contract": "terp1yldtf5nsychkasyz3gddemqy45fvl2fxpmc8jrsqvt5fv7ggghysektnqk",
+          "name": "Penumbra",
+          "key": "penumbra",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp12ye4vqzm6fmtatc3q87l2mde3ymajh4mlq0ut2ll8lkf8c9r6qzqmsvx8t",
+          "name": "Osmosis",
+          "key": "osmosis",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1jdjrrf00grgvcgusf36juf7y9gsr962he7wp9c3pfpk27g0ulfmqs4jpvm",
+          "name": "Cardano",
+          "key": "cardano",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1fmkfazecjn2pmdxxywksaqsxp69jprsframqeg5da4l3emrx004surkf44",
+          "name": "BitCanna",
+          "key": "bcna",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1q3algj0h80vpyx3xelwql9umwmyvl7gzm4nuly3lseqlqg89tresc364de",
+          "name": "Cosmos",
+          "key": "cosmos",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp12v7q75xl7zm8vjzvxenyyyx4ktfye9a92u93kjrk4rppdyvj0wjspzpa6z",
+          "name": "Terp",
+          "key": "terp",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1sdu5qxlpydhpn0a8g4v3jehzn9lhf96rqalc5mj6d6u4ss3jq47susr279",
+          "name": "Bitcoin",
+          "key": "bitcoin",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp18xca496njd5v7vw0vcl0ddqvsw2s554npxhztrtz7t0x6djd7eyq6qdlez",
+          "name": "Akash",
+          "key": "akash",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1l6wlwe5kysukwcln9c9rf9en5x6xzx8lzj5hfa5py8svzt78s8tswkutuz",
+          "name": "BitSong",
+          "key": "bitsong",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1tf2jp6qll2x936s2g9f0h7m63dyua7827wcezsc6gsfwgq550n6ss9dtcu",
+          "name": "DAO",
+          "key": "dao",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1a9rkeulfskj7arn8qagvu2ykkp4l664n5zj2jxwm6vfqwudnk7kqht5lnx",
+          "name": "Ethereum",
+          "key": "eth",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1nphx5lmx4az8ptra2c6n04csa5u3ugcp3stcvq0n5ayw8xupyg7svlgc4t",
+          "name": "Monero",
+          "key": "monero",
+          "codeId": 98,
+          "series": "interchain-logos"
+        },
+        {
+          "contract": "terp1q3kgl2rnx30f88t5hdfym7s7ugkll9rtvtx2slaq6rd2p5gc50jq0rh3er",
+          "name": "Zcash",
+          "key": "zec",
+          "codeId": 98,
+          "series": "interchain-logos"
+        }
+      ]
     }
   },
   "checksums": {

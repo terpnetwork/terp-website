@@ -1,32 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-<!-- app shell: load once, reuse across routes (must stay first) -->
-<script src="/lib/shell/shell.js"></script>
-<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
-<link rel="modulepreload" href="/lib/config.js">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <!-- WIP gate: default OFF. Flip WIP_GATE_ENABLED in /lib/wip-gate.js or use ?wip=1 -->
-  <script src="/lib/wip-gate.js"></script>
-  <title>IBC | Terp Network</title>
-  <meta name="description" content="IBC channels, clients, and modular light-client surfaces on Terp Network.">
-  <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
-  <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
-  <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
-  <link rel="stylesheet" href="/public/global.css">
-<link rel="stylesheet" href="/public/world.css">
-<link rel="modulepreload" href="/lib/fractal/routes.js">
-<link rel="modulepreload" href="/lib/fractal/world.js">
-<script type="module" src="/lib/fractal/world.js"></script>
-<script type="module" src="/lib/ui/select.js"></script>
-  <!--
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <!-- app shell: load once, reuse across routes (must stay first) --> <script src="/lib/shell/shell.js?v=7750cac23a"></script> <script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script> <link rel="modulepreload" href="/lib/config.js?v=a177cb9062"> <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes"> <!-- WIP gate: default OFF. Flip WIP_GATE_ENABLED in /lib/wip-gate.js or use ?wip=1 --> <script src="/lib/wip-gate.js?v=d4645557da"></script> <title>IBC | Terp Network</title> <meta name="description" content="IBC channels, clients, and modular light-client surfaces on Terp Network."> <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png?v=964c4b5060"> <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi"> <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet"> <link rel="stylesheet" href="/public/global.css?v=964c4b5060"> <link rel="stylesheet" href="/public/world.css?v=61e4bee33d"> <link rel="modulepreload" href="/lib/fractal/routes.js?v=c884c9e3de"> <link rel="modulepreload" href="/lib/fractal/world.js?v=615efa4ca3"> <script type="module" src="/lib/fractal/world.js?v=615efa4ca3"></script> <script type="module" src="/lib/ui/select.js?v=ae03d172b6"></script> <!--
     Static page: read-only LCD/RPC queries + optional wallet deposits.
     Client types register in /lib/ibc-clients.js (same-origin only).
-  -->
-  <style>
-    :root {
+  --> <style> :root {
       --eco-text: 1rem;
       --eco-text-sm: 0.9375rem;
       --eco-label: 0.8125rem;
@@ -411,50 +386,6 @@
     }
     @media (max-width: 560px) {
       .ibc-cap-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-</head>
-<body>
-  <script src="/lib/fab.js"></script>
+    } </style> <meta name="tn-build" content="321a87df78"><script>window.__TN_ASSET_V="964c4b5060";</script></head> <body> <script src="/lib/fab.js?v=29fdf4f1db"></script> <main class="main"> <h1 class="page-title" data-tn-head>IBC</h1> <p class="page-subtitle">Open channels · clients · relayer gas</p> <!-- Live inventory strip (wallet via FAB — no redundant Connect button) --> <div class="stat-strip" aria-live="polite"> <div class="stat-card"> <div class="stat-label">Open channels</div> <div class="stat-val" id="stat-channels">—</div> <div class="stat-meta" id="stat-channels-src">loading</div> </div> <div class="stat-card"> <div class="stat-label">Connections</div> <div class="stat-val" id="stat-connections">—</div> <div class="stat-meta">LCD</div> </div> <div class="stat-card"> <div class="stat-label">Clients</div> <div class="stat-val" id="stat-clients">—</div> <div class="stat-meta" id="stat-clients-meta">by type…</div> </div> <div class="stat-card"> <div class="stat-label">Data source</div> <div class="stat-val" id="stat-source" style="font-size:0.95rem;">—</div> <div class="stat-meta" id="stat-proxy">proxy…</div> </div> </div> <!-- Modular client-type tabs (recursive registry) --> <nav id="type-tabs" class="plane-nav" role="tablist" aria-label="IBC client types"></nav> <div id="type-panel-host"></div> </main> <script type="module"> import { bootIbcPage } from '/lib/ibc-page.js?v=6d75b2e737';
 
-  <main class="main">
-    <h1 class="page-title" data-tn-head>IBC</h1>
-    <p class="page-subtitle">Open channels · clients · relayer gas</p>
-
-    <!-- Live inventory strip (wallet via FAB — no redundant Connect button) -->
-    <div class="stat-strip" aria-live="polite">
-      <div class="stat-card">
-        <div class="stat-label">Open channels</div>
-        <div class="stat-val" id="stat-channels">—</div>
-        <div class="stat-meta" id="stat-channels-src">loading</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Connections</div>
-        <div class="stat-val" id="stat-connections">—</div>
-        <div class="stat-meta">LCD</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Clients</div>
-        <div class="stat-val" id="stat-clients">—</div>
-        <div class="stat-meta" id="stat-clients-meta">by type…</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Data source</div>
-        <div class="stat-val" id="stat-source" style="font-size:0.95rem;">—</div>
-        <div class="stat-meta" id="stat-proxy">proxy…</div>
-      </div>
-    </div>
-
-    <!-- Modular client-type tabs (recursive registry) -->
-    <nav id="type-tabs" class="plane-nav" role="tablist" aria-label="IBC client types"></nav>
-    <div id="type-panel-host"></div>
-
-  </main>
-
-  <script type="module">
-    import { bootIbcPage } from '/lib/ibc-page.js';
-
-    bootIbcPage().catch((e) => console.error('[ibc] boot', e));
-  </script>
-</body>
-</html>
+    bootIbcPage().catch((e) => console.error('[ibc] boot', e)); </script> </body> </html> 

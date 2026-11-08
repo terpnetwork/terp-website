@@ -1,45 +1,4 @@
-<!--  make this stateless tab in dao-dao-ui , wire in querie design with indexers and wallet support with existing wallet support -->
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-<!-- app shell: load once, reuse across routes (must stay first) -->
-<script src="/lib/shell/shell.js"></script>
-<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
-<link rel="modulepreload" href="/lib/config.js">
-<link rel="modulepreload" href="/lib/nav-guard.js">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description"
-        content="Register your Terp Account Billboard on-chain. Human-readable identities for Terp Network addresses.">
-    <title>TABS | Terp Network</title>
-
-    <meta property="og:title" content="TABS | Terp Network">
-    <meta property="og:description"
-        content="Register your on-chain identity. Terp Account Billboards for Terp Network.">
-    <meta property="og:type" content="website">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="TABS | Terp Network">
-    <meta name="twitter:creator" content="@terpculture">
-
-    <link rel="icon" type="image/x-icon" href="/public/favicons/terp-32x32.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png">
-
-    <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
-    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
-    <link rel="stylesheet" href="/public/global.css">
-<link rel="stylesheet" href="/public/world.css">
-<link rel="modulepreload" href="/lib/fractal/routes.js">
-<link rel="modulepreload" href="/lib/fractal/world.js">
-<script type="module" src="/lib/fractal/world.js"></script>
-<script type="module" src="/lib/ui/select.js"></script>
-
-    <style>
-        /* Main */
+<!--  make this stateless tab in dao-dao-ui , wire in querie design with indexers and wallet support with existing wallet support --> <!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <!-- app shell: load once, reuse across routes (must stay first) --> <script src="/lib/shell/shell.js?v=7750cac23a"></script> <script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script> <link rel="modulepreload" href="/lib/config.js?v=a177cb9062"> <link rel="modulepreload" href="/lib/nav-guard.js?v=c2122d8414"> <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes"> <meta name="description" content="Register your Terp Account Billboard on-chain. Human-readable identities for Terp Network addresses."> <title>TABS | Terp Network</title> <meta property="og:title" content="TABS | Terp Network"> <meta property="og:description" content="Register your on-chain identity. Terp Account Billboards for Terp Network."> <meta property="og:type" content="website"> <meta property="twitter:card" content="summary_large_image"> <meta property="twitter:title" content="TABS | Terp Network"> <meta name="twitter:creator" content="@terpculture"> <link rel="icon" type="image/x-icon" href="/public/favicons/terp-32x32.png?v=964c4b5060"> <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png?v=964c4b5060"> <link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png?v=964c4b5060"> <link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png?v=964c4b5060"> <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi"> <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet"> <link rel="stylesheet" href="/public/global.css?v=964c4b5060"> <link rel="stylesheet" href="/public/world.css?v=61e4bee33d"> <link rel="modulepreload" href="/lib/fractal/routes.js?v=c884c9e3de"> <link rel="modulepreload" href="/lib/fractal/world.js?v=615efa4ca3"> <script type="module" src="/lib/fractal/world.js?v=615efa4ca3"></script> <script type="module" src="/lib/ui/select.js?v=ae03d172b6"></script> <style> /* Main */
         .main {
             position: relative;
             z-index: 1;
@@ -1248,172 +1207,9 @@
             font-family: var(--tn-font-mono);
             font-size: 0.82em;
             color: var(--tn-teal);
-        }
-    </style>
-</head>
-
-<body>
-    <script src="/lib/fab.js"></script>
-    <main class="main">
-
-        <div data-tn-head style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
-            <h1 class="page-title" style="margin-bottom:0;">Ecosystem</h1>
-            <button class="btn-docs" onclick="document.getElementById('modal-docs').style.display='flex'"
-                aria-label="Documentation" title="Documentation">?</button>
-        </div>
-        <!-- Expandable: catalog from public/ecosystem.json — filter by tag / status / search -->
-        <div class="page-subtitle">Apps and projects on Terp</div>
-
-        <div id="eco-catalog-host" style="width:100%;"></div>
-        <div class="eco-list-foot">
-            <button type="button" class="plane-link" id="eco-list-app" aria-haspopup="dialog" aria-controls="modal-docs">List your app</button>
-            <p class="muted">Open a PR to add it to the Eco catalog.</p>
-        </div>
-
-        <!-- Planes parked here; opened cards host them via ecosystem.js -->
-        <div id="plane-storage" aria-hidden="true">
-
-        <!-- ─── Abstract Accounts plane ─── -->
-        <section class="plane" id="plane-abstract" role="tabpanel">
-            <div class="plane-card">
-                <h3>Abstract Accounts</h3>
-                <p>
-                    Smart accounts on mainnet: a registry, names, IBC, and a module factory.
-                    Addresses are below. To create and run an account, use the Abstract TypeScript SDK.
-                </p>
-                <div class="abstract-state" id="abstract-state" aria-live="polite">
-                    <div class="abstract-state-loading">Loading addresses…</div>
-                </div>
-                <div class="plane-links">
-                    <a class="plane-link" href="https://github.com/AbstractSDK/abstract.js" target="_blank" rel="noopener">abstract.js on GitHub</a>
-                    <a class="plane-link" href="https://docs.terp.network" target="_blank" rel="noopener">Docs · abstract &amp; modules</a>
-                    <a class="plane-link secondary" href="/" title="Install terpd">Installer (terp-core)</a>
-                    <a class="plane-link secondary" href="https://github.com/terpnetwork" target="_blank" rel="noopener">terpnetwork on GitHub</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- ─── Billboards plane ─── -->
-        <section class="plane" id="plane-billboards" role="tabpanel">
-            <div class="plane-card" style="margin-bottom:1rem;">
-                <h3>Terp Account Billboards (TABS)</h3>
-                <p>
-                    Check a name, then register it. Shorter names cost more.
-                </p>
-                <div class="lifecycle-grid">
-                    <div class="lifecycle-item">
-                        <strong>Mint &amp; list</strong>
-                        <span>Mint the name and list it for sale.</span>
-                    </div>
-                    <div class="lifecycle-item">
-                        <strong>Bid / rebid</strong>
-                        <span>Place or update asks on the marketplace; higher bids replace prior open asks per contract rules.</span>
-                    </div>
-                    <div class="lifecycle-item">
-                        <strong>Accept bid</strong>
-                        <span>Accept a bid. There is a cooldown before the name settles.</span>
-                    </div>
-                    <div class="lifecycle-item">
-                        <strong>Cooldown</strong>
-                        <span>During cooldown you cannot transfer the name. The seller can cancel for a fee.</span>
-                    </div>
-                </div>
-                <p style="margin-bottom:0;font-size:0.78rem;color:rgb(var(--tn-text-rgb) / max(0.75, var(--tn-alpha-floor)));">
-                    Contract sources: <span class="code-inline">terp-account-billboards</span>
-                    (terp721-account + manifold). Prefer pure JS clients / ts-codegen bindings over a full React rewrite.
-                </p>
-            </div>
-
-            <div class="name-card">
-                <div class="name-input-wrap">
-                    <input type="text" class="name-input" id="name-input" placeholder="your-name" maxlength="64"
-                        autocomplete="off">
-                    <button class="btn-check" id="btn-check" onclick="checkName()">Check</button>
-                </div>
-
-                <div class="name-status" id="name-status"></div>
-
-                <div class="pricing-info" id="pricing-info" style="display:none">
-                    <div class="pricing-item">
-                        <div class="pricing-label">Base price</div>
-                        <div class="pricing-value" id="base-price">--</div>
-                    </div>
-                    <div class="pricing-item">
-                        <div class="pricing-label">Length (min / max)</div>
-                        <div class="pricing-value" id="name-limits">--</div>
-                    </div>
-                    <div class="pricing-item">
-                        <div class="pricing-label">Characters</div>
-                        <div class="pricing-value" id="name-length">--</div>
-                    </div>
-                    <div class="pricing-item" id="mint-price-item" style="display:none">
-                        <div class="pricing-label">Your price</div>
-                        <div class="pricing-value" id="mint-price-display">--</div>
-                    </div>
-                </div>
-
-                <button class="btn-mint" id="btn-mint" onclick="mintName()" disabled style="display:none">
-                    Register Name
-                </button>
-            </div>
-        </section>
-
-        <!-- ─── SVG (same ecosystem surface as billboards / abstract) ─── -->
-        <section class="plane" id="plane-svg" role="tabpanel">
-            <div class="plane-card">
-                <h3>SVG mint</h3>
-                <p>
-                    Generative collections on Terp mainnet. Prices and supply are read live from the minter.
-                </p>
-                <div id="eco-svg-live" class="eco-svg-live" aria-live="polite"></div>
-                <div class="plane-links">
-                    <a class="plane-link" href="/svg">Open SVG mint</a>
-                    <a class="plane-link secondary" href="https://docs.terp.network" target="_blank" rel="noopener">Docs</a>
-                </div>
-            </div>
-        </section>
-
-        <section class="plane" id="plane-ibc" role="tabpanel">
-            <div class="plane-card">
-                <h3>IBC</h3>
-                <p>Open channels and clients from LCD. Relayer gas lives on the full IBC page.</p>
-                <div id="eco-ibc-mount"></div>
-                <div class="plane-links">
-                    <a class="plane-link" href="/ibc">Full IBC page</a>
-                </div>
-            </div>
-        </section>
-
-        <section class="plane" id="plane-explorer" role="tabpanel">
-            <div id="eco-explorer-mount"></div>
-        </section>
-        <section class="plane" id="plane-upgrades" role="tabpanel">
-            <div id="eco-upgrades-mount"></div>
-        </section>
-        <section class="plane" id="plane-releases" role="tabpanel">
-            <div id="eco-releases-mount"></div>
-        </section>
-
-        <!-- Staking moved to its own page (/staking, pages/staking.html); the Eco card links there. -->
-
-        </div><!-- /#plane-storage -->
-
-        <div class="loading" id="loading" style="display:none">
-            <div class="spinner"></div>
-            <p id="loading-text">Loading...</p>
-        </div>
-
-        <p class="muted" style="margin-top:1.25rem;font-size:0.88rem;color:var(--tn-text-dim);">
-            Live contract table lives under <a href="/resources#contracts" style="color:var(--tn-teal);">Resources → Contracts</a>.
-        </p>
-    </main>
-
-    <div class="toast-container" id="toasts"></div>
-
-    <script type="module">
-        import { loadSiteConfig, missingContracts, useBrowserSafeChainEndpoints } from '/lib/config.js';
-        import { applyNavGuard } from '/lib/nav-guard.js';
-        import * as TerpWallet from '/lib/wallet.js';
+        } </style> <meta name="tn-build" content="321a87df78"><script>window.__TN_ASSET_V="964c4b5060";</script></head> <body> <script src="/lib/fab.js?v=29fdf4f1db"></script> <main class="main"> <div data-tn-head style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;"> <h1 class="page-title" style="margin-bottom:0;">Ecosystem</h1> <button class="btn-docs" onclick="document.getElementById('modal-docs').style.display='flex'" aria-label="Documentation" title="Documentation">?</button> </div> <!-- Expandable: catalog from public/ecosystem.json — filter by tag / status / search --> <div class="page-subtitle">Apps and projects on Terp</div> <div id="eco-catalog-host" style="width:100%;"></div> <div class="eco-list-foot"> <button type="button" class="plane-link" id="eco-list-app" aria-haspopup="dialog" aria-controls="modal-docs">List your app</button> <p class="muted">Open a PR to add it to the Eco catalog.</p> </div> <!-- Planes parked here; opened cards host them via ecosystem.js --> <div id="plane-storage" aria-hidden="true"> <!-- ─── Abstract Accounts plane ─── --> <section class="plane" id="plane-abstract" role="tabpanel"> <div class="plane-card"> <h3>Abstract Accounts</h3> <p> Smart accounts on mainnet: a registry, names, IBC, and a module factory. Addresses are below. To create and run an account, use the Abstract TypeScript SDK. </p> <div class="abstract-state" id="abstract-state" aria-live="polite"> <div class="abstract-state-loading">Loading addresses…</div> </div> <div class="plane-links"> <a class="plane-link" href="https://github.com/AbstractSDK/abstract.js" target="_blank" rel="noopener">abstract.js on GitHub</a> <a class="plane-link" href="https://docs.terp.network" target="_blank" rel="noopener">Docs · abstract &amp; modules</a> <a class="plane-link secondary" href="/" title="Install terpd">Installer (terp-core)</a> <a class="plane-link secondary" href="https://github.com/terpnetwork" target="_blank" rel="noopener">terpnetwork on GitHub</a> </div> </div> </section> <!-- ─── Billboards plane ─── --> <section class="plane" id="plane-billboards" role="tabpanel"> <div class="plane-card" style="margin-bottom:1rem;"> <h3>Terp Account Billboards (TABS)</h3> <p> Check a name, then register it. Shorter names cost more. </p> <div class="lifecycle-grid"> <div class="lifecycle-item"> <strong>Mint &amp; list</strong> <span>Mint the name and list it for sale.</span> </div> <div class="lifecycle-item"> <strong>Bid / rebid</strong> <span>Place or update asks on the marketplace; higher bids replace prior open asks per contract rules.</span> </div> <div class="lifecycle-item"> <strong>Accept bid</strong> <span>Accept a bid. There is a cooldown before the name settles.</span> </div> <div class="lifecycle-item"> <strong>Cooldown</strong> <span>During cooldown you cannot transfer the name. The seller can cancel for a fee.</span> </div> </div> <p style="margin-bottom:0;font-size:0.78rem;color:rgb(var(--tn-text-rgb) / max(0.75, var(--tn-alpha-floor)));"> Contract sources: <span class="code-inline">terp-account-billboards</span> (terp721-account + manifold). Prefer pure JS clients / ts-codegen bindings over a full React rewrite. </p> </div> <div class="name-card"> <div class="name-input-wrap"> <input type="text" class="name-input" id="name-input" placeholder="your-name" maxlength="64" autocomplete="off"> <button class="btn-check" id="btn-check" onclick="checkName()">Check</button> </div> <div class="name-status" id="name-status"></div> <div class="pricing-info" id="pricing-info" style="display:none"> <div class="pricing-item"> <div class="pricing-label">Base price</div> <div class="pricing-value" id="base-price">--</div> </div> <div class="pricing-item"> <div class="pricing-label">Length (min / max)</div> <div class="pricing-value" id="name-limits">--</div> </div> <div class="pricing-item"> <div class="pricing-label">Characters</div> <div class="pricing-value" id="name-length">--</div> </div> <div class="pricing-item" id="mint-price-item" style="display:none"> <div class="pricing-label">Your price</div> <div class="pricing-value" id="mint-price-display">--</div> </div> </div> <button class="btn-mint" id="btn-mint" onclick="mintName()" disabled="disabled" style="display:none"> Register Name </button> </div> </section> <!-- ─── SVG (same ecosystem surface as billboards / abstract) ─── --> <section class="plane" id="plane-svg" role="tabpanel"> <div class="plane-card"> <h3>SVG mint</h3> <p> Generative collections on Terp mainnet. Prices and supply are read live from the minter. </p> <div id="eco-svg-live" class="eco-svg-live" aria-live="polite"></div> <div class="plane-links"> <a class="plane-link" href="/svg">Open SVG mint</a> <a class="plane-link secondary" href="https://docs.terp.network" target="_blank" rel="noopener">Docs</a> </div> </div> </section> <section class="plane" id="plane-ibc" role="tabpanel"> <div class="plane-card"> <h3>IBC</h3> <p>Open channels and clients from LCD. Relayer gas lives on the full IBC page.</p> <div id="eco-ibc-mount"></div> <div class="plane-links"> <a class="plane-link" href="/ibc">Full IBC page</a> </div> </div> </section> <section class="plane" id="plane-explorer" role="tabpanel"> <div id="eco-explorer-mount"></div> </section> <section class="plane" id="plane-upgrades" role="tabpanel"> <div id="eco-upgrades-mount"></div> </section> <section class="plane" id="plane-releases" role="tabpanel"> <div id="eco-releases-mount"></div> </section> <!-- Staking moved to its own page (/staking, pages/staking.html); the Eco card links there. --> </div><!-- /#plane-storage --> <div class="loading" id="loading" style="display:none"> <div class="spinner"></div> <p id="loading-text">Loading...</p> </div> <p class="muted" style="margin-top:1.25rem;font-size:0.88rem;color:var(--tn-text-dim);"> Live contract table lives under <a href="/resources#contracts" style="color:var(--tn-teal);">Resources → Contracts</a>. </p> </main> <div class="toast-container" id="toasts"></div> <script type="module"> import { loadSiteConfig, missingContracts, useBrowserSafeChainEndpoints } from '/lib/config.js?v=a177cb9062';
+        import { applyNavGuard } from '/lib/nav-guard.js?v=c2122d8414';
+        import * as TerpWallet from '/lib/wallet.js?v=3ba243b800';
 
         applyNavGuard();
         // ═══════════════════════════════════════════════════════════════
@@ -1463,7 +1259,7 @@
             }
         }
         try {
-            const { loadEcosystem, mountEcosystemCatalog } = await import('/lib/ecosystem.js');
+            const { loadEcosystem, mountEcosystemCatalog } = await import('/lib/ecosystem.js?v=a460124942');
             const catalog = await loadEcosystem();
             const host = document.getElementById('eco-catalog-host');
             mountEcosystemCatalog(host, catalog, {
@@ -1476,13 +1272,13 @@
                     detailEl.appendChild(plane);
                     detailEl.hidden = false;
                     if (componentId === 'upgrades' || componentId === 'releases') {
-                        import('/lib/ops-modal.js').then((m) => m.openOpsModal(componentId));
+                        import('/lib/ops-modal.js?v=964c4b5060').then((m) => m.openOpsModal(componentId));
                     }
                     if (componentId === 'svg') {
-                        import('/lib/eco-svg-plane.js').then((m) => m.mountSvgPlane());
+                        import('/lib/eco-svg-plane.js?v=5158746211').then((m) => m.mountSvgPlane());
                     }
                     if (componentId === 'ibc') {
-                        import('/lib/ibc-core.js').then(async ({ loadIbcContext, loadIbcSnapshot }) => {
+                        import('/lib/ibc-core.js?v=56725d38ae').then(async ({ loadIbcContext, loadIbcSnapshot }) => {
                             const mount = document.getElementById('eco-ibc-mount');
                             if (!mount || mount.dataset.ready) return;
                             mount.textContent = 'Querying LCD…';
@@ -1499,7 +1295,7 @@
                         });
                     }
                     if (['explorer', 'upgrades', 'releases'].includes(componentId)) {
-                        import('/lib/chain-versions.js').then(({ mountChainResource }) => {
+                        import('/lib/chain-versions.js?v=fef4545576').then(({ mountChainResource }) => {
                             const el = document.getElementById(`eco-${componentId}-mount`);
                             if (el) mountChainResource(el, componentId, CONFIG);
                         });
@@ -1513,7 +1309,7 @@
             // the way the navigation does: select the "Staking" light, then open it, so the router
             // plays the same fractal zoom into the orb shield. ?stake= rides along.
             async function enterStaking(stakeAddr) {
-                const { selectEcoProject } = await import('/lib/ecosystem.js');
+                const { selectEcoProject } = await import('/lib/ecosystem.js?v=a460124942');
                 const to = '/staking' + (stakeAddr ? '?stake=' + encodeURIComponent(stakeAddr) : '');
                 history.replaceState(history.state, '', '/eco');   // Back from /staking lands on Eco
                 selectEcoProject('staking', { scroll: false });
@@ -1537,7 +1333,7 @@
             // then open it, so the router plays the fractal entrance into the Bounties shield.
             // The task id rides along (/bounties?bounty=TB-…), where it is selected and zoomed.
             async function enterBounties(wantBounty) {
-                const { selectEcoProject } = await import('/lib/ecosystem.js');
+                const { selectEcoProject } = await import('/lib/ecosystem.js?v=a460124942');
                 const to = '/bounties' + (wantBounty ? '?bounty=' + encodeURIComponent(wantBounty) : '');
                 history.replaceState(history.state, '', '/eco');   // Back from /bounties lands on Eco, not on this redirect
                 selectEcoProject('bounties', { scroll: false });
@@ -1619,7 +1415,7 @@
             // Fetch contract data via assets-registry (state.json → { contracts, codeIds, raw })
             let contracts = {}, codeIds = {}, raw = {}, chainId = CONFIG.chainId || 'morocco-1', url = stateUrl;
             try {
-                const { loadStateContracts, STATE_JSON_URL } = await import('/lib/assets-registry.js');
+                const { loadStateContracts, STATE_JSON_URL } = await import('/lib/assets-registry.js?v=1226d28228');
                 url = stateUrl || STATE_JSON_URL;
                 const result = await loadStateContracts(url, chainId);
                 contracts = result.contracts || {};
@@ -1724,7 +1520,7 @@
             if (!host) return;
             const stateUrl = CONFIG.stateJsonUrl || CONFIG.services?.stateJson || null;
             try {
-                const { loadStateContracts, STATE_JSON_URL } = await import('/lib/assets-registry.js');
+                const { loadStateContracts, STATE_JSON_URL } = await import('/lib/assets-registry.js?v=1226d28228');
                 const url = stateUrl || STATE_JSON_URL;
                 const { contracts, codeIds } = await loadStateContracts(url, CONFIG.chainId || 'morocco-1');
                 // Ordered module list — registry, ans-host, ibc-client, ibc-host, module-factory
@@ -1791,7 +1587,7 @@
                 // cosmes loads on connect intent; the wallet.js wrapper builds the msg once it has.
                 MsgExecuteContract = TerpWallet.getState().MsgExecuteContract || TerpWallet.MsgExecuteContract;
 
-                const minterMod = await import("/lib/account-minter.js");
+                const minterMod = await import("/lib/account-minter.js?v=8b9147543b");
                 AccountMinterQueryClient = minterMod.AccountMinterQueryClient;
                 AccountMinterClient = minterMod.AccountMinterClient;
 
@@ -1801,7 +1597,7 @@
                 console.error("Failed to load libraries:", err);
                 // Query clients can still work via LCD without cosmes
                 try {
-                    const minterMod = await import("/lib/account-minter.js");
+                    const minterMod = await import("/lib/account-minter.js?v=8b9147543b");
                     AccountMinterQueryClient = minterMod.AccountMinterQueryClient;
                     AccountMinterClient = minterMod.AccountMinterClient;
                 } catch (e2) {
@@ -2233,13 +2029,7 @@
 
         init().catch(err => {
             console.error("Init failed:", err);
-        });
-
-
-    </script>
-
-    <script>
-        window.openDocModal = function (sectionId) {
+        }); </script> <script> window.openDocModal = function (sectionId) {
             const modal = document.getElementById('modal-docs');
             if (!modal) return;
             modal.style.display = 'flex';
@@ -2258,59 +2048,4 @@
         };
         document.getElementById('eco-list-app')?.addEventListener('click', () => {
             openDocModal('eco-list-guide');
-        });
-    </script>
-
-    <!-- ─── Documentation Modal ─── -->
-    <div class="modal" id="modal-docs" style="display:none" role="dialog" aria-labelledby="modal-docs-title">
-        <div class="modal-backdrop" onclick="closeDocModal()"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-docs-title">Ecosystem</h2>
-                <button class="modal-close" onclick="closeDocModal()" aria-label="Close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="doc-section">
-                    <h3 class="doc-heading">What’s here</h3>
-                    <p class="doc-text">A community catalog of the apps and projects on Terp: names and accounts, art, DeFi, DAOs, tools and infrastructure. Each light is one project.</p>
-                </div>
-
-                <div class="doc-section">
-                    <h3 class="doc-heading">Browse</h3>
-                    <p class="doc-text">Nine projects show at a time. Previous and Next turn the page, and the line under the lights tells you which page you are on.</p>
-                </div>
-
-                <div class="doc-section">
-                    <h3 class="doc-heading">Filter</h3>
-                    <p class="doc-text">Pick a category to see only those projects, or choose All to see everything again.</p>
-                </div>
-
-                <div class="doc-section">
-                    <h3 class="doc-heading">Open</h3>
-                    <p class="doc-text">Select a project to read what it does. Apps built into this site open right here. Projects hosted elsewhere open in a new tab, after you confirm you are leaving.</p>
-                </div>
-
-                <div class="doc-section">
-                    <h3 class="doc-heading">Terp Account Billboards</h3>
-                    <p class="doc-text">Despite the name, TABS is not a message board. It is the on-chain name registry: a username that points at your wallet, which other apps can look up.</p>
-                </div>
-
-                <div class="doc-section" id="eco-list-guide" tabindex="-1">
-                    <h3 class="doc-heading">List your app</h3>
-                    <p class="doc-text">Eco reads its catalog from <code>public/ecosystem.json</code> in the <a href="https://github.com/terpnetwork/terp-website" target="_blank" rel="noopener">terp-website</a> repository. A merged pull request on that file is what puts a project on this page.</p>
-                    <ol class="doc-steps">
-                        <li>Fork <a href="https://github.com/terpnetwork/terp-website" target="_blank" rel="noopener">github.com/terpnetwork/terp-website</a> and open <a href="https://github.com/terpnetwork/terp-website/blob/main/public/ecosystem.json" target="_blank" rel="noopener">public/ecosystem.json</a>.</li>
-                        <li>Add one object to the <code>projects</code> array with at least <code>id</code>, <code>title</code>, <code>summary</code>, <code>tags</code>, <code>status</code> (<code>live</code>, <code>beta</code>, or <code>soon</code>), and a <code>links</code> entry pointing at your app or repo.</li>
-                        <li>Use an existing tag from <code>filters.tags</code> when it fits (accounts, nft, governance, zk, ibc, infra, agentic, defi). Set <code>relevance</code> as a number if you care about sort order; higher appears first.</li>
-                        <li>Open a pull request against <code>main</code>. Keep the description short: what the app does and the live URL.</li>
-                    </ol>
-                    <p class="doc-text">Deployed CosmWasm contracts show under Resources → App state from the published chain address file after they are live on mainnet — that list is not edited in this JSON.</p>
-                    <p class="doc-text">Edit file: <a href="https://github.com/terpnetwork/terp-website/edit/main/public/ecosystem.json" target="_blank" rel="noopener">github.com/terpnetwork/terp-website/edit/main/public/ecosystem.json</a>. Wider contribution notes: <a href="https://docs.terp.network/resources/contribution" target="_blank" rel="noopener">docs.terp.network/resources/contribution</a>.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</body>
-
-</html>
+        }); </script> <!-- ─── Documentation Modal ─── --> <div class="modal" id="modal-docs" style="display:none" role="dialog" aria-labelledby="modal-docs-title"> <div class="modal-backdrop" onclick="closeDocModal()"></div> <div class="modal-content"> <div class="modal-header"> <h2 id="modal-docs-title">Ecosystem</h2> <button class="modal-close" onclick="closeDocModal()" aria-label="Close">&times;</button> </div> <div class="modal-body"> <div class="doc-section"> <h3 class="doc-heading">What’s here</h3> <p class="doc-text">A community catalog of the apps and projects on Terp: names and accounts, art, DeFi, DAOs, tools and infrastructure. Each light is one project.</p> </div> <div class="doc-section"> <h3 class="doc-heading">Browse</h3> <p class="doc-text">Nine projects show at a time. Previous and Next turn the page, and the line under the lights tells you which page you are on.</p> </div> <div class="doc-section"> <h3 class="doc-heading">Filter</h3> <p class="doc-text">Pick a category to see only those projects, or choose All to see everything again.</p> </div> <div class="doc-section"> <h3 class="doc-heading">Open</h3> <p class="doc-text">Select a project to read what it does. Apps built into this site open right here. Projects hosted elsewhere open in a new tab, after you confirm you are leaving.</p> </div> <div class="doc-section"> <h3 class="doc-heading">Terp Account Billboards</h3> <p class="doc-text">Despite the name, TABS is not a message board. It is the on-chain name registry: a username that points at your wallet, which other apps can look up.</p> </div> <div class="doc-section" id="eco-list-guide" tabindex="-1"> <h3 class="doc-heading">List your app</h3> <p class="doc-text">Eco reads its catalog from <code>public/ecosystem.json</code> in the <a href="https://github.com/terpnetwork/terp-website" target="_blank" rel="noopener">terp-website</a> repository. A merged pull request on that file is what puts a project on this page.</p> <ol class="doc-steps"> <li>Fork <a href="https://github.com/terpnetwork/terp-website" target="_blank" rel="noopener">github.com/terpnetwork/terp-website</a> and open <a href="https://github.com/terpnetwork/terp-website/blob/main/public/ecosystem.json" target="_blank" rel="noopener">public/ecosystem.json</a>.</li> <li>Add one object to the <code>projects</code> array with at least <code>id</code>, <code>title</code>, <code>summary</code>, <code>tags</code>, <code>status</code> (<code>live</code>, <code>beta</code>, or <code>soon</code>), and a <code>links</code> entry pointing at your app or repo.</li> <li>Use an existing tag from <code>filters.tags</code> when it fits (accounts, nft, governance, zk, ibc, infra, agentic, defi). Set <code>relevance</code> as a number if you care about sort order; higher appears first.</li> <li>Open a pull request against <code>main</code>. Keep the description short: what the app does and the live URL.</li> </ol> <p class="doc-text">Deployed CosmWasm contracts show under Resources → App state from the published chain address file after they are live on mainnet — that list is not edited in this JSON.</p> <p class="doc-text">Edit file: <a href="https://github.com/terpnetwork/terp-website/edit/main/public/ecosystem.json" target="_blank" rel="noopener">github.com/terpnetwork/terp-website/edit/main/public/ecosystem.json</a>. Wider contribution notes: <a href="https://docs.terp.network/resources/contribution" target="_blank" rel="noopener">docs.terp.network/resources/contribution</a>.</p> </div> </div> </div> </div> </body> </html>

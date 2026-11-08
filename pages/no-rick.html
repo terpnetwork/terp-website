@@ -1,35 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-<!-- app shell: load once, reuse across routes (must stay first) -->
-<script src="/lib/shell/shell.js"></script>
-<script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script>
-<link rel="modulepreload" href="/lib/config.js">
-<link rel="modulepreload" href="/lib/nav-guard.js">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description"
-        content="No-Rick ZK proof demo on Terp Network. Client-side halo2 proof generation with on-chain verification via custom wasmvm.">
-    <title>No Rick | Terp Network — ZK Proof Demo</title>
-
-    <link rel="icon" type="image/x-icon" href="/public/favicons/terp-32x32.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png">
-
-    <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi">
-    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
-    <link rel="stylesheet" href="/public/global.css">
-<link rel="stylesheet" href="/public/world.css">
-<link rel="modulepreload" href="/lib/fractal/routes.js">
-<link rel="modulepreload" href="/lib/fractal/world.js">
-<script type="module" src="/lib/fractal/world.js"></script>
-<script type="module" src="/lib/ui/select.js"></script>
-
-    <style>
-        .main {
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <!-- app shell: load once, reuse across routes (must stay first) --> <script src="/lib/shell/shell.js?v=7750cac23a"></script> <script type="importmap">{"imports":{"interchainjs/cosmwasm/wasm/v1/tx":"https://esm.sh/interchainjs@1.11.1/cosmwasm/wasm/v1/tx","@interchainjs/encoding":"https://esm.sh/@interchainjs/encoding@1.11.1"}}</script> <link rel="modulepreload" href="/lib/config.js?v=a177cb9062"> <link rel="modulepreload" href="/lib/nav-guard.js?v=c2122d8414"> <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes"> <meta name="description" content="No-Rick ZK proof demo on Terp Network. Client-side halo2 proof generation with on-chain verification via custom wasmvm."> <title>No Rick | Terp Network — ZK Proof Demo</title> <link rel="icon" type="image/x-icon" href="/public/favicons/terp-32x32.png?v=964c4b5060"> <link rel="icon" type="image/png" sizes="32x32" href="/public/favicons/terp-32x32.png?v=964c4b5060"> <link rel="icon" type="image/png" sizes="16x16" href="/public/favicons/terp-16x16.png?v=964c4b5060"> <link rel="apple-touch-icon" sizes="180x180" href="/public/favicons/terp-apple-touch.png?v=964c4b5060"> <link rel="preconnect" href="https://fonts.cdnfonts.com/css/satoshi"> <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet"> <link rel="stylesheet" href="/public/global.css?v=964c4b5060"> <link rel="stylesheet" href="/public/world.css?v=61e4bee33d"> <link rel="modulepreload" href="/lib/fractal/routes.js?v=c884c9e3de"> <link rel="modulepreload" href="/lib/fractal/world.js?v=615efa4ca3"> <script type="module" src="/lib/fractal/world.js?v=615efa4ca3"></script> <script type="module" src="/lib/ui/select.js?v=ae03d172b6"></script> <style> .main {
             position: relative;
             z-index: 1;
             max-width: 440px;
@@ -593,139 +562,7 @@
             .rewards-strip {
                 flex-direction: column;
             }
-        }
-    </style>
-</head>
-
-<body>
-
-    <main class="main">
-        <script src="/lib/fab.js"></script>
-        <article class="nr-card nr-hero" data-tn-head>
-            <h1 class="page-title">No Rick</h1>
-            <p class="page-subtitle">Keep the word. Prove it isn’t rick.</p>
-            <button type="button" class="btn-info" id="info-btn" aria-haspopup="dialog" aria-controls="info-modal">
-                What’s this?
-            </button>
-        </article>
-
-        <article class="nr-card proof-card">
-            <div class="forbidden-display">
-                <div class="label">Forbidden</div>
-                <div class="word">rick</div>
-            </div>
-            <label for="secret-word">Your secret</label>
-            <input type="text" id="secret-word" placeholder="Any word except rick" maxlength="20"
-                autocomplete="off">
-            <button class="btn-prove" id="prove-btn" disabled>Prove &amp; submit</button>
-            <p class="play-status" id="play-status">Starting session…</p>
-        </article>
-
-        <div class="rewards-strip">
-            <div class="reward-card randy-card" id="randy-reward">
-                <div class="reward-outcome">Not rick</div>
-                <div class="reward-token">+1 RANDY</div>
-                <div class="reward-balance" id="randy-bal"></div>
-            </div>
-            <div class="reward-card rick-card" id="rick-reward">
-                <div class="reward-outcome">Is rick</div>
-                <div class="reward-token">+1 RICK</div>
-                <div class="reward-balance" id="rick-bal"></div>
-            </div>
-        </div>
-
-        <details class="nr-card nr-session" id="bootstrap-card">
-            <summary>
-                <span>Session</span>
-                <span class="session-pill" id="session-pill">starting…</span>
-            </summary>
-            <div class="boot-row">
-                <span class="boot-k">Signer</span>
-                <span id="boot-wallet" class="boot-wait">creating…</span>
-            </div>
-            <div class="boot-row">
-                <span class="boot-k">Register grant</span>
-                <span id="boot-reg-grant" class="boot-wait">pending</span>
-            </div>
-            <div class="boot-row">
-                <span class="boot-k">Mint grant</span>
-                <span id="boot-mint-grant" class="boot-wait">pending</span>
-            </div>
-            <div class="boot-row">
-                <span class="boot-k">Passkey</span>
-                <span id="boot-zkjwt" class="boot-wait">optional</span>
-            </div>
-            <button type="button" class="btn-bind" id="bind-zkjwt-btn" disabled>
-                Bind passkey (optional)
-            </button>
-        </details>
-
-
-
-        <div id="result" class="result-area">
-            <div id="result-intro" hidden></div>
-
-            <!-- Progress pipeline -->
-            <div id="progress" class="progress-pipeline" style="display:none;">
-                <div class="step" id="step-prove">
-                    <div class="circle"></div>
-                    <div class="label">Prove</div>
-                    <div class="elapsed" id="timer-prove"></div>
-                </div>
-                <div class="step-line"></div>
-                <div class="step" id="step-broadcast">
-                    <div class="circle"></div>
-                    <div class="label">Broadcast</div>
-                    <div class="elapsed" id="timer-broadcast"></div>
-                </div>
-                <div class="step-line"></div>
-                <div class="step" id="step-confirm">
-                    <div class="circle"></div>
-                    <div class="label">Confirm</div>
-                </div>
-            </div>
-
-            <!-- Status text -->
-            <div id="status-text" style="display:none;"></div>
-
-            <!-- Proof data (collapsible) -->
-            <div id="proof-display" class="proof-display" style="display:none;">
-                <div class="proof-toggle" id="proof-toggle">Proof data &#9656;</div>
-                <div class="proof-content" id="proof-content" style="display:none;">
-                    <div class="proof-section">
-                        <div class="proof-label">Proof (base64)</div>
-                        <div class="proof-b64" id="proof-b64"></div>
-                    </div>
-                    <div class="proof-section">
-                        <div class="proof-label">Execute message</div>
-                        <pre class="proof-msg" id="proof-msg"></pre>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Final verdict -->
-            <div id="verdict-area" style="display:none;"></div>
-        </div>
-
-        <div id="wasm-status" class="wasm-status">Loading WASM...</div>
-    </main>
-
-    <dialog class="info-modal" id="info-modal" aria-labelledby="info-modal-title">
-        <h3 id="info-modal-title">What’s No Rick?</h3>
-        <p>
-            Type a word. Your browser builds a proof that the word is
-            <em>not</em> <code style="color:var(--tn-coral);">rick</code>. The chain checks the proof.
-            Nobody else sees the word.
-        </p>
-        <p>
-            Not rick → <strong>RANDY</strong>. Rick → <strong>RICK</strong>. Toy tokens, real pattern.
-        </p>
-        <form method="dialog">
-            <button type="submit" class="close-info" id="info-close">Got it</button>
-        </form>
-    </dialog>
-    <script>
-        (function () {
+        } </style> <meta name="tn-build" content="321a87df78"><script>window.__TN_ASSET_V="964c4b5060";</script></head> <body> <main class="main"> <script src="/lib/fab.js?v=29fdf4f1db"></script> <article class="nr-card nr-hero" data-tn-head> <h1 class="page-title">No Rick</h1> <p class="page-subtitle">Keep the word. Prove it isn’t rick.</p> <button type="button" class="btn-info" id="info-btn" aria-haspopup="dialog" aria-controls="info-modal"> What’s this? </button> </article> <article class="nr-card proof-card"> <div class="forbidden-display"> <div class="label">Forbidden</div> <div class="word">rick</div> </div> <label for="secret-word">Your secret</label> <input type="text" id="secret-word" placeholder="Any word except rick" maxlength="20" autocomplete="off"> <button class="btn-prove" id="prove-btn" disabled="disabled">Prove &amp; submit</button> <p class="play-status" id="play-status">Starting session…</p> </article> <div class="rewards-strip"> <div class="reward-card randy-card" id="randy-reward"> <div class="reward-outcome">Not rick</div> <div class="reward-token">+1 RANDY</div> <div class="reward-balance" id="randy-bal"></div> </div> <div class="reward-card rick-card" id="rick-reward"> <div class="reward-outcome">Is rick</div> <div class="reward-token">+1 RICK</div> <div class="reward-balance" id="rick-bal"></div> </div> </div> <details class="nr-card nr-session" id="bootstrap-card"> <summary> <span>Session</span> <span class="session-pill" id="session-pill">starting…</span> </summary> <div class="boot-row"> <span class="boot-k">Signer</span> <span id="boot-wallet" class="boot-wait">creating…</span> </div> <div class="boot-row"> <span class="boot-k">Register grant</span> <span id="boot-reg-grant" class="boot-wait">pending</span> </div> <div class="boot-row"> <span class="boot-k">Mint grant</span> <span id="boot-mint-grant" class="boot-wait">pending</span> </div> <div class="boot-row"> <span class="boot-k">Passkey</span> <span id="boot-zkjwt" class="boot-wait">optional</span> </div> <button type="button" class="btn-bind" id="bind-zkjwt-btn" disabled="disabled"> Bind passkey (optional) </button> </details> <div id="result" class="result-area"> <div id="result-intro" hidden></div> <!-- Progress pipeline --> <div id="progress" class="progress-pipeline" style="display:none;"> <div class="step" id="step-prove"> <div class="circle"></div> <div class="label">Prove</div> <div class="elapsed" id="timer-prove"></div> </div> <div class="step-line"></div> <div class="step" id="step-broadcast"> <div class="circle"></div> <div class="label">Broadcast</div> <div class="elapsed" id="timer-broadcast"></div> </div> <div class="step-line"></div> <div class="step" id="step-confirm"> <div class="circle"></div> <div class="label">Confirm</div> </div> </div> <!-- Status text --> <div id="status-text" style="display:none;"></div> <!-- Proof data (collapsible) --> <div id="proof-display" class="proof-display" style="display:none;"> <div class="proof-toggle" id="proof-toggle">Proof data &#9656;</div> <div class="proof-content" id="proof-content" style="display:none;"> <div class="proof-section"> <div class="proof-label">Proof (base64)</div> <div class="proof-b64" id="proof-b64"></div> </div> <div class="proof-section"> <div class="proof-label">Execute message</div> <pre class="proof-msg" id="proof-msg"></pre> </div> </div> </div> <!-- Final verdict --> <div id="verdict-area" style="display:none;"></div> </div> <div id="wasm-status" class="wasm-status">Loading WASM...</div> </main> <dialog class="info-modal" id="info-modal" aria-labelledby="info-modal-title"> <h3 id="info-modal-title">What’s No Rick?</h3> <p> Type a word. Your browser builds a proof that the word is <em>not</em> <code style="color:var(--tn-coral);">rick</code>. The chain checks the proof. Nobody else sees the word. </p> <p> Not rick → <strong>RANDY</strong>. Rick → <strong>RICK</strong>. Toy tokens, real pattern. </p> <form method="dialog"> <button type="submit" class="close-info" id="info-close">Got it</button> </form> </dialog> <script> (function () {
             const dlg = document.getElementById('info-modal');
             const btn = document.getElementById('info-btn');
             if (!dlg || !btn) return;
@@ -737,25 +574,21 @@
             dlg.addEventListener('click', function (e) {
                 if (e.target === dlg) dlg.close();
             });
-        })();
-    </script>
-
-    <script type="module">
-        import { loadSiteConfig, preferHubIfContractMissing, useLocalChainProxies } from '/lib/config.js';
-        import * as TerpWallet from '/lib/wallet.js';
+        })(); </script> <script type="module"> import { loadSiteConfig, preferHubIfContractMissing, useLocalChainProxies } from '/lib/config.js?v=a177cb9062';
+        import * as TerpWallet from '/lib/wallet.js?v=3ba243b800';
 
 
-        import { loadWasm, generateProof, encodeProofMsg, isWasmReady } from '/lib/norick.js';
-        import { authenticatePasskey, registerPasskey, resolveRpId } from '/lib/auth.js';
+        import { loadWasm, generateProof, encodeProofMsg, isWasmReady } from '/lib/norick.js?v=e141bcc5ea';
+        import { authenticatePasskey, registerPasskey, resolveRpId } from '/lib/auth.js?v=51078ac5ea';
         import {
             loadZkJwtWasm,
             proveActionWithPasskeyZkJwt,
             registerClaimMsgFromSecret,
             zkjwtContract,
-        } from '/lib/zkjwt-auth.js';
-        import { ensureScopedGrant } from '/lib/onboard-client.js';
-        import { applyNavGuard } from '/lib/nav-guard.js';
-        import { ensureBrowserWallet } from '/lib/browser-wallet.js';
+        } from '/lib/zkjwt-auth.js?v=717b2f3045';
+        import { ensureScopedGrant } from '/lib/onboard-client.js?v=d6d1d696c7';
+        import { applyNavGuard } from '/lib/nav-guard.js?v=c2122d8414';
+        import { ensureBrowserWallet } from '/lib/browser-wallet.js?v=3a83862f1d';
         applyNavGuard();
 
         function gasPriceString(cfg) {
@@ -1029,7 +862,7 @@
                 const msg = registerClaimMsgFromSecret(reg.credentialId);
                 const zkjwt = zkjwtContract(chainConfig);
                 if (zkjwt) {
-                    const { executeWithSmartAccount, ensureCosmwasmAuthenticator } = await import('/lib/smart-account-tx.js');
+                    const { executeWithSmartAccount, ensureCosmwasmAuthenticator } = await import('/lib/smart-account-tx.js?v=a12f25e986');
                     const saChain = {
                         chainId: chainConfig.chainId,
                         rpc: chainConfig.rpc,
@@ -1228,7 +1061,7 @@
                 if (!contractAddr) throw new Error('cw_norick not instantiated yet (code 72). Proof is valid locally.');
 
                 const execBody = JSON.parse(msg);
-                const { executeWithSmartAccount, zkJwtSignatureBytes } = await import('/lib/smart-account-tx.js');
+                const { executeWithSmartAccount, zkJwtSignatureBytes } = await import('/lib/smart-account-tx.js?v=a12f25e986');
                 const signatureBytes = lastZkJwt?.payload
                     ? zkJwtSignatureBytes(lastZkJwt.payload)
                     : undefined;
@@ -1316,9 +1149,4 @@
         });
 
         // ── Start ────────────────────────────────────────────────────────
-        init();
-    </script>
-
-</body>
-
-</html>
+        init(); </script> </body> </html>
