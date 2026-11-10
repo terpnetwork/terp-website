@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-07-16",
+  "updated": "2026-11-09",
   "filters": {
     "tags": [
       "accounts",
@@ -294,6 +294,82 @@
         {
           "label": "psychedex.org",
           "url": "https://psychedex.org/"
+        }
+      ]
+    },
+    {
+      "id": "oracle",
+      "title": "Oracle",
+      "summary": "Osmosis prices read on Terp. Pay to fetch the latest.",
+      "description": "Prices from Osmosis, carried to Terp and kept on chain. Read the last price for free, or pay a small fee to fetch a fresh one. Every value links to the transaction that wrote it.",
+      "tags": [
+        "defi",
+        "ibc"
+      ],
+      "status": "live",
+      "relevance": 82,
+      "component": null,
+      "links": [
+        {
+          "label": "Open oracle",
+          "url": "/oracle"
+        }
+      ]
+    },
+    {
+      "id": "headstash",
+      "title": "Headstash",
+      "summary": "Claim your Terp headstash allocation.",
+      "description": "The headstash claim page, loaded from chain: the page is stored in a frontend contract and its sha256 is checked before it runs. Look up an address, see what it can claim, and claim it.",
+      "tags": [
+        "accounts",
+        "infra"
+      ],
+      "status": "live",
+      "relevance": 70,
+      "component": null,
+      "links": [
+        {
+          "label": "Open headstash",
+          "url": "https://terp.network/headstash/"
+        }
+      ]
+    },
+    {
+      "id": "loans",
+      "title": "NFT Loans",
+      "summary": "Borrow against an NFT you hold, or lend to someone who does.",
+      "description": "Peer-to-peer loans with an NFT as collateral, on permissionless.money. Pick a piece you hold, set the terms, and a lender funds it. Repay in time to get the piece back. 4% fee to the Foundation DAO.",
+      "tags": [
+        "nft",
+        "defi"
+      ],
+      "status": "beta",
+      "relevance": 60,
+      "component": null,
+      "links": [
+        {
+          "label": "Open loans",
+          "url": "https://permissionless.money/svg/loans-raffles#loans"
+        }
+      ]
+    },
+    {
+      "id": "raffles",
+      "title": "NFT Raffles",
+      "summary": "Raffle an NFT you hold. The winner is drawn from on-chain randomness.",
+      "description": "Start a raffle with a piece you hold, on permissionless.money. Tickets are sold on chain and the winner comes from drand randomness verified on Terp. 4% fee to the Foundation DAO.",
+      "tags": [
+        "nft",
+        "defi"
+      ],
+      "status": "beta",
+      "relevance": 58,
+      "component": null,
+      "links": [
+        {
+          "label": "Open raffles",
+          "url": "https://permissionless.money/svg/loans-raffles#raffles"
         }
       ]
     }
